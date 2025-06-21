@@ -14,6 +14,7 @@ leanback = "1.0.0"
 glide = "4.11.0"
 activity = "1.8.0"
 mediarouter = "1.8.0"
+roomCompilerProcessingTesting = "2.7.2"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -30,6 +31,7 @@ leanback = { group = "androidx.leanback", name = "leanback", version.ref = "lean
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.ref = "mediarouter" }
+room-compiler-processing-testing = { group = "androidx.room", name = "room-compiler-processing-testing", version.ref = "roomCompilerProcessingTesting" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

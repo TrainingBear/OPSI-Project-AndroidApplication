@@ -14,6 +14,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
     }
 
     buildTypes {
@@ -32,10 +37,19 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -47,6 +61,7 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.activity)
     implementation(libs.mediarouter)
+    implementation(libs.room.compiler.processing.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
