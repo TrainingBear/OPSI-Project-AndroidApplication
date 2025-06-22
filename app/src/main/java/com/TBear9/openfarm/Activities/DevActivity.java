@@ -18,13 +18,14 @@ import androidx.core.content.FileProvider;
 
 import com.TBear9.openfarm.Util;
 import com.TBear9.openfarm.databinding.DevBinding;
+import com.TBear9.openfarm.ml.MyModel;
 import com.bumptech.glide.Glide;
 
-import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class DevActivity extends AppCompatActivity {
     private DevBinding binding;
@@ -68,12 +69,21 @@ public class DevActivity extends AppCompatActivity {
     }
 
     public void test(){
-        try (InputStream IS = getAssets().open("model_edgetpu.tflite");
-             Interpreter interpreter = new Interpreter(new File(IS.toString()));
-             ){
+        try {
+            MyModel model = MyModel.newInstance(this);
 
+            // Creates inputs for reference.
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.UINT8);
+            inputFeature0.loadBuffer(byteBuffer);
+
+            // Runs model inference and gets result.
+            ModelEdgetpu.Outputs outputs = model.process(inputFeature0);
+            TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
+
+            // Releases model resources if no longer used.
+            model.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            // TODO Handle the exception
         }
     }
 }

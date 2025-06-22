@@ -44,10 +44,10 @@ android {
             version = "3.22.1"
         }
     }
+    sourceSets["main"].java.srcDir("build/generated/ml_source_set_base_package")
 }
 
 dependencies {
-    implementation(libs.tensorflow.lite.metadata)
     implementation(libs.litert)
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -61,6 +61,11 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.mediarouter)
     implementation(libs.room.compiler.processing.testing)
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.tensorflow.lite.metadata)
+    implementation(libs.tensorflow.lite.gpu)
+    implementation(libs.litert.support.api)
+    implementation(libs.tensorflow.tensorflow.lite.support)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
