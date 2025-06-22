@@ -20,6 +20,44 @@ android {
             }
         }
     }
+    packaging {
+        packaging {
+            jniLibs {
+                pickFirsts += "lib/arm64-v8a/libtensorflowlite_jni.so"
+                pickFirsts += "lib/armeabi-v7a/libtensorflowlite_jni.so"
+            }
+        }
+
+        resources {
+//            excludes += "messages/JavaOptionBundle.properties"
+//            excludes += "messages/JavaErrorBundle.properties"
+//            excludes += "kotlin/reflect/reflect.kotlin_builtins"
+//            excludes += "kotlin/coroutines/coroutines.kotlin_builtins"
+//            excludes += "DebugProbesKt.bin"
+//            excludes += "kotlin/collections/collections.kotlin_builtins"
+//            excludes += "kotlin/internal/internal.kotlin_builtins"
+//            excludes += "kotlinManifest.properties"
+//            excludes += "misc/registry.properties"
+//            excludes += "kotlin/kotlin.kotlin_builtins"
+//            pickFirsts += setOf(
+//                "**/*.properties",
+//                "**/*.kotlin_builtins",
+//                "DebugProbesKt.bin",
+//                "**/**/*.xml";
+//                "META-INF/*.version"
+//            )
+            pickFirsts += "**"
+
+//            excludes += "META-INF/analysis-api/analysis-api-impl-base.xml"
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force("org.checkerframework:checker-qual:3.42.0")
+            force("com.google.auto.value:auto-value:1.6.3")
+        }
+    }
 
     buildTypes {
         release {
@@ -44,11 +82,32 @@ android {
             version = "3.22.1"
         }
     }
-    sourceSets["main"].java.srcDir("build/generated/ml_source_set_base_package")
+//    sourceSets["main"].java.srcDir("build/generated/ml_source_set_base_package")
 }
 
 dependencies {
-    implementation(libs.litert)
+//    implementation(libs.litert){
+//        exclude(group = "org.checkerframework", module = "checker-qual")
+//        exclude(group = "com.google.auto.value", module = "auto-value")
+//    }
+//    implementation(libs.litert.support.api){
+//        exclude(group = "org.checkerframework", module = "checker-qual")
+//        exclude(group = "com.google.auto.value", module = "auto-value")
+//    }
+    implementation(libs.tensorflow.lite.gpu){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+    }
+    implementation(libs.tensorflow.tensorflow.lite.support){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+    }
+    implementation(libs.tensorflow.tensorflow.lite.metadata){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+    }
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -60,12 +119,10 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.activity)
     implementation(libs.mediarouter)
-    implementation(libs.room.compiler.processing.testing)
-    implementation(libs.tensorflow.lite.support)
-    implementation(libs.tensorflow.tensorflow.lite.metadata)
-    implementation(libs.tensorflow.lite.gpu)
-    implementation(libs.litert.support.api)
-    implementation(libs.tensorflow.tensorflow.lite.support)
+    implementation(libs.room.compiler.processing.testing){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+    }
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

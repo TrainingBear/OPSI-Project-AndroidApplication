@@ -1,5 +1,6 @@
 [versions]
 agp = "8.10.1"
+autoValue = "1.6.3"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -23,6 +24,7 @@ litertSupportApi = "1.3.0"
 tensorflowLiteSupportVersion = "0.1.0"
 
 [libraries]
+auto-value = { module = "com.google.auto.value:auto-value", version.ref = "autoValue" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -32,8 +34,8 @@ material = { group = "com.google.android.material", name = "material", version.r
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version = "navigationFragment" }
-navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version = "navigationUi" }
+navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 leanback = { group = "androidx.leanback", name = "leanback", version.ref = "leanback" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -42,8 +44,8 @@ room-compiler-processing-testing = { group = "androidx.room", name = "room-compi
 
 
 tensorflow-tensorflow-lite-metadata = { module = "org.tensorflow:tensorflow-lite-metadata", version.ref = "tensorflowLiteMetadata" }
-tensorflow-lite-support = { group = "org.tensorflow", name = "tensorflow-lite-support", version = "tensorflowLiteSupport" }
-tensorflow-lite-gpu = { group = "org.tensorflow", name = "tensorflow-lite-gpu", version = "tensorflowLiteGpu" }
+#tensorflow-lite-support = { group = "org.tensorflow", name = "tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
+tensorflow-lite-gpu = { group = "org.tensorflow", name = "tensorflow-lite-gpu", version.ref = "tensorflowLiteGpu" }
 litert-support-api = { group = "com.google.ai.edge.litert", name = "litert-support-api", version.ref = "litertSupportApi" }
 tensorflow-tensorflow-lite-support = { group = "org.tensorflow", name = "tensorflow-lite-support", version.ref = "tensorflowLiteSupportVersion" }
 
