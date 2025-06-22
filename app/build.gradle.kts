@@ -36,6 +36,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        mlModelBinding = true
     }
     externalNativeBuild {
         cmake {
@@ -45,11 +46,8 @@ android {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
+    implementation(libs.litert)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)

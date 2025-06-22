@@ -21,6 +21,8 @@ import com.TBear9.openfarm.Util;
 import com.TBear9.openfarm.databinding.DevBinding;
 import com.bumptech.glide.Glide;
 
+import org.tensorflow.lite.Interpreter;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -63,5 +65,9 @@ public class DevActivity extends AppCompatActivity {
             }
         });
         EdgeToEdge.enable(this);
+    }
+
+    public void test(){
+        Interpreter interpreter = new Interpreter();
     }
 }
