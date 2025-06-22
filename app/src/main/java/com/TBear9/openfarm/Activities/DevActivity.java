@@ -1,7 +1,6 @@
 package com.TBear9.openfarm.Activities;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -25,6 +24,7 @@ import org.tensorflow.lite.Interpreter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class DevActivity extends AppCompatActivity {
     private DevBinding binding;
@@ -68,6 +68,12 @@ public class DevActivity extends AppCompatActivity {
     }
 
     public void test(){
-        Interpreter interpreter = new Interpreter();
+        try (InputStream IS = getAssets().open("model_edgetpu.tflite");
+             Interpreter interpreter = new Interpreter(new File(IS.toString()));
+             ){
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
