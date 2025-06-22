@@ -18,7 +18,6 @@ import androidx.core.content.FileProvider;
 
 import com.TBear9.openfarm.Util;
 import com.TBear9.openfarm.databinding.DevBinding;
-import com.TBear9.openfarm.ml.MyModel;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
@@ -67,7 +66,7 @@ public class DevActivity extends AppCompatActivity {
 
     public void test(){
 //        try {
-            MyModel model = MyModel.newInstance(this);
+//            MyModel model = MyModel.newInstance(this);
 //
 //            // Creates inputs for reference.
 //            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.UINT8);
