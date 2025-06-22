@@ -38,7 +38,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
         <activity
-            android:name=".Activities.DevActivity"
+            android:name=".activities.DevActivity"
             android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />

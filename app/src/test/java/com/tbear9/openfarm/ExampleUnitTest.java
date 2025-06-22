@@ -1,4 +1,4 @@
-package com.TBear9.openfarm;
+package com.tbear9.openfarm;
 
 import org.junit.Test;
 

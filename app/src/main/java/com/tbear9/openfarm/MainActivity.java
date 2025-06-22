@@ -1,4 +1,4 @@
-package com.TBear9.openfarm;
+package com.tbear9.openfarm;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
-import com.TBear9.openfarm.Activities.DevActivity;
+import com.tbear9.openfarm.activities.DevActivity;
 import com.tbear9.openfarm.databinding.TestlayoutBinding;
 
 import androidx.navigation.ui.AppBarConfiguration;

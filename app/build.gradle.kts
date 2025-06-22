@@ -54,7 +54,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
-        viewBinding = true
+        viewBinding = rootProject.extra["viewBindingEnabled"] as Boolean
         mlModelBinding = true
     }
     externalNativeBuild {
