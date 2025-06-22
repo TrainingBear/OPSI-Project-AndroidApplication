@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.TBear9.openfarm"
+    namespace = "com.tbear9.openfarm"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.TBear9.openfarm"
+        applicationId = "com.tbear9.openfarm"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
@@ -29,26 +29,7 @@ android {
         }
 
         resources {
-//            excludes += "messages/JavaOptionBundle.properties"
-//            excludes += "messages/JavaErrorBundle.properties"
-//            excludes += "kotlin/reflect/reflect.kotlin_builtins"
-//            excludes += "kotlin/coroutines/coroutines.kotlin_builtins"
-//            excludes += "DebugProbesKt.bin"
-//            excludes += "kotlin/collections/collections.kotlin_builtins"
-//            excludes += "kotlin/internal/internal.kotlin_builtins"
-//            excludes += "kotlinManifest.properties"
-//            excludes += "misc/registry.properties"
-//            excludes += "kotlin/kotlin.kotlin_builtins"
-//            pickFirsts += setOf(
-//                "**/*.properties",
-//                "**/*.kotlin_builtins",
-//                "DebugProbesKt.bin",
-//                "**/**/*.xml";
-//                "META-INF/*.version"
-//            )
             pickFirsts += "**"
-
-//            excludes += "META-INF/analysis-api/analysis-api-impl-base.xml"
         }
     }
 
@@ -86,10 +67,6 @@ android {
 }
 
 dependencies {
-//    implementation(libs.litert){
-//        exclude(group = "org.checkerframework", module = "checker-qual")
-//        exclude(group = "com.google.auto.value", module = "auto-value")
-//    }
 //    implementation(libs.litert.support.api){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
