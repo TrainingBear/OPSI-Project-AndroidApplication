@@ -18,7 +18,7 @@ import androidx.core.content.FileProvider;
 
 import com.tbear9.openfarm.Util;
 import com.tbear9.openfarm.databinding.DevBinding;
-import com.TBear9.openfarm.ml.ModelEdgetpu;
+import com.tbear9.openfarm.ml.ModelEdgetpu;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
