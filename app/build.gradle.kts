@@ -54,7 +54,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
-        viewBinding = rootProject.extra["viewBindingEnabled"] as Boolean
+        viewBinding = true
         mlModelBinding = true
     }
     externalNativeBuild {
@@ -63,7 +63,9 @@ android {
             version = "3.22.1"
         }
     }
-//    sourceSets["main"].java.srcDir("build/generated/ml_source_set_base_package")
+    aaptOptions {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
@@ -71,20 +73,26 @@ dependencies {
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
 //    }
+    implementation(libs.google.litert)
+    implementation(libs.image.labeling.custom)
+    implementation(libs.tensorflow.lite.task.vision)
     implementation(libs.tensorflow.lite.gpu){
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
     }
-    implementation(libs.tensorflow.tensorflow.lite.support){
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.auto.value", module = "auto-value")
-        exclude(group = "org.tensorflow", module = "tensorflow-lite")
-    }
+//    implementation(libs.tensorflow.tensorflow.lite.support){
+//        exclude(group = "org.checkerframework", module = "checker-qual")
+//        exclude(group = "com.google.auto.value", module = "auto-value")
+//        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+//    }
     implementation(libs.tensorflow.tensorflow.lite.metadata){
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
         exclude(group = "org.tensorflow", module = "tensorflow-lite")
     }
+    implementation(libs.image.labeling.custom)
+    implementation(libs.linkfirebase)
+    implementation(libs.tensorflow.lite)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -100,6 +108,14 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
     }
+
+    implementation(libs.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
+
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

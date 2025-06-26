@@ -1,2 +1,3 @@
-0 Class 1
-1 Class 3
+0 kukuh
+1 Dani
+2 Yakult

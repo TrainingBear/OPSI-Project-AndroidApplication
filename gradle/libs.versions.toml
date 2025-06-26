@@ -1,11 +1,15 @@
 [versions]
 agp = "8.10.1"
 autoValue = "1.6.3"
+camVersion = "1.4.2"
+imageLabelingCustom = "17.0.3"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
+linkfirebase = "17.0.0"
 litert = "1.3.0"
+litertVersion = "2.0.0-alpha.1"
 material = "1.10.0"
 constraintlayout = "2.1.4"
 lifecycleLivedataKtx = "2.6.1"
@@ -17,19 +21,30 @@ glide = "4.11.0"
 activity = "1.8.0"
 mediarouter = "1.8.0"
 roomCompilerProcessingTesting = "2.7.2"
+tensorflowLite = "2.12.0"
 tensorflowLiteMetadata = "0.1.0"
 tensorflowLiteSupport = "0.1.0"
 tensorflowLiteGpu = "2.3.0"
 litertSupportApi = "1.3.0"
 tensorflowLiteSupportVersion = "0.1.0"
+tensorflowLiteTaskVision = "0.4.3"
 
 [libraries]
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camVersion" }
+androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camVersion" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camVersion" }
+androidx-camera-video = { module = "androidx.camera:camera-video", version.ref = "camVersion" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camVersion" }
 auto-value = { module = "com.google.auto.value:auto-value", version.ref = "autoValue" }
+camera-core = { module = "androidx.camera:camera-core", version.ref = "camVersion" }
+google-litert = { module = "com.google.ai.edge.litert:litert", version.ref = "litertVersion" }
+image-labeling-custom = { module = "com.google.mlkit:image-labeling-custom", version.ref = "imageLabelingCustom" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-litert = { module = "com.google.ai.edge.litert:litert", version.ref = "litert" }
+linkfirebase = { module = "com.google.mlkit:linkfirebase", version.ref = "linkfirebase" }
+litert = { module = "com.google.ai.edge.litert:litert-alpha", version.ref = "litert" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
@@ -43,6 +58,8 @@ mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.re
 room-compiler-processing-testing = { group = "androidx.room", name = "room-compiler-processing-testing", version.ref = "roomCompilerProcessingTesting" }
 
 
+tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
+tensorflow-lite-task-vision = { module = "org.tensorflow:tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
 tensorflow-tensorflow-lite-metadata = { module = "org.tensorflow:tensorflow-lite-metadata", version.ref = "tensorflowLiteMetadata" }
 #tensorflow-lite-support = { group = "org.tensorflow", name = "tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
 tensorflow-lite-gpu = { group = "org.tensorflow", name = "tensorflow-lite-gpu", version.ref = "tensorflowLiteGpu" }
