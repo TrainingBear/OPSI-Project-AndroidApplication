@@ -1,3 +1,5 @@
+import com.android.utils.jvmArchitecture
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -54,8 +56,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
-        viewBinding = true
         mlModelBinding = true
+        viewBinding = true
     }
     externalNativeBuild {
         cmake {
