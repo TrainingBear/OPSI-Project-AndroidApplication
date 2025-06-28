@@ -71,6 +71,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.unirest.java)
 //    implementation(libs.litert.support.api){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
@@ -121,4 +122,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+    testCompileOnly(libs.lombok)
+    testAnnotationProcessor(libs.lombok)
 }
