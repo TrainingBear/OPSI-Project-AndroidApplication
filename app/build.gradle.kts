@@ -8,6 +8,10 @@ android {
     namespace = "com.tbear9.openfarm"
     compileSdk = 35
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     defaultConfig {
         applicationId = "com.tbear9.openfarm"
         minSdk = 29
@@ -65,14 +69,9 @@ android {
             version = "3.22.1"
         }
     }
-    aaptOptions {
-        noCompress += "tflite"
-    }
 }
 
 dependencies {
-    implementation(libs.mysql.connector.j)
-    implementation(libs.unirest.java)
 //    implementation(libs.litert.support.api){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
