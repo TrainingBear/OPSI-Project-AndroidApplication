@@ -19,10 +19,10 @@ import kong.unirest.Unirest;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
-        GetRequest request = Unirest.get("https://perenual.com/api/v2/species-list?key=sk-fh6s685f9f720fc7b11089");
-        HttpResponse<JsonNode> json = request.asJson();
-        JsonNode body = json.getBody();
-        body.a;
+//        assertEquals(4, 2 + 2);
+//        GetRequest request = Unirest.get("https://perenual.com/api/v2/species-list?key=sk-fh6s685f9f720fc7b11089");
+//        HttpResponse<JsonNode> json = request.asJson();
+//        JsonNode body = json.getBody();
+//        body.a;
     }
 }

@@ -71,6 +71,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.mysql.connector.j)
     implementation(libs.unirest.java)
 //    implementation(libs.litert.support.api){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
@@ -127,4 +128,5 @@ dependencies {
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
     testAnnotationProcessor(libs.lombok)
+
 }
