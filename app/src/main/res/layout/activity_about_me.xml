@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_about_me"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Gambar panjang -->
+        <ImageView
+            android:id="@+id/imagePenjelasan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitStart"
+            android:src="@drawable/bg_hijau_hd"
+            android:contentDescription="Penjelasan Gambar Figma" />
+
+        <!-- Tombol panah kiri atas -->
+        <ImageButton
+            android:id="@+id/tombolKembali"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            android:layout_gravity="top|start"
+            android:background="@android:color/transparent"
+            android:src="@drawable/panahkiri_removebg_preview_1"
+            android:contentDescription="Tombol kembali" />
+    </FrameLayout>
+</ScrollView>

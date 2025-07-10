@@ -25,7 +25,14 @@
     <string name="buy_2">AT $9.99</string>
     <string name="movie">Movie</string>
 
+
     <!-- Error messages -->
     <string name="error_fragment_message">An error occurred</string>
     <string name="dismiss_error">Dismiss</string>
+    <string name="title_activity_pengetahuan">PengetahuanActivity</string>
+    <string name="title_activity_botakuhpengetahuan">botakuhpengetahuan</string>
+    <string name="title_activity_botakuh_pengetahuan">BotakuhPengetahuanActivity</string>
+    <string name="title_activity_botakuhpanduan">botakuhpanduan</string>
+    <string name="title_activity_botakuh_panduan">BotakuhPanduanActivity</string>
+    <string name="title_activity_about_me">AboutMeActivity</string>
 </resources>
