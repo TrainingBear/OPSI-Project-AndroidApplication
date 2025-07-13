@@ -28,6 +28,6 @@
             android:layout_gravity="top|start"
             android:background="@android:color/transparent"
             android:src="@drawable/panahkiri_removebg_preview_1"
-            android:contentDescription="Tombol kembali 2" />
+            android:contentDescription="@string/TombolKembali" />
     </FrameLayout>
 </ScrollView>
