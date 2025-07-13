@@ -17,7 +17,7 @@
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
             android:src="@drawable/tentangaplikasinewupdate"
-            android:contentDescription="Penjelasan Tentang Aplikasi" />
+            android:contentDescription="@string/PenjelasanTentangAplikasi" />
 
         <!-- Tombol panah kiri atas -->
         <ImageButton
