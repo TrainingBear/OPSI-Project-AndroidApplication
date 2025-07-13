@@ -35,4 +35,6 @@
     <string name="title_activity_botakuhpanduan">botakuhpanduan</string>
     <string name="title_activity_botakuh_panduan">BotakuhPanduanActivity</string>
     <string name="title_activity_about_me">AboutMeActivity</string>
+    <string name="TombolKembali">TombolKembali</string>
+    <string name="PenjelasanTentangAplikasi">PenjelasanTentangAplikasi</string>
 </resources>

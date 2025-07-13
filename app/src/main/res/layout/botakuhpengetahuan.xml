@@ -17,7 +17,7 @@
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
             android:src="@drawable/botakuhpengetahuannewupdate"
-            android:contentDescription="Penjelasan Gambar Figma Pengetahuan" />
+            android:contentDescription="@string/PenjelasanTentangAplikasi" />
 
         <!-- Tombol panah kiri atas -->
         <ImageButton
@@ -28,6 +28,6 @@
             android:layout_gravity="top|start"
             android:background="@android:color/transparent"
             android:src="@drawable/panahkiri_removebg_preview_1"
-            android:contentDescription="Tombol kembali" />
+            android:contentDescription="Tombol kembali 2" />
     </FrameLayout>
 </ScrollView>
