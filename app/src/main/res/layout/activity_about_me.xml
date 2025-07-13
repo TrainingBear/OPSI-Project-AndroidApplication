@@ -16,8 +16,8 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
-            android:src="@drawable/bg_hijau_hd"
-            android:contentDescription="Penjelasan Gambar Figma" />
+            android:src="@drawable/tentangaplikasinewupdate"
+            android:contentDescription="Penjelasan Tentang Aplikasi" />
 
         <!-- Tombol panah kiri atas -->
         <ImageButton
