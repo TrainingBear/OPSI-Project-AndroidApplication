@@ -1,22 +1,49 @@
+import com.android.utils.jvmArchitecture
+
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 
 android {
-
-    namespace = "com.TBear9.openfarm"
+    namespace = "com.tbear9.openfarm"
     compileSdk = 35
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     defaultConfig {
-        applicationId = "com.TBear9.openfarm"
+        applicationId = "com.tbear9.openfarm"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
+    }
+    packaging {
+        packaging {
+            jniLibs {
+                pickFirsts += "lib/arm64-v8a/libtensorflowlite_jni.so"
+                pickFirsts += "lib/armeabi-v7a/libtensorflowlite_jni.so"
+            }
+        }
+
+        resources {
+            pickFirsts += "**"
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force("org.checkerframework:checker-qual:3.42.0")
+            force("com.google.auto.value:auto-value:1.6.3")
+        }
     }
 
     buildTypes {
@@ -33,18 +60,42 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
+        mlModelBinding = true
         viewBinding = true
-        compose = true
     }
-}
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 }
 
 dependencies {
-
+//    implementation(libs.litert.support.api){
+//        exclude(group = "org.checkerframework", module = "checker-qual")
+//        exclude(group = "com.google.auto.value", module = "auto-value")
+//    }
+    implementation(libs.google.litert)
+    implementation(libs.image.labeling.custom)
+    implementation(libs.tensorflow.lite.task.vision)
+    implementation(libs.tensorflow.lite.gpu){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+    }
+//    implementation(libs.tensorflow.tensorflow.lite.support){
+//        exclude(group = "org.checkerframework", module = "checker-qual")
+//        exclude(group = "com.google.auto.value", module = "auto-value")
+//        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+//    }
+    implementation(libs.tensorflow.tensorflow.lite.metadata){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+    }
+    implementation(libs.image.labeling.custom)
+    implementation(libs.linkfirebase)
+    implementation(libs.tensorflow.lite)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -56,18 +107,25 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.activity)
     implementation(libs.mediarouter)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.activity.compose)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
+    implementation(libs.room.compiler.processing.testing){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+    }
+
+    implementation(libs.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
+
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.tooling)
-    debugImplementation(libs.ui.test.manifest)
+
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+    testCompileOnly(libs.lombok)
+    testAnnotationProcessor(libs.lombok)
+
 }

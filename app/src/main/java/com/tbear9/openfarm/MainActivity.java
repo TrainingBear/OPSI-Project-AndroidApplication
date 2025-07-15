@@ -1,3 +1,4 @@
+package com.tbear9.openfarm;
 package com.TBear9.openfarm;
 import android.content.Intent;
 import com.TBear9.openfarm.ui.BotakuhPengetahuanActivity; // ⬅️ Tambahkan ini
@@ -8,19 +9,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.tbear9.openfarm.activities.DevActivity;
+import com.tbear9.openfarm.databinding.TestlayoutBinding;
 import com.TBear9.openfarm.Activities.DevActivity;
 import com.TBear9.openfarm.databinding.MainmenuBinding;
 import com.TBear9.openfarm.databinding.TestlayoutBinding;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.appcompat.app.AppCompatActivity;
 
