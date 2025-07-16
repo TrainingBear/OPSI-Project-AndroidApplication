@@ -69,6 +69,14 @@ android {
             version = "3.22.1"
         }
     }
+    buildToolsVersion = "35.0.0"
+//    viewBinding {
+//        isEnabled = true
+//    }
+    dependenciesInfo {
+        includeInApk = true
+        includeInBundle = true
+    }
 }
 
 dependencies {
