@@ -2,12 +2,11 @@ package com.tbear9.openfarm;
 
 import android.content.Intent;
 
-import com.tbear9.openfarm.AboutMeActivity;
-import com.tbear9.openfarm.ui.BotakuhPengetahuanActivity;
-import com.tbear9.openfarm.ui.BotakuhPanduanActivity;
+import com.TBear9.openfarm.ui.AboutMeActivity;
+import com.TBear9.openfarm.ui.BotakuhPengetahuanActivity;
+import com.TBear9.openfarm.ui.BotakuhPanduanActivity;
 
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -29,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private TestlayoutBinding binding;
     private MainmenuBinding bindingmenu;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
