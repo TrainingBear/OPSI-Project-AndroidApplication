@@ -1,22 +1,24 @@
 package com.tbear9.openfarm;
-package com.TBear9.openfarm;
+
 import android.content.Intent;
-import com.TBear9.openfarm.ui.BotakuhPengetahuanActivity; // ⬅️ Tambahkan ini
-import com.TBear9.openfarm.ui.BotakuhPanduanActivity;
+
+import com.tbear9.openfarm.AboutMeActivity;
+import com.tbear9.openfarm.ui.BotakuhPengetahuanActivity;
+import com.tbear9.openfarm.ui.BotakuhPanduanActivity;
 
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.tbear9.openfarm.activities.DevActivity;
+import com.tbear9.openfarm.databinding.MainmenuBinding;
 import com.tbear9.openfarm.databinding.TestlayoutBinding;
-import com.TBear9.openfarm.Activities.DevActivity;
-import com.TBear9.openfarm.databinding.MainmenuBinding;
-import com.TBear9.openfarm.databinding.TestlayoutBinding;
 
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.appcompat.app.AppCompatActivity;

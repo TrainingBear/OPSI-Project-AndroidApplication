@@ -2,6 +2,7 @@ import com.android.utils.jvmArchitecture
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -77,6 +78,10 @@ android {
         includeInApk = true
         includeInBundle = true
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
 }
 
 dependencies {
@@ -127,6 +132,7 @@ dependencies {
 
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
+    implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

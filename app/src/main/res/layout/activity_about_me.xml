@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
-            android:src="@drawable/tentangaplikasinewupdate"
+            android:src="@drawable/tentangaplikasinew"
             android:contentDescription="@string/PenjelasanTentangAplikasi" />
 
         <!-- Tombol panah kiri atas -->
