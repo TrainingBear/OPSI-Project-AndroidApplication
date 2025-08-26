@@ -1,5 +1,3 @@
-import com.android.utils.jvmArchitecture
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -22,11 +20,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags += ""
-            }
-        }
     }
     packaging {
         packaging {
@@ -66,12 +59,12 @@ android {
         viewBinding = true
         compose = true
     }
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path = file("src/main/cpp/CMakeLists.txt")
+//            version = "3.22.1"
+//        }
+//    }
     buildToolsVersion = "35.0.0"
 //    viewBinding {
 //        isEnabled = true
@@ -87,30 +80,21 @@ android {
 }
 
 dependencies {
-//    implementation(libs.litert.support.api){
+//    implementation(libs.google.litert)
+//    implementation(libs.image.labeling.custom)
+//    implementation(libs.tensorflow.lite.task.vision)
+//    implementation(libs.tensorflow.lite.gpu){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
 //    }
-    implementation(libs.google.litert)
-    implementation(libs.image.labeling.custom)
-    implementation(libs.tensorflow.lite.task.vision)
-    implementation(libs.tensorflow.lite.gpu){
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.auto.value", module = "auto-value")
-    }
-//    implementation(libs.tensorflow.tensorflow.lite.support){
+//    implementation(libs.tensorflow.tensorflow.lite.metadata){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
 //        exclude(group = "org.tensorflow", module = "tensorflow-lite")
 //    }
-    implementation(libs.tensorflow.tensorflow.lite.metadata){
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.auto.value", module = "auto-value")
-        exclude(group = "org.tensorflow", module = "tensorflow-lite")
-    }
-    implementation(libs.image.labeling.custom)
+//    implementation(libs.image.labeling.custom)
+//    implementation(libs.tensorflow.lite)
     implementation(libs.linkfirebase)
-    implementation(libs.tensorflow.lite)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -136,6 +120,9 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation(libs.androidx.core.ktx)
     implementation(libs.core.ktx)
+    implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.material3.jvmstubs)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
