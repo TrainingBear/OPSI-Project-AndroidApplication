@@ -20,9 +20,14 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.tbear9.openfarm.Util;
 import com.tbear9.openfarm.databinding.DevBinding;
+
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.support.label.Category;
+import org.tensorflow.lite.task.vision.classifier.Classifications;
+import org.tensorflow.lite.task.vision.classifier.ImageClassifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -56,6 +61,10 @@ public class DevActivity extends AppCompatActivity {
         binding.button2.setOnClickListener( e -> {
             binding.viewFinder.setVisibility(binding.viewFinder.getVisibility() == VISIBLE ? INVISIBLE : VISIBLE);
         });
+        binding.button3.setOnClickListener( e -> {
+            camSel = camSel == CameraSelector.DEFAULT_BACK_CAMERA? CameraSelector.DEFAULT_FRONT_CAMERA : CameraSelector.DEFAULT_BACK_CAMERA;
+            poto();
+        });
         binding.viewFinder.setVisibility(INVISIBLE);
         cameraExecutor = Executors.newSingleThreadExecutor();
         EdgeToEdge.enable(this);
@@ -63,21 +72,21 @@ public class DevActivity extends AppCompatActivity {
 
     private ProcessCameraProvider cameraProvider;
     private void poto(){
-//        getPerms();
-//        binding.viewFinder.setVisibility(VISIBLE);
-//        com.google.common.util.concurrent.ListenableFuture<ProcessCameraProvider> camProviderFuture = ProcessCameraProvider.getInstance(this);
-//        camProviderFuture.addListener(()->{
-//            Preview preview = new Preview.Builder().build();
-//            preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
-//            try {
-//                this.cameraProvider = camProviderFuture.get();
-//                cameraProvider.unbindAll();
-//                cameraProvider.bindToLifecycle(this, camSel, preview);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }}, ContextCompat.getMainExecutor(this));
-//        binding.button1.setOnClickListener(e -> cebret());
-//        binding.button1.setVisibility(VISIBLE);
+        getPerms();
+        binding.viewFinder.setVisibility(VISIBLE);
+        ListenableFuture<ProcessCameraProvider> camProviderFuture = ProcessCameraProvider.getInstance(this);
+        camProviderFuture.addListener(()->{
+            Preview preview = new Preview.Builder().build();
+            preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
+            try {
+                this.cameraProvider = camProviderFuture.get();
+                cameraProvider.unbindAll();
+                cameraProvider.bindToLifecycle(this, camSel, preview);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }}, ContextCompat.getMainExecutor(this));
+        binding.button1.setOnClickListener(e -> cebret());
+        binding.button1.setVisibility(VISIBLE);
     }
     private void cebret(){
         ImageCapture capture = new ImageCapture.Builder()
@@ -111,6 +120,12 @@ public class DevActivity extends AppCompatActivity {
                 cameraProvider.unbindAll();
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
                 binding.imageView.setImageBitmap(bitmap);
+                try {
+                    process(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override
@@ -121,6 +136,17 @@ public class DevActivity extends AppCompatActivity {
         });
     }
     private void rekam(){}
+
+    public void process(Bitmap bitmap) throws IOException {
+        try (ImageClassifier classifier = ImageClassifier.createFromFile(this, "model.tflite");){
+            List<Classifications> result = classifier.classify(TensorImage.fromBitmap(bitmap));
+            for (Classifications classifications : result) {
+                for (Category category : classifications.getCategories()) {
+                    Util.debug("Prediction", category.getLabel() + ": " + category.getScore());
+                }
+            }
+        }
+    }
 
     private void getPerms(){
         if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
