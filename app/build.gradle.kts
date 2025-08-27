@@ -94,6 +94,8 @@ dependencies {
 //    }
 //    implementation(libs.image.labeling.custom)
 //    implementation(libs.tensorflow.lite)
+    /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
+    implementation(libs.okhttp)
     implementation(libs.linkfirebase)
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -122,7 +124,8 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.material3.jvmstubs)
+    implementation(libs.firebase.crashlytics.buildtools)
+//    implementation(libs.androidx.material3.jvmstubs)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
