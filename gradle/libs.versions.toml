@@ -1,5 +1,5 @@
 [versions]
-agp = "8.12.1"
+agp = "8.10.1"
 autoValue = "1.6.3"
 camVersion = "1.4.2"
 imageLabelingCustom = "17.0.3"
@@ -22,6 +22,7 @@ leanback = "1.0.0"
 glide = "4.11.0"
 activity = "1.8.0"
 mediarouter = "1.8.0"
+okhttp = "5.1.0"
 roomCompilerProcessingTesting = "2.7.2"
 tensorflowLite = "2.12.0"
 tensorflowLiteMetadata = "0.1.0"
@@ -34,6 +35,10 @@ unirestJava = "3.13.6"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 coreKtxVersion = "1.17.0"
+foundationAndroid = "1.9.0"
+material3Android = "1.3.2"
+material3Jvmstubs = "1.5.0-alpha02"
+firebaseCrashlyticsBuildtools = "3.0.6"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camVersion" }
@@ -63,6 +68,7 @@ leanback = { group = "androidx.leanback", name = "leanback", version.ref = "lean
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.ref = "mediarouter" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 room-compiler-processing-testing = { group = "androidx.room", name = "room-compiler-processing-testing", version.ref = "roomCompilerProcessingTesting" }
 
 
@@ -76,6 +82,10 @@ tensorflow-tensorflow-lite-support = { group = "org.tensorflow", name = "tensorf
 unirest-java = { module = "com.konghq:unirest-java", version.ref = "unirestJava" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+androidx-material3-jvmstubs = { group = "androidx.compose.material3", name = "material3-jvmstubs", version.ref = "material3Jvmstubs" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

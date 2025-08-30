@@ -20,14 +20,9 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.util.concurrent.ListenableFuture;
 import com.tbear9.openfarm.Util;
 import com.tbear9.openfarm.databinding.DevBinding;
-
-import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.label.Category;
-import org.tensorflow.lite.task.vision.classifier.Classifications;
-import org.tensorflow.lite.task.vision.classifier.ImageClassifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -67,56 +62,26 @@ public class DevActivity extends AppCompatActivity {
         });
         binding.viewFinder.setVisibility(INVISIBLE);
         cameraExecutor = Executors.newSingleThreadExecutor();
-//        Util.debug("created temp file at ", file.getAbsolutePath());
-//        Uri uri = FileProvider.getUriForFile(DevActivity.this, getPackageName() + ".fileprovider", file);
-//        ActivityResultLauncher<Intent> activity = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    if (result.getResultCode() == RESULT_OK) {
-//                        Glide.with(DevActivity.this).load(uri).into(binding.imageView);
-//                        binding.welcomemsg.setText("Camera has been executed!");
-//                        try {
-//                            process(uri);
-//                        }catch (IOException e){
-//                            binding.welcomemsg.setText("Error: IOException");
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//        );
-//        binding.openCamera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if(ContextCompat.checkSelfPermission(DevActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-//                    ActivityCompat.requestPermissions(DevActivity.this, new String[]{Manifest.permission.CAMERA}, 1);
-//                }else{
-//                    Util.debug("Camera button pressed");
-//                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-//                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//                    activity.launch(intent);
-//                }
-//            }
-//        });
         EdgeToEdge.enable(this);
     }
 
     private ProcessCameraProvider cameraProvider;
     private void poto(){
-        getPerms();
-        binding.viewFinder.setVisibility(VISIBLE);
-        ListenableFuture<ProcessCameraProvider> camProviderFuture = ProcessCameraProvider.getInstance(this);
-        camProviderFuture.addListener(()->{
-            Preview preview = new Preview.Builder().build();
-            preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
-            try {
-                this.cameraProvider = camProviderFuture.get();
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this, camSel, preview);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }}, ContextCompat.getMainExecutor(this));
-        binding.button1.setOnClickListener(e -> cebret());
-        binding.button1.setVisibility(VISIBLE);
+//        getPerms();
+//        binding.viewFinder.setVisibility(VISIBLE);
+//        com.google.common.util.concurrent.ListenableFuture<ProcessCameraProvider> camProviderFuture = ProcessCameraProvider.getInstance(this);
+//        camProviderFuture.addListener(()->{
+//            Preview preview = new Preview.Builder().build();
+//            preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
+//            try {
+//                this.cameraProvider = camProviderFuture.get();
+//                cameraProvider.unbindAll();
+//                cameraProvider.bindToLifecycle(this, camSel, preview);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }}, ContextCompat.getMainExecutor(this));
+//        binding.button1.setOnClickListener(e -> cebret());
+//        binding.button1.setVisibility(VISIBLE);
     }
     private void cebret(){
         ImageCapture capture = new ImageCapture.Builder()
@@ -150,12 +115,6 @@ public class DevActivity extends AppCompatActivity {
                 cameraProvider.unbindAll();
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
                 binding.imageView.setImageBitmap(bitmap);
-                try {
-                    process(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
             }
 
             @Override
@@ -166,59 +125,6 @@ public class DevActivity extends AppCompatActivity {
         });
     }
     private void rekam(){}
-
-    public void process(Bitmap bitmap) throws IOException {
-        try (ImageClassifier classifier = ImageClassifier.createFromFile(this, "model.tflite");){
-            List<Classifications> result = classifier.classify(TensorImage.fromBitmap(bitmap));
-            for (Classifications classifications : result) {
-                for (Category category : classifications.getCategories()) {
-                    Util.debug("Prediction", category.getLabel() + ": " + category.getScore());
-                }
-            }
-        }
-//        TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
-//        tensorImage.load(bitmap);
-//
-//        ImageProcessor imageProcessor = new ImageProcessor.Builder()
-//                .add(new ResizeOp(224, 224, ResizeOp.ResizeMethod.BILINEAR))
-//                .add(new NormalizeOp(0.0f, 255.0f))
-//                .build();
-//
-//        tensorImage = imageProcessor.process(tensorImage);
-//        Util.debug("ODEBUG", "Processed image with data type : ", tensorImage.getDataType());
-//        try (ImageLabeler test = TFLITE.getTest();) {
-//            ImageLabeler test = TFLITE.getTest();
-//            binding.linearLayout.clearAnimation();
-//            LocalModel localModel =
-//                    new LocalModel.Builder()
-//                            .setAssetFilePath("model.tflite")
-//                            .build();
-//            TextView textView1 = new TextView(this);
-//            textView1.setText(localModel.getAbsoluteFilePath());
-//            binding.linearLayout.addView(textView1);
-//            Task<List<ImageLabel>> listTask = test.process(bitmap, 0)
-//                    .addOnSuccessListener(result -> {
-//                        binding.welcomemsg.setText("ODEBUG: " + result.get(0).getIndex() + result.get(0).getText() + " with confidence " + result.get(0).getConfidence());
-//                        for (ImageLabel label : result) {
-//                            Util.debug("ODEBUG", (Object) ("ODEBUG: " + label.getIndex() + label.getText() + " with confidence " + label.getConfidence()));
-//                            TextView textView = new TextView(this);
-//                            textView.setText("ODEBUG: " + label.getIndex() + label.getText() + " with confidence " + label.getConfidence());
-//                            binding.linearLayout.addView(textView);
-//                        }
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        binding.welcomemsg.setText("ODEBUG: " + e.getMessage());
-//                        Util.debug("ODEBUG", e.getMessage());
-//                        e.printStackTrace();
-//                    });
-//        }
-//        Model1 model = Model1.newInstance(this);
-//        TensorImage tensorImage1 = TensorImage.fromBitmap(bitmap);
-//        Model1.Outputs output = model.process(tensorImage1.getTensorBuffer());
-//        for (float f : output.getOutputFeature0AsTensorBuffer().getFloatArray()){
-//            Util.debug("ODEBUG", "ODEBUG: " + f);
-//        }
-    }
 
     private void getPerms(){
         if(ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){

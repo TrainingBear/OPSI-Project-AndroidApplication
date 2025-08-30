@@ -16,6 +16,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.tbear9.openfarm.activities.DevActivity;
+import com.tbear9.openfarm.activities.PostActivity;
 import com.tbear9.openfarm.databinding.MainmenuBinding;
 import com.tbear9.openfarm.databinding.TestlayoutBinding;
 
@@ -27,36 +28,28 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private TestlayoutBinding binding;
-    private MainmenuBinding bindingmenu;
+    private MainmenuBinding main;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = TestlayoutBinding.inflate(getLayoutInflater());
-        bindingmenu = MainmenuBinding.inflate(getLayoutInflater());
-        setContentView(bindingmenu.getRoot());
+        main = MainmenuBinding.inflate(getLayoutInflater());
+        setContentView(main.getRoot());
         setSupportActionBar(binding.toolbar);
-        bindingmenu.tombolPengetahuan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BotakuhPengetahuanActivity.class);
-                startActivity(intent);
-            }
+        main.tombolPengetahuan.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, BotakuhPengetahuanActivity.class);
+            startActivity(intent);
         });
-        bindingmenu.btnPanduan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BotakuhPanduanActivity.class);
-                startActivity(intent);
-            }
+        main.btnPanduan.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, BotakuhPanduanActivity.class);
+            startActivity(intent);
         });
-        bindingmenu.menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMenu(v);
-            }
+        main.menuButton.setOnClickListener(v -> showMenu(v));
+        main.jalankanAplikasi.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, PostActivity.class);
+            startActivity(intent);
         });
-
 
         initmain();
     }
