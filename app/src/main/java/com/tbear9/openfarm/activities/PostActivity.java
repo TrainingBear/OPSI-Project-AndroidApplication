@@ -6,6 +6,8 @@ import static android.view.View.VISIBLE;
 
 import android.Manifest;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,22 +27,21 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.tbear9.openfarm.Fragments.PostPageNav.Listener;
 import com.tbear9.openfarm.R;
+import com.tbear9.openfarm.api.Parameters;
 import com.tbear9.openfarm.api.UserVariable;
 import com.tbear9.openfarm.databinding.ActivityPostBinding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class PostActivity extends AppCompatActivity implements Listener {
-    private ProcessCameraProvider cameraProvider;
-    CameraSelector camSel = CameraSelector.DEFAULT_BACK_CAMERA;
-    ActivityPostBinding binding;
-    UserVariable variable = UserVariable.builder().build();
-    ActivityResultLauncher<String[]> perm = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+    private ActivityPostBinding binding;
+    ActivityResultLauncher<String> perm = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
         boolean[] allGranted = {true};
-        result.forEach((permission, isGranted) -> {
-            if (isGranted) {
+            if (result) {
                 Log.i("Permission", "Permission granted");
                 Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
             } else {
@@ -48,7 +49,7 @@ public class PostActivity extends AppCompatActivity implements Listener {
                 Log.w("Permission", "Permission denied");
                 allGranted[0] = false;
             }
-        });
+        ;
         if(!allGranted[0]) finish();
     });
     ActivityResultLauncher<String> gallery = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -58,11 +59,6 @@ public class PostActivity extends AppCompatActivity implements Listener {
                     return;
                 }
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                binding.image.setImageBitmap(bitmap);
-                binding.image.setVisibility(VISIBLE);
-                binding.image.setOnClickListener(v -> {
-                    binding.image.setVisibility(GONE);
-                });
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 variable = UserVariable.builder()
@@ -75,15 +71,15 @@ public class PostActivity extends AppCompatActivity implements Listener {
         }
         );
     ActivityResultLauncher<Void> camera = registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), result -> {
-        binding.image.setImageBitmap(result);
-        binding.image.setVisibility(VISIBLE);
-        binding.image.setOnClickListener(v -> {
-            binding.image.setVisibility(GONE);
-        });
         Log.i("Image", "Image loaded with camera");
     });
 
-    private int page = 1;
+    private CameraSelector camSel = CameraSelector.DEFAULT_BACK_CAMERA;
+    private UserVariable variable = UserVariable.builder().build();
+    private ProcessCameraProvider cameraProvider;
+    private Location location;
+    private Map<String, Parameters> params = new HashMap<>();
+    private static int page = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,52 +92,38 @@ public class PostActivity extends AppCompatActivity implements Listener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        perm.launch(new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_MEDIA_IMAGES
-        });
-
-        binding.openCamera.setOnClickListener(v -> {
-            Log.i("Camera", "Camera launched");
-            Toast.makeText(this, "Camera launched", Toast.LENGTH_SHORT).show();
-            camera.launch(null);
-        });
-        binding.openGalery.setOnClickListener(v -> {
-            Log.i("Gallery", "Gallery launched");
-            Toast.makeText(this, "Gallery launched", Toast.LENGTH_SHORT).show();
-            gallery.launch("image/*");
-        });
-
-    }
-
-    @Override
-    public void next(){
-//        hide();
-//        page++;
+        binding.page1.setVisibility(GONE);
+        binding.page2.setVisibility(GONE);
         show();
-    }
-    @Override
-    public void back(){
-        hide();
-//        page--;
-//        show();
+        location = getIntent().getParcelableExtra("location");
     }
 
     private void show(){
-        switch (page){
-            case 1 :
-                binding.openCamera.setVisibility(VISIBLE);
-                binding.page1.setVisibility(VISIBLE);
-                Toast.makeText(this, "Shown", Toast.LENGTH_SHORT).show();
+        if(page==1) {
+            binding.page1.setVisibility(VISIBLE);
+            binding.openCamera.setOnClickListener(v -> {
+                Log.i("Post", "Camera launched");
+                perm.launch(Manifest.permission.CAMERA);
+                camera.launch(null);
+            });
+
+            binding.openGalery.setOnClickListener(v -> {
+                Log.i("Post", "Gallery launched");
+                perm.launch(Manifest.permission.READ_MEDIA_IMAGES);
+                gallery.launch("image/*");
+            });
+            Parameters.SoilParameters.builder().pH(binding.pH.getText().).build();
+        }
+        if(page==2) {
+            binding.page2.setVisibility(VISIBLE);
         }
     }
 
     private void hide(){
-        switch(page){
-            case 1:
-                binding.openCamera.setVisibility(GONE);
-                binding.page1.setVisibility(GONE);
-                Toast.makeText(this, "Hidden", Toast.LENGTH_SHORT).show();
+        if(page==1) {
+            binding.page1.setVisibility(GONE);
         }
+        if(page==2) binding.page2.setVisibility(GONE);
     }
+    @Override protected void onDestroy() {super.onDestroy();binding = null;}@Override protected void onStop() {super.onStop();binding = null;}public void next(){hide();page++;show();}public void back(){hide();page--;show();}
 }
