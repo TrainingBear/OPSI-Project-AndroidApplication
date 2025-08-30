@@ -11,16 +11,15 @@
         android:id="@+id/page1"
         android:layout_width="336dp"
         android:layout_height="604dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/background" />
 
         <EditText
@@ -89,17 +88,106 @@
             android:layout_width="match_parent"
             android:layout_height="127dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <fragment
-            android:id="@+id/nav_host_fragment"
-            android:name="com.tbear9.openfarm.Fragments.PostPageNav"
-            class="com.tbear9.openfarm.Fragments.PostPageNav"
-            android:layout_width="match_parent"
-            android:layout_height="128dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:layout_editor_absoluteX="16dp" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/page2"
+        android:layout_width="336dp"
+        android:layout_height="604dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/page2t"
+            android:layout_width="164dp"
+            android:layout_height="29dp"
+            android:layout_marginStart="84dp"
+            android:layout_marginTop="16dp"
+            android:text="Geo Parameter"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/latitude"
+            android:layout_width="285dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="Latitude"
+            android:inputType="numberDecimal"
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/page2t" />
+
+        <EditText
+            android:id="@+id/altitude"
+            android:layout_width="285dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="68dp"
+            android:ems="10"
+            android:hint="Altitude"
+            android:inputType="numberDecimal"
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/page2t" />
+
+        <EditText
+            android:id="@+id/temp"
+            android:layout_width="285dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="29dp"
+            android:layout_marginTop="124dp"
+            android:ems="10"
+            android:hint="Curah Hujan"
+            android:inputType="numberDecimal"
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/page2t" />
+
+        <EditText
+            android:id="@+id/rainfall2"
+            android:layout_width="285dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="29dp"
+            android:layout_marginTop="174dp"
+            android:ems="10"
+            android:hint="Temperatur"
+            android:inputType="numberDecimal"
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/page2t" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <fragment
+        android:id="@+id/nav_host_fragment"
+        android:name="com.tbear9.openfarm.Fragments.PostPageNav"
+        class="com.tbear9.openfarm.Fragments.PostPageNav"
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
