@@ -94,6 +94,7 @@ dependencies {
 //    }
 //    implementation(libs.image.labeling.custom)
 //    implementation(libs.tensorflow.lite)
+    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:1.1.3")
     /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
     implementation(libs.okhttp)
     implementation(libs.linkfirebase)
