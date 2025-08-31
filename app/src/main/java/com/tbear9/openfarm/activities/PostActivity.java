@@ -27,9 +27,11 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.tbear9.openfarm.Fragments.PostPageNav.Listener;
 import com.tbear9.openfarm.R;
-import com.tbear9.openfarm.api.Parameters;
-import com.tbear9.openfarm.api.UserVariable;
+import com.trbear9.plants.api.CustomParameters;
+import com.trbear9.plants.api.Parameters;
 import com.tbear9.openfarm.databinding.ActivityPostBinding;
+import com.trbear9.plants.api.SoilParameters;
+import com.trbear9.plants.api.UserVariable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -112,7 +114,7 @@ public class PostActivity extends AppCompatActivity implements Listener {
                 perm.launch(Manifest.permission.READ_MEDIA_IMAGES);
                 gallery.launch("image/*");
             });
-            Parameters.SoilParameters.builder().pH(binding.pH.getText().).build();
+            SoilParameters.builder().pH(Float.MAX_VALUE).build();
         }
         if(page==2) {
             binding.page2.setVisibility(VISIBLE);
