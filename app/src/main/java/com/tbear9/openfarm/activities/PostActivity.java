@@ -27,7 +27,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.tbear9.openfarm.Fragments.PostPageNav.Listener;
 import com.tbear9.openfarm.R;
-import com.trbear9.plants.api.CustomParameters;
 import com.trbear9.plants.api.Parameters;
 import com.tbear9.openfarm.databinding.ActivityPostBinding;
 import com.trbear9.plants.api.SoilParameters;
