@@ -1,3 +1,5 @@
+import com.android.utils.jvmArchitecture
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.tbear9.openfarm"
-    compileSdk = 36
+    compileSdk = 35
 
     lint {
         baseline = file("lint-baseline.xml")
@@ -19,6 +21,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
     }
     packaging {
         packaging {
@@ -57,12 +64,12 @@ android {
         mlModelBinding = true
         viewBinding = true
     }
-//    externalNativeBuild {
-//        cmake {
-//            path = file("src/main/cpp/CMakeLists.txt")
-//            version = "3.22.1"
-//        }
-//    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
     buildToolsVersion = "35.0.0"
 //    viewBinding {
 //        isEnabled = true
@@ -78,25 +85,30 @@ android {
 }
 
 dependencies {
-//    implementation(libs.google.litert)
-//    implementation(libs.image.labeling.custom)
-//    implementation(libs.tensorflow.lite.task.vision)
-//    implementation(libs.tensorflow.lite.gpu){
+//    implementation(libs.litert.support.api){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
 //    }
-//    implementation(libs.tensorflow.tensorflow.lite.metadata){
+    implementation(libs.google.litert)
+    implementation(libs.image.labeling.custom)
+    implementation(libs.tensorflow.lite.task.vision)
+    implementation(libs.tensorflow.lite.gpu){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+    }
+//    implementation(libs.tensorflow.tensorflow.lite.support){
 //        exclude(group = "org.checkerframework", module = "checker-qual")
 //        exclude(group = "com.google.auto.value", module = "auto-value")
 //        exclude(group = "org.tensorflow", module = "tensorflow-lite")
 //    }
-//    implementation(libs.image.labeling.custom)
-//    implementation(libs.tensorflow.lite)
-
-    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:1.1.3")
-    /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
-    implementation(libs.okhttp)
+    implementation(libs.tensorflow.tensorflow.lite.metadata){
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.auto.value", module = "auto-value")
+        exclude(group = "org.tensorflow", module = "tensorflow-lite")
+    }
+    implementation(libs.image.labeling.custom)
     implementation(libs.linkfirebase)
+    implementation(libs.tensorflow.lite)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -122,10 +134,6 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation(libs.androidx.core.ktx)
     implementation(libs.core.ktx)
-    implementation(libs.androidx.foundation.android)
-    implementation(libs.androidx.material3.android)
-    implementation(libs.firebase.crashlytics.buildtools)
-//    implementation(libs.androidx.material3.jvmstubs)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -134,5 +142,9 @@ dependencies {
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
     testAnnotationProcessor(libs.lombok)
+
+
+
+
 
 }
