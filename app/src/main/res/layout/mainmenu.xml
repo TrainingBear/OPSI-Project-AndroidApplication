@@ -85,27 +85,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/mulai"
-            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="100dp"
             android:layout_height="40dp"
-            android:layout_gravity="center_horizontal|center_vertical"
             android:background="#2C1B1B"
-            android:backgroundTint="@color/black"
-            android:clipToOutline="true"
             android:fontFamily="sans-serif-black"
             android:text="mulai"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="16sp"
-            app:cornerRadius="10dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mainBackground"
-            app:strokeColor="@color/white"
-            app:strokeWidth="5dp" />
+            app:layout_constraintTop_toBottomOf="@+id/mainBackground"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
     <FrameLayout
