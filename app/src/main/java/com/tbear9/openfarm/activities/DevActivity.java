@@ -56,10 +56,6 @@ public class DevActivity extends AppCompatActivity {
         binding.button2.setOnClickListener( e -> {
             binding.viewFinder.setVisibility(binding.viewFinder.getVisibility() == VISIBLE ? INVISIBLE : VISIBLE);
         });
-        binding.button3.setOnClickListener( e -> {
-            camSel = camSel == CameraSelector.DEFAULT_BACK_CAMERA? CameraSelector.DEFAULT_FRONT_CAMERA : CameraSelector.DEFAULT_BACK_CAMERA;
-            poto();
-        });
         binding.viewFinder.setVisibility(INVISIBLE);
         cameraExecutor = Executors.newSingleThreadExecutor();
         EdgeToEdge.enable(this);
