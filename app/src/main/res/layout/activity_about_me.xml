@@ -11,17 +11,17 @@
 
         <!-- Gambar panjang -->
         <ImageView
-            android:id="@+id/imagePenjelasan"
+            android:id="@+id/imageAboutUs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
-            android:src="@drawable/tentangaplikasinew"
+            android:src="@drawable/aboutustheme"
             android:contentDescription="@string/PenjelasanTentangAplikasi" />
 
         <!-- Tombol panah kiri atas -->
         <ImageButton
-            android:id="@+id/tombolKembali"
+            android:id="@+id/buttonBackmenuabout"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_margin="16dp"
