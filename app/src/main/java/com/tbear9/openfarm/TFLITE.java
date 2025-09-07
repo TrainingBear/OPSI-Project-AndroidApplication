@@ -1,4 +1,4 @@
-package com.tbear9.openfarm;
+package com.TBear9.openfarm;
 
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.label.ImageLabeler;

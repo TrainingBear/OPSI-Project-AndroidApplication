@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 <item
     android:title="Tentang Aplikasi"
-    android:id="@+id/AboutMe" />
+    android:id="@+id/aboutme" />
     <item
         android:title="Keluar"
-        android:id="@+id/KeluarApk" />
+        android:id="@+id/keluar_apk" />
 
 </menu>

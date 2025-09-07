@@ -3,11 +3,12 @@ import com.android.utils.jvmArchitecture
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.tbear9.openfarm"
-    compileSdk = 35
+    compileSdk = 36
 
     lint {
         baseline = file("lint-baseline.xml")
@@ -63,6 +64,7 @@ android {
     buildFeatures {
         mlModelBinding = true
         viewBinding = true
+        compose = true
     }
     externalNativeBuild {
         cmake {
@@ -142,6 +144,17 @@ dependencies {
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
     testAnnotationProcessor(libs.lombok)
+    val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
+    implementation(composeBom)
+
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+
+    implementation("androidx.activity:activity-compose:1.9.0")
+
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
 
 

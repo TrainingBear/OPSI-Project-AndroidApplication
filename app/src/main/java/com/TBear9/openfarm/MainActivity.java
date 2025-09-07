@@ -7,6 +7,9 @@ import com.TBear9.openfarm.ui.BotakuhPengetahuanActivity;
 import com.TBear9.openfarm.ui.BotakuhPanduanActivity;
 
 
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -16,6 +19,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.tbear9.openfarm.activities.DevActivity;
+import com.tbear9.openfarm.databinding.BottomsheetPageBinding;
 import com.tbear9.openfarm.databinding.MainmenuBinding;
 import com.tbear9.openfarm.databinding.TestlayoutBinding;
 
@@ -86,28 +90,29 @@ public class MainActivity extends AppCompatActivity {
 //
 //    }
 
-//    private void showMenu(View v){
-//        PopupMenu popupMenu = new PopupMenu(MainActivity.this, v);
-//        popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-//        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                if (item.getItemId() == R.id.AboutMe) {
-//                    Intent intent = new Intent(MainActivity.this, AboutMeActivity.class);
-//                    startActivity(intent);
-//                    return true;
-//                } else if (item.getItemId() == R.id.KeluarApk) {
-//                    finishAffinity();
-//                    return true;
-//
-//                }
-//                return false;
-//
-//
-//        }
-//    });
-//        popupMenu.show();
-//    }
+    // --- BottomSheet muncul disini ---
+    private void showBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+        BottomsheetPageBinding bottomBinding = BottomsheetPageBinding.inflate(getLayoutInflater());
+        bottomSheetDialog.setContentView(bottomBinding.getRoot());
+
+        // Tombol Panduan
+        bottomBinding.btnPanduan.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, BotakuhPanduanActivity.class);
+            startActivity(intent);
+            bottomSheetDialog.dismiss();
+        });
+
+        // Tombol Pengetahuan
+        bottomBinding.tombolPengetahuan.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, BotakuhPengetahuanActivity.class);
+            startActivity(intent);
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+
 
 
     public void initmain(){

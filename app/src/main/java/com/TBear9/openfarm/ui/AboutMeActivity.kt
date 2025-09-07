@@ -3,7 +3,7 @@ package com.TBear9.openfarm.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.tbear9.openfarm.MainActivity
+import com.TBear9.openfarm.MainActivity
 import com.tbear9.openfarm.databinding.ActivityAboutMeBinding
 
 class AboutMeActivity : AppCompatActivity() {
@@ -16,7 +16,7 @@ class AboutMeActivity : AppCompatActivity() {
         binding = ActivityAboutMeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.tombolKembali.setOnClickListener {
+        binding.buttonBackmenuabout.setOnClickListener {
             // Kembali ke MainActivity
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
