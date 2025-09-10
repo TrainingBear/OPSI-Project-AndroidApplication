@@ -21,25 +21,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    packaging {
-        packaging {
-            jniLibs {
-                pickFirsts += "lib/arm64-v8a/libtensorflowlite_jni.so"
-                pickFirsts += "lib/armeabi-v7a/libtensorflowlite_jni.so"
-            }
-        }
-
-        resources {
-            pickFirsts += "**"
-        }
-    }
-
-    configurations.all {
-        resolutionStrategy {
-            force("org.checkerframework:checker-qual:3.42.0")
-            force("com.google.auto.value:auto-value:1.6.3")
-        }
-    }
 
     buildTypes {
         release {
@@ -59,16 +40,7 @@ android {
         viewBinding = true
         compose = true
     }
-//    externalNativeBuild {
-//        cmake {
-//            path = file("src/main/cpp/CMakeLists.txt")
-//            version = "3.22.1"
-//        }
-//    }
     buildToolsVersion = "35.0.0"
-//    viewBinding {
-//        isEnabled = true
-//    }
     dependenciesInfo {
         includeInApk = true
         includeInBundle = true
@@ -76,24 +48,31 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
+
+    packaging {
+            resources {
+                pickFirsts += "messages/JavaOptionBundle.properties"
+                pickFirsts += "kotlin/reflect/reflect.kotlin_builtins"
+                pickFirsts += "DebugProbesKt.bin"
+                pickFirsts += "META-INF/analysis-api/analysis-api-impl-base.xml"
+                pickFirsts += "META-INF/analysis-api/analysis-api-fir.xml"
+                pickFirsts += "META-INF/analysis-api/**"
+                pickFirsts += "META-INF/**/**"
+                pickFirsts += "META-INF/**"
+            }
+    }
 
 }
 
 dependencies {
-//    implementation(libs.google.litert)
-//    implementation(libs.image.labeling.custom)
-//    implementation(libs.tensorflow.lite.task.vision)
-//    implementation(libs.tensorflow.lite.gpu){
-//        exclude(group = "org.checkerframework", module = "checker-qual")
-//        exclude(group = "com.google.auto.value", module = "auto-value")
+//    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:2.1.0"){
+//        exclude(group = "org.jetbrains.kotlin")
+//        exclude(group = "org.jetbrains")
+//        exclude("messages/JavaOptionBundle.properties")
 //    }
-//    implementation(libs.tensorflow.tensorflow.lite.metadata){
-//        exclude(group = "org.checkerframework", module = "checker-qual")
-//        exclude(group = "com.google.auto.value", module = "auto-value")
-//        exclude(group = "org.tensorflow", module = "tensorflow-lite")
-//    }
-//    implementation(libs.image.labeling.custom)
-//    implementation(libs.tensorflow.lite)
     /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
     implementation(libs.okhttp)
     implementation(libs.linkfirebase)
@@ -111,6 +90,7 @@ dependencies {
     implementation(libs.room.compiler.processing.testing){
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
     }
 
     implementation(libs.camera.core)
@@ -120,12 +100,11 @@ dependencies {
 
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
-    implementation(libs.androidx.core.ktx)
     implementation(libs.core.ktx)
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.material3.android)
     implementation(libs.firebase.crashlytics.buildtools)
-//    implementation(libs.androidx.material3.jvmstubs)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -134,20 +113,11 @@ dependencies {
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
     testAnnotationProcessor(libs.lombok)
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
-    implementation(composeBom)
 
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-
-    implementation("androidx.activity:activity-compose:1.9.0")
-
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-
-
-
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.ui)
+//    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
 
 }

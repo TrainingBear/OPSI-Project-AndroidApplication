@@ -27,11 +27,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.tbear9.openfarm.Fragments.PostPageNav.Listener;
 import com.tbear9.openfarm.R;
-import com.trbear9.plants.api.CustomParameters;
-import com.trbear9.plants.api.Parameters;
+//import com.trbear9.plants.api.Parameters;
 import com.tbear9.openfarm.databinding.ActivityPostBinding;
-import com.trbear9.plants.api.SoilParameters;
-import com.trbear9.plants.api.UserVariable;
+//import com.trbear9.plants.api.SoilParameters;
+//import com.trbear9.plants.api.UserVariable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,9 +62,9 @@ public class PostActivity extends AppCompatActivity implements Listener {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                variable = UserVariable.builder()
-                        .image(stream.toByteArray())
-                        .build();
+//                variable = UserVariable.builder()
+//                        .image(stream.toByteArray())
+//                        .build();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -77,10 +76,10 @@ public class PostActivity extends AppCompatActivity implements Listener {
     });
 
     private CameraSelector camSel = CameraSelector.DEFAULT_BACK_CAMERA;
-    private UserVariable variable = UserVariable.builder().build();
+//    private UserVariable variable = UserVariable.builder().build();
     private ProcessCameraProvider cameraProvider;
     private Location location;
-    private Map<String, Parameters> params = new HashMap<>();
+//    private Map<String, Parameters> params = new HashMap<>();
     private static int page = 1;
 
     @Override
@@ -114,7 +113,7 @@ public class PostActivity extends AppCompatActivity implements Listener {
                 perm.launch(Manifest.permission.READ_MEDIA_IMAGES);
                 gallery.launch("image/*");
             });
-            SoilParameters.builder().pH(Float.MAX_VALUE).build();
+//            SoilParameters.builder().pH(Float.MAX_VALUE).build();
         }
         if(page==2) {
             binding.page2.setVisibility(VISIBLE);
