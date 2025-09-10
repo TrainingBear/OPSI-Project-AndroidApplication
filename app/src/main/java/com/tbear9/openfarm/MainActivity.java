@@ -2,17 +2,21 @@ package com.tbear9.openfarm;
 
 import android.content.Intent;
 
+import com.TBear9.openfarm.ui.AboutMeActivity;
 import com.TBear9.openfarm.ui.BotakuhPengetahuanActivity;
 import com.TBear9.openfarm.ui.BotakuhPanduanActivity;
 
 
+import android.view.MenuItem;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.tbear9.openfarm.activities.DevActivity;
@@ -51,18 +55,23 @@ public class MainActivity extends AppCompatActivity {
 //                startActivity(intent);
 //            }
 //        });
-//        bindingmenu.chooseButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
-//        bindingmenu.menuButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                showMenu(v);
-//            }
-//        });
+        bindingmenu.chooseButton.setOnClickListener(v -> {
+            showBottomSheet();
+        });
+
+        bindingmenu.menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopup(v);
+            }
+        });
+        bindingmenu.helpIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AboutMeActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
         initmain();
@@ -86,6 +95,26 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(intent);
 //
 //    }
+
+    private void showPopup(View v) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        MenuInflater inflater = popupMenu.getMenuInflater();
+        inflater.inflate(R.menu.popup_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.keluar_apk) {
+                    finishAffinity(); // keluar aplikasi
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        popupMenu.show();
+    }
+
 
     // --- BottomSheet muncul disini ---
     private void showBottomSheet() {
