@@ -5,18 +5,19 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:visibility="visible"
     tools:context=".activities.PostActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/page1"
-        android:layout_width="336dp"
-        android:layout_height="604dp"
-        android:visibility="gone">
+        android:layout_width="408dp"
+        android:layout_height="815dp"
+        android:visibility="visible">
 
         <ImageView
             android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:visibility="invisible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -26,7 +27,6 @@
             android:id="@+id/pH"
             android:layout_width="286dp"
             android:layout_height="44dp"
-            android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="pH tanah (opsional)"
             android:inputType="numberDecimal"
@@ -34,17 +34,20 @@
             android:textAllCaps="false"
             android:textSize="12sp"
             android:visibility="visible"
-            app:layout_constraintStart_toStartOf="@+id/deep"
-            app:layout_constraintTop_toBottomOf="@+id/deep" />
+            tools:layout_editor_absoluteX="61dp"
+            tools:layout_editor_absoluteY="349dp" />
 
         <TextView
             android:id="@+id/textView5"
             android:layout_width="164dp"
             android:layout_height="29dp"
-            android:layout_marginStart="84dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginTop="216dp"
+            android:fontFamily="sans-serif"
             android:text="Parameter Tanah"
             android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,8 +55,6 @@
             android:id="@+id/deep"
             android:layout_width="285dp"
             android:layout_height="38dp"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="8dp"
             android:ems="10"
             android:hint="Kedalaman tanah (opsional)"
             android:inputType="numberDecimal"
@@ -61,28 +62,20 @@
             android:textAllCaps="false"
             android:textSize="12sp"
             android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView5" />
-
-        <Button
-            android:id="@+id/open_galery"
-            android:layout_width="91dp"
-            android:layout_height="34dp"
-            android:layout_marginTop="20dp"
-            android:text="open galery"
-            android:textSize="8sp"
-            app:layout_constraintStart_toStartOf="@+id/pH"
-            app:layout_constraintTop_toBottomOf="@+id/pH" />
+            tools:layout_editor_absoluteX="61dp"
+            tools:layout_editor_absoluteY="275dp" />
 
         <Button
             android:id="@+id/open_camera"
-            android:layout_width="91dp"
+            android:layout_width="286dp"
             android:layout_height="34dp"
-            android:layout_marginTop="20dp"
-            android:text="open camera"
-            android:textSize="8sp"
-            app:layout_constraintEnd_toEndOf="@+id/pH"
-            app:layout_constraintTop_toBottomOf="@+id/pH" />
+            android:background="@drawable/rounded_button_black"
+            android:text="Open Camera"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="8dp"
+            tools:layout_editor_absoluteX="61dp"
+            tools:layout_editor_absoluteY="438dp" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -94,92 +87,48 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/page2"
-        android:layout_width="336dp"
-        android:layout_height="604dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@drawable/app_bar_radius"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:dividerColor="@android:color/darker_gray"
+
+        app:dividerThickness="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        tools:layout_editor_absoluteY="215dp" />
 
-        <TextView
-            android:id="@+id/page2t"
-            android:layout_width="164dp"
-            android:layout_height="29dp"
-            android:layout_marginStart="84dp"
-            android:layout_marginTop="16dp"
-            android:text="Geo Parameter"
-            android:textAlignment="center"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:dividerColor="@android:color/darker_gray"
+        app:dividerThickness="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="430dp" />
 
-        <EditText
-            android:id="@+id/latitude"
-            android:layout_width="285dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="8dp"
-            android:ems="10"
-            android:hint="Latitude"
-            android:inputType="numberDecimal"
-            android:textAlignment="textStart"
-            android:textAllCaps="false"
-            android:textSize="12sp"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page2t" />
-
-        <EditText
-            android:id="@+id/altitude"
-            android:layout_width="285dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="68dp"
-            android:ems="10"
-            android:hint="Altitude"
-            android:inputType="numberDecimal"
-            android:textAlignment="textStart"
-            android:textAllCaps="false"
-            android:textSize="12sp"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page2t" />
-
-        <EditText
-            android:id="@+id/temp"
-            android:layout_width="285dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="29dp"
-            android:layout_marginTop="124dp"
-            android:ems="10"
-            android:hint="Curah Hujan"
-            android:inputType="numberDecimal"
-            android:textAlignment="textStart"
-            android:textAllCaps="false"
-            android:textSize="12sp"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page2t" />
-
-        <EditText
-            android:id="@+id/rainfall2"
-            android:layout_width="285dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="29dp"
-            android:layout_marginTop="174dp"
-            android:ems="10"
-            android:hint="Temperatur"
-            android:inputType="numberDecimal"
-            android:textAlignment="textStart"
-            android:textAllCaps="false"
-            android:textSize="12sp"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page2t" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:dividerColor="@android:color/darker_gray"
+        app:dividerThickness="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="645dp" />
 
     <fragment
         android:id="@+id/nav_host_fragment"

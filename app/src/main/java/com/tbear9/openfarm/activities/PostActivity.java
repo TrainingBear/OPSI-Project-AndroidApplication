@@ -31,6 +31,7 @@ import com.trbear9.plants.api.Parameters;
 import com.tbear9.openfarm.databinding.ActivityPostBinding;
 import com.trbear9.plants.api.SoilParameters;
 import com.trbear9.plants.api.UserVariable;
+import com.trbear9.plants.api.CustomParameters;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
