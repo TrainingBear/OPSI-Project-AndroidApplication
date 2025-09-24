@@ -70,7 +70,7 @@ android {
 
 dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:1.0.0-SNAPSHOT"){
+    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:3.0.0-SNAPSHOT"){
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains")
         exclude("messages/JavaOptionBundle.properties")
@@ -82,6 +82,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
+    implementation("com.google.guava:guava:31.0.1-android")
+    
     implementation(libs.okhttp)
     implementation(libs.linkfirebase)
     implementation(libs.appcompat)

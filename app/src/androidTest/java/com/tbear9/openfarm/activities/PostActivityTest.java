@@ -1,7 +1,7 @@
 package com.tbear9.openfarm.activities;
 
 import com.trbear9.plants.PlantClient;
-import com.trbear9.plants.api.Plant;
+import com.trbear9.plants.api.blob.Plant;
 
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -11,11 +11,12 @@ public class PostActivityTest extends TestCase {
     private static final Log log = LogFactory.getLog(PostActivityTest.class);
 
     public void testGetGistUrl(){
-        PlantClient.addProvider("TrainingBear", "84d0e105aaabce26c8dfbaff74b2280e");
-        PlantClient.addProvider("Github", "https://api.github.com");
-        PlantClient.addProvider("Github", "https://api.github.com");
-        PlantClient.addProvider("Github", "https://api.github.com");
-        String url = PlantClient.url;
+        PlantClient client = new PlantClient(new String[]{"aiusdasndhais"}, 192399);
+        client.addProvider("TrainingBear", "84d0e105aaabce26c8dfbaff74b2280e");
+        client.addProvider("Github", "https://api.github.com");
+        client.addProvider("Github", "https://api.github.com");
+        client.addProvider("Github", "https://api.github.com");
+        String url = client.getUrl();
         log.info(url);
     }
 

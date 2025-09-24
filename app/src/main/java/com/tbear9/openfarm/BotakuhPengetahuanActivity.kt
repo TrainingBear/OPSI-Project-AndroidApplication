@@ -1,4 +1,4 @@
-package com.TBear9.openfarm.ui
+package com.tbear9.openfarm
 
 import android.content.Intent
 import android.os.Bundle

@@ -1,180 +1,99 @@
-package com.tbear9.openfarm;
+package com.tbear9.openfarm
 
-import android.content.Intent;
+import android.content.Intent
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.PopupMenu
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.ui.AppBarConfiguration
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.tbear9.openfarm.activities.Camera
+import com.tbear9.openfarm.activities.DevActivity
+import com.tbear9.openfarm.databinding.BottomsheetPageBinding
+import com.tbear9.openfarm.databinding.MainmenuBinding
 
-import com.TBear9.openfarm.ui.AboutMeActivity;
-import com.TBear9.openfarm.ui.BotakuhPengetahuanActivity;
-import com.TBear9.openfarm.ui.BotakuhPanduanActivity;
+class MainActivity : AppCompatActivity() {
+    private val mAppBarConfiguration: AppBarConfiguration? = null
+    private var binding: MainmenuBinding? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = MainmenuBinding.inflate(layoutInflater)
+        setContentView(binding!!.getRoot())
+        binding!!.chooseButton.setOnClickListener(View.OnClickListener { v: View? ->
+            showBottomSheet()
+        })
 
-import android.view.MenuItem;
+        binding!!.menuButton.setOnClickListener(View.OnClickListener { v: View? -> showPopup(v) })
+        binding!!.helpIcon.setOnClickListener(View.OnClickListener { v: View? ->
+            val intent = Intent(this@MainActivity, AboutMeActivity::class.java)
+            startActivity(intent)
+        })
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+        binding!!.start.setOnClickListener {
+            val intent = Intent(this, Camera::class.java)
+            startActivity(intent)
+        }
 
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.View;
-import android.widget.PopupMenu;
-import android.widget.TextView;
-
-import com.tbear9.openfarm.activities.DevActivity;
-import com.tbear9.openfarm.databinding.BottomsheetPageBinding;
-import com.tbear9.openfarm.databinding.MainmenuBinding;
-import com.tbear9.openfarm.databinding.TestlayoutBinding;
-
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.appcompat.app.AppCompatActivity;
-
-
-public class MainActivity extends AppCompatActivity {
-
-    private AppBarConfiguration mAppBarConfiguration;
-    private TestlayoutBinding binding;
-    private MainmenuBinding bindingmenu;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = TestlayoutBinding.inflate(getLayoutInflater());
-        bindingmenu = MainmenuBinding.inflate(getLayoutInflater());
-        setContentView(bindingmenu.getRoot());
-        setSupportActionBar(binding.toolbar);
-//        bindingmenu.tombolPengetahuan.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(MainActivity.this, BotakuhPengetahuanActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-//        bindingmenu.btnPanduan.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(MainActivity.this, BotakuhPanduanActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-        bindingmenu.chooseButton.setOnClickListener(v -> {
-            showBottomSheet();
-        });
-
-        bindingmenu.menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopup(v);
-            }
-        });
-        bindingmenu.helpIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AboutMeActivity.class);
-                startActivity(intent);
-            }
-        });
-
-
-        initmain();
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 //        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu)
     }
 
-    public void enterDev(View view){
-        Intent intent = new Intent(this, DevActivity.class);
-        startActivity(intent);
+    fun enterDev(view: View?) {
+        val intent = Intent(this, DevActivity::class.java)
+        startActivity(intent)
     }
 
-//    public void botakuh_pengetahuan(View view){
-//        setContentView(findViewById(R.id.botakuhpengetahuan));
-//        Intent intent = new Intent(this, MainActivity.class);
-//        startActivity(intent);
-//
-//    }
+    private fun showPopup(v: View?) {
+        val popupMenu = PopupMenu(this, v)
+        val inflater = popupMenu.getMenuInflater()
+        inflater.inflate(R.menu.popup_menu, popupMenu.getMenu())
 
-    private void showPopup(View v) {
-        PopupMenu popupMenu = new PopupMenu(this, v);
-        MenuInflater inflater = popupMenu.getMenuInflater();
-        inflater.inflate(R.menu.popup_menu, popupMenu.getMenu());
-
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
+        popupMenu.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener {
+            override fun onMenuItemClick(item: MenuItem): Boolean {
                 if (item.getItemId() == R.id.keluar_apk) {
-                    finishAffinity(); // keluar aplikasi
-                    return true;
+                    finishAffinity() // keluar aplikasi
+                    return true
                 }
-                return false;
+                return false
             }
-        });
+        })
 
-        popupMenu.show();
+        popupMenu.show()
     }
 
 
     // --- BottomSheet muncul disini ---
-    private void showBottomSheet() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-        BottomsheetPageBinding bottomBinding = BottomsheetPageBinding.inflate(getLayoutInflater());
-        bottomSheetDialog.setContentView(bottomBinding.getRoot());
+    private fun showBottomSheet() {
+        val bottomSheetDialog = BottomSheetDialog(this@MainActivity)
+        val bottomBinding = BottomsheetPageBinding.inflate(getLayoutInflater())
+        bottomSheetDialog.setContentView(bottomBinding.getRoot())
 
         // Tombol Panduan
-        bottomBinding.btnPanduan.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, BotakuhPanduanActivity.class);
-            startActivity(intent);
-            bottomSheetDialog.dismiss();
-        });
+        bottomBinding.btnPanduan.setOnClickListener(View.OnClickListener { v: View? ->
+            val intent = Intent(this@MainActivity, BotakuhPanduanActivity::class.java)
+            startActivity(intent)
+            bottomSheetDialog.dismiss()
+        })
 
         // Tombol Pengetahuan
-        bottomBinding.tombolPengetahuan.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, BotakuhPengetahuanActivity.class);
-            startActivity(intent);
-            bottomSheetDialog.dismiss();
-        });
+        bottomBinding.tombolPengetahuan.setOnClickListener(View.OnClickListener { v: View? ->
+            val intent = Intent(this@MainActivity, BotakuhPengetahuanActivity::class.java)
+            startActivity(intent)
+            bottomSheetDialog.dismiss()
+        })
 
-        bottomSheetDialog.show();
+        bottomSheetDialog.show()
     }
 
 
+    fun initmain() {
 
-    public void initmain(){
-        int c = binding.toolbar.getChildCount();
-        for (int i = 0; i < c; i++) {
-            View v = binding.toolbar.getChildAt(i);
-            if(v instanceof TextView){
-                TextView title = (TextView) v;
-                if(title.getText().equals(binding.toolbar.getTitle())){
-                    title.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent repo = new Intent(Intent.ACTION_VIEW);
-                            repo.setData(Uri.parse("https://github.com/TrainingBear/OPSI-Project-AndroidApplication"));
-                            view.getContext().startActivity(repo);
-                        }
-                    });
-                }
-            }
-        }
-        binding.author.setOnClickListener((v)->{
-            Intent author = new Intent(Intent.ACTION_VIEW);
-            author.setData(Uri.parse("https://github.com/TrainingBear"));
-            v.getContext().startActivity(author);
-        });
-        binding.openfarmLogo2.setOnClickListener((v)->{
-            Intent openfarm = new Intent(Intent.ACTION_VIEW);
-            openfarm.setData(Uri.parse("https://github.com/TrainingBear/OPSI-Project-AndroidApplication"));
-            v.getContext().startActivity(openfarm);
-        });
-        binding.devMode.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                enterDev(v);
-                return true;
-            }
-        });
     }
 }

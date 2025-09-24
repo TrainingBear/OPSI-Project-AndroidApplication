@@ -12,28 +12,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.location.LocationServices;
 import com.tbear9.openfarm.Fragments.PostPageNav.Listener;
-import com.tbear9.openfarm.R;
 import com.trbear9.plants.PlantClient;
 import com.trbear9.plants.api.GeoParameters;
 import com.tbear9.openfarm.databinding.ActivityPostBinding;
 import com.trbear9.plants.api.Response;
-import com.trbear9.plants.api.SoilParameters;
 import com.trbear9.plants.api.UserVariable;
-import com.trbear9.plants.api.CustomParameters;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,28 +37,40 @@ public class PostActivity extends AppCompatActivity implements Listener {
     private ActivityPostBinding binding;
     private UserVariable variable;
     private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final PlantClient client =
+            new PlantClient(new String[]{"TrainingBear/84d0e105aaabce26c8dfbaff74b2280e"}, 200_000);
     private static int page = 1;
 
-    ActivityResultLauncher<String> perm = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            result -> {
-        boolean[] allGranted = {true};
-            if (result) {
-                Log.i("Permission", "Permission granted");
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-                Log.w("Permission", "Permission denied");
-                allGranted[0] = false;
-            }
-        ;
-        if(!allGranted[0]) finish();
-    });
-    ActivityResultLauncher<String> gallery = registerForActivityResult(
+    ActivityResultLauncher<String> perm;
+    ActivityResultLauncher<String> gallery;
+    ActivityResultLauncher<Void> camera;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActivityPostBinding binding = ActivityPostBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        this.binding = binding;
+        variable = new UserVariable();
+        camera = registerForActivityResult
+            (new ActivityResultContracts.TakePicturePreview(), result -> {
+                if(result == null){
+                    throw new RuntimeException("Image not loaded");
+                }
+                if(binding == null){
+                    throw new RuntimeException("The binding is null!!!!");
+                }
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                result.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                binding.image.setImageBitmap(result);
+                variable.setImage(stream.toByteArray());
+                variable.setFilename(System.currentTimeMillis()+".jpg");
+            });
+        gallery = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {try {
                 if(uri == null) {
-                    Toast.makeText(this, "Image not loaded", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "Image not loaded", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -76,55 +82,37 @@ public class PostActivity extends AppCompatActivity implements Listener {
             } catch (IOException e) {
                 Log.e("I/O", e.getMessage(), e);
                 throw new RuntimeException(e);
-            }
-        }
+            }}
         );
-    ActivityResultLauncher<Void> camera = registerForActivityResult
-            (new ActivityResultContracts.TakePicturePreview(), result -> {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                Bitmap scalledResult = Bitmap.createScaledBitmap(result, 320, 320, true);
-                scalledResult.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                binding.image.setImageBitmap(scalledResult);
-                variable.setImage(stream.toByteArray());
-    });
-
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityPostBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        EdgeToEdge.enable(this);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        variable = new UserVariable();
+        perm = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            result -> {
+            boolean[] allGranted = {true};
+            if (result) {
+                Log.i("Permission", "Permission granted");
+                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                Log.w("Permission", "Permission denied");
+                allGranted[0] = false;
+            }}
+        );
         binding.page1.setVisibility(GONE);
-        binding.page2.setVisibility(GONE);
+        binding.openCamera.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED)
+                camera.launch(null);
+            else
+                perm.launch(Manifest.permission.CAMERA);
+        });
         next();
     }
 
     private void onNext(){
         if(page==1) { // page 1 == next
             binding.page1.setVisibility(VISIBLE);
-            binding.openCamera.setOnClickListener(v -> {
-                Log.i("Post", "Camera launched");
-                perm.launch(Manifest.permission.CAMERA);
-                camera.launch(null);
-            });
-
-            binding.openGalery.setOnClickListener(v -> {
-                Log.i("Post", "Gallery launched");
-                perm.launch(Manifest.permission.READ_MEDIA_IMAGES);
-                gallery.launch("image/*");
-            });
-            SoilParameters.builder().pH(Float.MAX_VALUE).build();
         }
         if(page==2) {
-            binding.page2.setVisibility(VISIBLE);
         }
     }
 
@@ -152,7 +140,6 @@ public class PostActivity extends AppCompatActivity implements Listener {
         if(page==1) { // page 1 == previous
             binding.page1.setVisibility(GONE);
         }
-        if(page==2) binding.page2.setVisibility(GONE);
     }
     @Override protected void onDestroy() {super.onDestroy();binding = null;}@Override protected void onStop() {super.onStop();binding = null;}
     public void next(){
@@ -172,9 +159,9 @@ public class PostActivity extends AppCompatActivity implements Listener {
             throw new NullPointerException("Image is null");
         }
         getLocation();
-        Response produk = PlantClient.sendPacket(variable, "PROCESS");
+        Response response = client.sendPacket(variable, PlantClient.PROCESS);
         try {
-            Log.i("JSON", objectMapper.readTree(objectMapper.writeValueAsString(produk)).toPrettyString());
+            Log.i("JSON", objectMapper.readTree(objectMapper.writeValueAsString(response)).toPrettyString());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

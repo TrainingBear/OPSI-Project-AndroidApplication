@@ -39,17 +39,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.OpenFarm"
         tools:targetApi="31">
-        <activity android:name="com.TBear9.openfarm.ui.AboutMeActivity"
+        <activity android:name="com.tbear9.openfarm.activities.Camera"
             android:exported="true" />
-        <activity android:name="com.TBear9.openfarm.ui.BotakuhPengetahuanActivity"
+        <activity android:name=".AboutMeActivity"
             android:exported="true" />
-        <activity android:name="com.TBear9.openfarm.ui.BotakuhPanduanActivity"
+        <activity android:name=".BotakuhPengetahuanActivity"
+            android:exported="true" />
+        <activity android:name="com.tbear9.openfarm.BotakuhPanduanActivity"
             android:exported="true" />
 
 
         <activity
             android:name=".activities.PostActivity"
-            android:exported="false" />
+            android:exported="false"
+            tools:targetApi="33" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
