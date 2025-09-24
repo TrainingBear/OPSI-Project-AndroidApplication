@@ -12,8 +12,9 @@
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -21,17 +22,19 @@
 
     <Button
         android:id="@+id/button3"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="100dp"
+        android:layout_width="360dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="65dp"
         android:background="@drawable/rounded_button"
-        android:textAllCaps="false"
         android:text="@string/Get_Started"
+        android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="50px"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="6:1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/chooseButton"
@@ -74,7 +77,10 @@
         android:scaleType="fitCenter"
         android:src="@drawable/icon_i"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.5"
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

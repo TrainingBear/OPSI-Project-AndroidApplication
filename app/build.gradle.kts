@@ -68,11 +68,11 @@ android {
 }
 
 dependencies {
-//    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:2.1.0"){
-//        exclude(group = "org.jetbrains.kotlin")
-//        exclude(group = "org.jetbrains")
-//        exclude("messages/JavaOptionBundle.properties")
-//    }
+    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:2.1.0"){
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains")
+        exclude("messages/JavaOptionBundle.properties")
+    }
     /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
     implementation(libs.okhttp)
     implementation(libs.linkfirebase)

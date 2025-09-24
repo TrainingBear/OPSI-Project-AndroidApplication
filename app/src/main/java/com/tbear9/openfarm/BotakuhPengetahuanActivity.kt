@@ -3,7 +3,6 @@ package com.TBear9.openfarm.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.tbear9.openfarm.MainActivity
 import com.tbear9.openfarm.databinding.BotakuhpengetahuanBinding
 
 class BotakuhPengetahuanActivity : AppCompatActivity() {

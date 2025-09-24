@@ -14,4 +14,8 @@
     <color name="selected_background">#ffaa3f</color>
     <color name="default_background">#3d3d3d</color>
     <color name="hijau">#4CAF50</color>
+    <color name="dark_green">#008000</color>
+    <color name="custom_green">#4A9E4A</color>
+
+
 </resources>
