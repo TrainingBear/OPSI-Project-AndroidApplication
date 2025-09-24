@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tbear9.openfarm.R;
 import com.tbear9.openfarm.activities.PostActivity;
 import com.tbear9.openfarm.databinding.FragmentPostPageNavBinding;
@@ -48,6 +49,7 @@ public class PostPageNav extends Fragment {
         binding = FragmentPostPageNavBinding.inflate(getLayoutInflater(), container, false);
         binding.back.setOnClickListener( e -> listener.back());
         binding.next.setOnClickListener( e -> listener.next());
+        binding.finish.setOnClickListener( e -> listener.onFinish());
         return binding.getRoot();
     }
 
@@ -60,6 +62,11 @@ public class PostPageNav extends Fragment {
         default void back(){
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 //                PostActivity.back();
+//            }
+        };
+        default void onFinish() {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                PostActivity.execute();
 //            }
         };
     }
