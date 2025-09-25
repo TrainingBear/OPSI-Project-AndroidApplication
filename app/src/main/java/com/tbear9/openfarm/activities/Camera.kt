@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -70,6 +71,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -116,7 +118,6 @@ class Camera : AppCompatActivity(){
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
     @Composable
     fun app(){
         val navController = rememberNavController()
@@ -175,7 +176,33 @@ class Camera : AppCompatActivity(){
                 }
             }
             composable("result"){
-
+                Scaffold(topBar = {
+                    TopAppBar(
+                        title = { Text("Results") },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                finish()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.White,
+                        )
+                    )
+                }) {
+                    Column(modifier = Modifier.padding(it)) {
+                        PlantCard(
+                            plantTitle = "Monstera Deliciosa",
+                            plantDesc = "Daun besar berlubang, cocok di cahaya tidak langsung.",
+                            plantMeta = "pH 6–7 • Tanah porous",
+                            plantImage = BitmapFactory.decodeByteArray(variable.image, 0, variable.image!!.size)
+                        )
+                    }
+                }
             }
         }
     }
@@ -190,7 +217,6 @@ class Camera : AppCompatActivity(){
                 title = { Text("Results") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        finish()
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -208,7 +234,7 @@ class Camera : AppCompatActivity(){
                     plantTitle = "Monstera Deliciosa",
                     plantDesc = "Daun besar berlubang, cocok di cahaya tidak langsung.",
                     plantMeta = "pH 6–7 • Tanah porous",
-                    plantImage = painterResource(R.drawable.gallery_thumb)
+BitmapFactory.decodeByteArray(variable.image, 0, variable.image!!.size)
                 )
             }
         }
@@ -219,7 +245,7 @@ class Camera : AppCompatActivity(){
         plantTitle: String = "Monstera Deliciosa",
         plantDesc: String = "Daun besar berlubang, cocok di cahaya tidak langsung.",
         plantMeta: String = "pH 6–7 • Tanah porous",
-        plantImage: Painter = painterResource(id = R.drawable.ic_menu_camera)
+        plantImage: Bitmap
     ) {
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -234,7 +260,7 @@ class Camera : AppCompatActivity(){
             ) {
                 // Plant Image
                 Image(
-                    painter = plantImage,
+                    bitmap = plantImage.asImageBitmap(),
                     contentDescription = plantTitle,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

@@ -71,6 +71,7 @@ android {
 dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("androidx.navigation:navigation-compose:2.9.4")
     implementation("com.github.TrainingBear.OPSI-PlantAPI:api:3.0.0-SNAPSHOT"){
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains")
@@ -115,7 +116,6 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.material3.android)
     implementation(libs.firebase.crashlytics.buildtools)
-    implementation(libs.androidx.navigation.compose.jvmstubs)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
