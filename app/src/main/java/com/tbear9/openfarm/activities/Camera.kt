@@ -401,11 +401,10 @@ BitmapFactory.decodeByteArray(variable.image, 0, variable.image!!.size)
                         .align(Alignment.Center)
                         .aspectRatio(1f)
                 ) {
-//                CameraPreviewView(
-//                    modifier = Modifier.fillMaxSize()
-//                        .padding(16.dp)
-//                        .clip(RoundedCornerShape(8.dp))
-//                )
+                    CameraPreviewView(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(16.dp)
+                        .clip(RoundedCornerShape(8.dp)))
                     drawOutline(15f, 60f)
                 }
                 Box(
