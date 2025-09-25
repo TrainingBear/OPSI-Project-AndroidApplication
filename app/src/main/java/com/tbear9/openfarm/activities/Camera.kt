@@ -229,14 +229,77 @@ class Camera : AppCompatActivity(){
                 )
             )
         }) {
-            Column (modifier = Modifier.padding(it)) {
-                PlantCard(
-                    plantTitle = "Monstera Deliciosa",
-                    plantDesc = "Daun besar berlubang, cocok di cahaya tidak langsung.",
-                    plantMeta = "pH 6–7 • Tanah porous",
-BitmapFactory.decodeByteArray(variable.image, 0, variable.image!!.size)
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .background(Color.Black)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 24.dp),
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    Text(
+                        text = "Foto tanahmu!\n",
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        fontSize = 30.sp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text =
+                            "Pastikan tanah tidak tertutupi objek apapun \n" +
+                                    "seperti batu, ranting, rumput, dsb",
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Start,
+                        color = Color.White,
+                    )
+
+                }
+                Box(
+                    modifier = Modifier
+                        .size(336.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .align(Alignment.Center)
+                        .aspectRatio(1f)
+                ) {
+                    CameraPreviewView(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(16.dp)
+                        .clip(RoundedCornerShape(8.dp)))
+                    drawOutline(15f, 60f)
+                }
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .background(Color.Green.copy(alpha = 0.4f))
+                ) {
+                    Surface(
+                        modifier = Modifier.size(100.dp)
+                            .align(Alignment.Center)
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        shape = CircleShape,
+                        color = Color.Unspecified,
+                        shadowElevation = 8.dp,
+                        border = BorderStroke(4.dp, Color(0xFF0AF10D)), // blue border
+                        onClick = {}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PhotoCamera,
+                            contentDescription = "Circle Button",
+                            tint = Color(0xFF2196F3),
+                            modifier = Modifier.fillMaxSize()
+                                .padding(8.dp)
+                        )
+                    }
+                }
             }
+        }
         }
     }
 
@@ -464,8 +527,8 @@ BitmapFactory.decodeByteArray(variable.image, 0, variable.image!!.size)
                         cameraProvider.bindToLifecycle(
                             lifecycleOwner,
                             cameraSelector,
-                            preview,
-                            imgCapture
+                            imgCapture,
+                            preview
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
