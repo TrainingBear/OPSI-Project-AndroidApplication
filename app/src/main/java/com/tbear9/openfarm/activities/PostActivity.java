@@ -159,11 +159,5 @@ public class PostActivity extends AppCompatActivity implements Listener {
             throw new NullPointerException("Image is null");
         }
         getLocation();
-        Response response = client.sendPacket(variable, PlantClient.PROCESS);
-        try {
-            Log.i("JSON", objectMapper.readTree(objectMapper.writeValueAsString(response)).toPrettyString());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -46,6 +45,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,8 +56,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -91,9 +91,8 @@ import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.SoilParameters
 import com.trbear9.plants.api.UserVariable
 import com.trbear9.plants.api.blob.Plant
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 class Camera : AppCompatActivity() {
@@ -113,14 +112,12 @@ class Camera : AppCompatActivity() {
             Toast.makeText(this, "Fine Location granted!", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Fine Location denied!", Toast.LENGTH_SHORT).show()
-            finish()
         }
 
         if (coarseLocationGranted) {
             Toast.makeText(this, "Coarse Location granted!", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Coarse Location denied!", Toast.LENGTH_SHORT).show()
-            finish()
         }
     }
 
@@ -189,9 +186,8 @@ class Camera : AppCompatActivity() {
                         )
                     )
                 }) {
-
                     val scope = rememberCoroutineScope()
-
+                    var job: Job? = null
                     SoilActivity(it, onClick = { ph ->
                         try {
                             ph?.let {
@@ -202,17 +198,10 @@ class Camera : AppCompatActivity() {
                         } catch (e: NumberFormatException){
                             Toast.makeText(this@Camera, "Invalid pH value of ${e.message}", Toast.LENGTH_SHORT).show()
                         }
-                        scope.launch {
-                            try {
-                                val response = withContext(Dispatchers.IO) {
-                                    client.sendPacket(variable)
-                                }
-                                // back on Main thread, update UI
-                                Toast.makeText(this@Camera, "Got response: $response", Toast.LENGTH_SHORT).show()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                Toast.makeText(this@Camera, "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
+                        response = null;
+                        job?.cancel()
+                        job = scope.launch {
+                            response = client.sendPacket(variable)
                         }
                         navController.navigate("result")
                     })
@@ -657,7 +646,16 @@ class Camera : AppCompatActivity() {
     @Composable
     fun ResultScreen() {
         val plants = remember { mutableMapOf<Int, Plant>() }
-        // Example: load first plant on entry
+        var loaded by remember { mutableStateOf(false) }
+
+        LaunchedEffect(response) {
+            if(response != null){
+                loaded = true
+            } else{
+                loaded = false
+            }
+        }
+
         Scaffold(topBar = {
             TopAppBar(
                 title = { Text("Results") },
@@ -669,21 +667,32 @@ class Camera : AppCompatActivity() {
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         }) { padding ->
-            Column(modifier = Modifier.padding(padding)) {
-                LazyColumn {
-                    items(plants.toList()) {
-                        (score, plant) ->
-                        PlantCard(
-                            plantTitle = plant.commonName,
-                            plantDesc = plant.description,
-                            plantImage = plant.thumbnail?.let {
-                                BitmapFactory.decodeByteArray(it, 0, it.size)
-                            },
-                            score = score,
-                            diff = plant.difficulty,
-                            panen = "${plant.min_panen}-${plant.max_panen} hari",
-                            category = plant.kategori
-                        )
+            Box(modifier = Modifier.fillMaxSize()
+                .padding(padding)) {
+                if(!loaded){
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Loading plants...", fontSize = 16.sp)
+                    }
+                }
+                else Column(modifier = Modifier.padding(padding)) {
+                    LazyColumn {
+                        items(plants.toList()) { (score, plant) ->
+                            PlantCard(
+                                plantTitle = plant.commonName,
+                                plantDesc = plant.description,
+                                plantImage = plant.thumbnail?.let {
+                                    BitmapFactory.decodeByteArray(it, 0, it.size)
+                                },
+                                score = score,
+                                diff = plant.difficulty,
+                                panen = "${plant.min_panen}-${plant.max_panen} hari",
+                                category = plant.kategori
+                            )
+                        }
                     }
                 }
             }
