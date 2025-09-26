@@ -2,7 +2,11 @@ package com.tbear9.openfarm.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,12 +27,19 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Biotech
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.Coronavirus
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.EnergySavingsLeaf
 import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -44,21 +57,31 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
+import com.trbear9.plants.api.blob.Plant
+import java.util.Locale
 
-class PlantDetail {
+class PlantDetail : ComponentActivity(){
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            val ref = intent.getSerializableExtra("plant", Plant::class.java)
+            PlantDetail(ref = ref, onExit = { finish() })
+        }
+    }
+}
 
     @SuppressLint("ConfigurationScreenWidthHeight")
     @Composable
     fun getHeightByWidth(width: Dp = getScreenWidth(), bias: Float): Dp {
-        val res: Dp = (width!! * bias)
+        val res: Dp = (width * bias)
         return res
     }
 
@@ -68,10 +91,10 @@ class PlantDetail {
         return LocalConfiguration.current.screenWidthDp.dp;
     }
 
+    @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
-    @Preview
     @Composable
-    fun Demo() {
+    fun PlantDetail(ref: Plant, onExit: () -> Unit, ) {
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -84,9 +107,28 @@ class PlantDetail {
                         .fillMaxWidth()
                         .aspectRatio(1.7f)
                         .background(Color.Gray)
-                ){
+                ) {
+                    if(ref.thumbnail == null){
+                        Image(
+                            imageVector = Icons.Default.WbSunny,
+                            contentDescription = "Plant image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }else {
+                        Image(
+                            bitmap = BitmapFactory.decodeByteArray(
+                                ref.thumbnail,
+                                0,
+                                ref.thumbnail.size
+                            ).asImageBitmap(),
+                            contentDescription = "Plant image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
                     IconButton(
-                        onClick = { },
+                        onClick = { onExit },
                         modifier = Modifier
                             .padding(24.dp)
                             .size(40.dp)
@@ -96,7 +138,7 @@ class PlantDetail {
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Back"
+                            contentDescription = "Close"
                         )
                     }
                 }
@@ -106,95 +148,101 @@ class PlantDetail {
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = "Diserale discota",
+                        text = ref.commonName,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Tanaman ini ialah tanaman yang hidup di tanah, biasanya hidup di luar negri",
+                        text =ref.description,
                         fontSize = 16.sp
                     )
                     Row(modifier = Modifier.padding(top = 16.dp)) {
-                        Label("Difficulty", "EASY", Icons.Default.LocalFireDepartment)
+                        val diff = ref.difficulty.lowercase()
+                        diff.replaceFirstChar { it.uppercase() }
+                        Label("Difficulty", diff, Icons.Default.LocalFireDepartment)
                         Spacer(modifier = Modifier.width(16.dp))
-                        Label("Panen", "1-2 hari", Icons.Default.HourglassEmpty)
+                        Label("Panen", "${ref.min_panen}-${ref.max_panen} hari", Icons.Default.HourglassEmpty)
                         Spacer(modifier = Modifier.width(16.dp))
-                        Label("Kingdom", "Diserale", Icons.Default.FamilyRestroom)
+                        Label("Genus", ref.genus, Icons.Default.Spa)
                     }
                     FlowRow(
                         modifier = Modifier.padding(top = 16.dp),
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        Kat("Vegetable")
-                        Kat("Sayur")
-                        Kat("Buah")
-                        Kat("Lele")
+                        ref.kategori.split(",").forEach {
+                            Kat(it)
+                        }
                     }
                     ClickableText(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(fontSize = 16.sp)) {
-                                append("Takson -> Plantae King Queen Urtica Lens: ")
+                                append("Takson -> ${ref.kingdom} ${ref.family} ${ref.nama_ilmiah}: ")
                                 pushStyle(
                                     SpanStyle(
                                         color = Color.Blue,
                                         textDecoration = TextDecoration.Underline
                                     )
                                 )
-                                append("https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:857987-1")
+                                append(ref.taxon)
                                 pop()
                             }
                         },
                         modifier = Modifier.padding(top = 3.dp),
                         onClick = { offset ->
-                            val url = "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:857987-1"
+                            val url = ref.taxon
                             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                             context.startActivity(intent)
                         }
                     )
-
-                    Text(
-                        text = "Perawatan:",
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Content(
-                        "Penyiraman", "Tanaman ini hanya cukup di siram sehari sekali. " +
-                                "kalau lebih sering ya lebih bagus. biar seger tanamanya",
+                        "Penyiraman", ref.plantCare.watering,
                         Icons.Default.WaterDrop
                     )
                     Content(
-                        "Kontrol Hama", "Tanaman ini tidak memiliki penyakit yang berbahaya. " +
-                                "tapi kalau mau dikasih obat ya boleh. " +
-                                "tapi jangan dikasih obat yang tidak diijinkan",
+                        "Kontrol Hama", ref.plantCare.pestDiseaseManagement,
+                        Icons.Default.Coronavirus
+                    )
+                    Content(
+                        "Pemupukan", ref.plantCare.fertilization,
                         Icons.Default.LocalHospital
                     )
                     Content(
-                        "Pemupukan", "Tanaman ini tidak memerlukan pupuk. " +
-                                "tapi kalau mau dikasih pupuk ya boleh. " +
-                                "tapi jangan dikasih pupuk yang tidak diijinkan",
-                        Icons.Default.Shield
+                        "Sinar Matahari", ref.plantCare.sunlight,
+                        Icons.Default.WbSunny
                     )
                     Content(
-                        "Sinar Matahari", "Tanaman ini tidak memerlukan penyiangan. " +
-                                "tapi kalau mau dikasih penyiangan ya boleh. " +
-                                "tapi jangan dikasih penyiangan yang tidak diijinkan"
+                        "Pruning", ref.plantCare.pruning,
+                        Icons.Default.ContentCut
                     )
-                    Content(
-                        "Pruning", "Tanaman ini tidak memerlukan temperatur yang tinggi. " +
-                                "tapi kalau mau dikasih temperatur ya boleh. " +
-                                "tapi jangan dikasih temperatur yang tidak diijinkan"
-                    )
-
+                    Content2("Rumah Tangga", ref.productSystem.rumah_tangga)
+                    Content2("Komersial", ref.productSystem.komersial)
+                    Content2("Industri", ref.productSystem.industri)
                 }
             }
         }
     }
+
+
+    @Composable
+    fun Content2(header: String, content: String){
+        Text(
+            text = header,
+            fontSize = 19.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 10.dp)
+        )
+        Text(
+            text = content,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 2.dp)
+        )
+    }
     @Composable
     fun Content(header: String, content: String, icon: ImageVector){
         Row(
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 10.dp)
         ) {
             Icon(
                 imageVector = icon,
