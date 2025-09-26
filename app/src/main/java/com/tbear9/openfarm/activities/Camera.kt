@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,9 +35,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -58,10 +59,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotMutableState
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,45 +85,42 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.gms.location.LocationServices
+import com.tbear9.openfarm.Util
 import com.trbear9.plants.PlantClient
 import com.trbear9.plants.api.GeoParameters
 import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.SoilParameters
 import com.trbear9.plants.api.UserVariable
 import com.trbear9.plants.api.blob.Plant
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.internal.cache.DiskLruCache
 import java.io.ByteArrayOutputStream
+import java.time.Duration
 
 class Camera : AppCompatActivity() {
+
     val client: PlantClient = PlantClient("TrainingBear/84d0e105aaabce26c8dfbaff74b2280e", size = 200_000)
     var response: Response? = null
+    var loaded by mutableStateOf(false)
+    var plants: SnapshotStateMap<Int, List<Plant>> = mutableStateMapOf()
     val variable = UserVariable();
     val imgCapture = ImageCapture.Builder()
         .build()
 
     private val perm = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+    ) {}
 
-        if (fineLocationGranted) {
-            Toast.makeText(this, "Fine Location granted!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Fine Location denied!", Toast.LENGTH_SHORT).show()
-        }
-
-        if (coarseLocationGranted) {
-            Toast.makeText(this, "Coarse Location granted!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Coarse Location denied!", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,7 +140,9 @@ class Camera : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun App() {
-        val navController = rememberNavController()
+        var navController = rememberNavController()
+        val scope = rememberCoroutineScope()
+        var job: Job? = null
         NavHost(navController = navController, startDestination = "camera") {
             composable("camera") {
                 Scaffold(
@@ -186,8 +189,6 @@ class Camera : AppCompatActivity() {
                         )
                     )
                 }) {
-                    val scope = rememberCoroutineScope()
-                    var job: Job? = null
                     SoilActivity(it, onClick = { ph ->
                         try {
                             ph?.let {
@@ -200,8 +201,21 @@ class Camera : AppCompatActivity() {
                         }
                         response = null;
                         job?.cancel()
+                        loaded = false
+                        plants.clear()
+                        Util.debug("Launching job coroutine... ")
                         job = scope.launch {
-                            response = client.sendPacket(variable)
+                            Toast.makeText(this@Camera, "Sending data...", Toast.LENGTH_SHORT).show()
+                            response = withContext(Dispatchers.IO) {
+                                client.sendPacket(variable)
+                            }
+                            loaded = true
+                            for (score in response!!.tanaman.keys) {
+                                Util.debug("Loaded $score with size ${response!!.tanaman[score]!!.size}")
+                                plants[score] = response!!.tanaman[score]!!
+                            }
+                            Toast.makeText(this@Camera, "finished", Toast.LENGTH_SHORT).show()
+                            Util.debug("Job has been finished!")
                         }
                         navController.navigate("result")
                     })
@@ -213,9 +227,192 @@ class Camera : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun PlantDetailScreen(
+        plant: Plant,
+        score: Int,
+        onBack: () -> Unit
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(plant.commonName ?: "Plant Detail") },
+                    navigationIcon = {
+                        IconButton(onClick = { onBack() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                )
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Plant Image
+                if (plant.thumbnail != null) {
+                    Image(
+                        bitmap = BitmapFactory.decodeByteArray(plant.thumbnail, 0, plant.thumbnail.size)
+                            .asImageBitmap(),
+                        contentDescription = plant.commonName,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .background(Color.LightGray)
+                            .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Image not available")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Plant Info Card
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = plant.commonName ?: "",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = plant.description ?: "No description available",
+                            fontSize = 16.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Plant meta info as FlowRow
+                        val tags = listOf(
+                            "Score: $score",
+                            plant.difficulty ?: "Unknown",
+                            "Panen: ${plant.min_panen}-${plant.max_panen} hari",
+                            plant.kategori ?: "Unknown"
+                        )
+
+                        androidx.compose.foundation.layout.FlowRow (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            tags.forEach { tag ->
+                                Box(
+                                    modifier = Modifier
+                                        .background(Color.LightGray, RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(text = tag, fontSize = 14.sp)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun ResultScreen() {
+
+        Scaffold(topBar = {
+            TopAppBar(
+                title = { Text("Results") },
+                navigationIcon = {
+                    IconButton(onClick = { finish() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+            )
+        }) { padding ->
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)) {
+                if(!loaded){
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Loading plants...", fontSize = 16.sp)
+                    }
+                }
+                if(loaded) Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn() {
+                        items(plants.toList()) { (score, plants) ->
+                            for (plant in plants) {
+                                PlantCard(
+                                    ref = plant,
+                                    plantTitle = plant.commonName,
+                                    plantDesc = plant.description,
+                                    plantImage = plant.thumbnail?.let {
+                                        BitmapFactory.decodeByteArray(it, 0, it.size)
+                                    },
+                                    score = score,
+                                    diff = plant.difficulty,
+                                    panen = "${plant.min_panen}-${plant.max_panen} hari",
+                                    category = plant.kategori
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Preview
+    @Composable
+    fun Previewable() {
+        Scaffold(topBar = {
+//            TopAppBar(
+//                title = { Text("Results") },
+//                navigationIcon = {
+//                    IconButton(onClick = {  }) {
+//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+//                    }
+//                },
+//                colors = TopAppBarDefaults.topAppBarColors(
+//                    containerColor = Color.LightGray
+//                )
+//            )
+        }) { it ->
+            Box(modifier = Modifier.fillMaxSize().padding(it)){
+
+            }
+        }
+    }
+
 
     @Composable
     fun PlantCard(
+        ref: Plant,
         plantTitle: String = "Monstera Deliciosa",
         plantDesc: String = "Daun besar berlubang, cocok di cahaya tidak langsung.",
         score: Int,
@@ -228,6 +425,8 @@ class Camera : AppCompatActivity() {
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
             border = BorderStroke(1.dp, Color.Black),
+            onClick = {
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -274,23 +473,25 @@ class Camera : AppCompatActivity() {
                     modifier = Modifier.padding(top = 6.dp)
                 )
 
-                // Plant Meta
-                Row(
-                    modifier = Modifier.padding(top = 5.dp)
+                // Plant Tags
+                FlowRow (modifier = Modifier.padding(4.dp),
+                    mainAxisSpacing = 2.dp,
+                    crossAxisSpacing = 2.dp
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = Color(0xFFFF9800),
-                                shape = RoundedCornerShape(8.dp)
+                    category.split(",").forEach {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = Color(0xFFFF9800),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(6.dp)
+                        ) {
+                            Text(
+                                text = it,
                             )
-                            .padding(6.dp)
-                    ) {
-                        Text(
-                            text = category,
-                        )
+                        }
                     }
-                    Spacer(modifier = Modifier.width(4.dp))
                     Box(
                         modifier = Modifier
                             .background(
@@ -305,7 +506,6 @@ class Camera : AppCompatActivity() {
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    Spacer(modifier = Modifier.width(4.dp))
                     Box(
                         modifier = Modifier
                             .background(
@@ -320,21 +520,19 @@ class Camera : AppCompatActivity() {
                             fontWeight = FontWeight.Bold
                         )
                     }
-
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(8.dp)
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(6.dp)
+                    ) {
+                        Text(
+                            text = "panen: $panen",
+                            fontSize = 12.sp
                         )
-                        .padding(6.dp)
-                ) {
-                    Text(
-                        text = "panen: $panen",
-                        fontSize = 12.sp
-                    )
+                    }
                 }
             }
         }
@@ -361,17 +559,20 @@ class Camera : AppCompatActivity() {
 
     @Composable
     fun SoilActivity(innerPadding: PaddingValues, onClick: (number: String?) -> Unit) = Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(innerPadding)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(Color.White)
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .align(Alignment.Center),
             ) {
                 var number by remember { mutableStateOf("") }
@@ -423,7 +624,8 @@ class Camera : AppCompatActivity() {
                 .padding(innerPadding)
         ) {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .background(Color.Black)
             ) {
                 Column(
@@ -457,19 +659,22 @@ class Camera : AppCompatActivity() {
                         .aspectRatio(1f)
                 ) {
                     CameraPreviewView(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                             .padding(16.dp)
                             .clip(RoundedCornerShape(8.dp))
                     )
                     drawOutline(15f, 60f)
                 }
                 Box(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .align(Alignment.BottomCenter)
                         .background(Color.Green.copy(alpha = 0.4f))
                 ) {
                     Surface(
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier
+                            .size(100.dp)
                             .align(Alignment.Center)
                             .padding(top = 16.dp, bottom = 16.dp),
                         shape = CircleShape,
@@ -484,7 +689,8 @@ class Camera : AppCompatActivity() {
                             imageVector = Icons.Default.PhotoCamera,
                             contentDescription = "Circle Button",
                             tint = Color(0xFF2196F3),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .padding(8.dp)
                         )
                     }
@@ -642,89 +848,7 @@ class Camera : AppCompatActivity() {
         variable.add(geo);
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ResultScreen() {
-        val plants = remember { mutableMapOf<Int, Plant>() }
-        var loaded by remember { mutableStateOf(false) }
 
-        LaunchedEffect(response) {
-            if(response != null){
-                loaded = true
-            } else{
-                loaded = false
-            }
-        }
 
-        Scaffold(topBar = {
-            TopAppBar(
-                title = { Text("Results") },
-                navigationIcon = {
-                    IconButton(onClick = { finish() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }) { padding ->
-            Box(modifier = Modifier.fillMaxSize()
-                .padding(padding)) {
-                if(!loaded){
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Loading plants...", fontSize = 16.sp)
-                    }
-                }
-                else Column(modifier = Modifier.padding(padding)) {
-                    LazyColumn {
-                        items(plants.toList()) { (score, plant) ->
-                            PlantCard(
-                                plantTitle = plant.commonName,
-                                plantDesc = plant.description,
-                                plantImage = plant.thumbnail?.let {
-                                    BitmapFactory.decodeByteArray(it, 0, it.size)
-                                },
-                                score = score,
-                                diff = plant.difficulty,
-                                panen = "${plant.min_panen}-${plant.max_panen} hari",
-                                category = plant.kategori
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
-    @Composable
-    fun Previewable() {
-        Scaffold(topBar = {
-            TopAppBar(
-                title = { Text("Results") },
-                navigationIcon = {
-                    IconButton(onClick = { finish() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.LightGray)
-            )
-        }) { padding ->
-            Column(modifier = Modifier.padding(padding)) {
-                PlantCard(
-                    plantTitle = "Monstera Deliciosa",
-                    plantDesc = "Daun besar berlubang, cocok di cahaya tidak langsung.",
-                    diff = "HARD",
-                    panen = "30-45 hari",
-                    score = 90,
-                    category = "Tanaman Hias",
-                )
-            }
-        }
-    }
 
 }
