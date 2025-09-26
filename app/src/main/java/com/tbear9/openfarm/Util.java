@@ -11,18 +11,8 @@ import java.nio.channels.FileChannel;
 
 public final class Util {
 
-    public static void d(Class<?> clazz, Object... msg) {
-        debug(clazz.getSimpleName(), msg);
-    }
-    public static void debug(Object... msg) {
-        debug("OpenFarm", msg);
-    }
-    public static void debug(String name, Object... msg){
-        StringBuilder messages = new StringBuilder();
-        for (Object o : msg) {
-            messages.append(o.toString());
-        }
-        Log.d(name, messages.toString());
+    public static void debug(String message){
+        Log.d("OpenFarm", message);
     }
 
     public static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {

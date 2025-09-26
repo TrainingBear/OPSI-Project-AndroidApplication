@@ -16,8 +16,8 @@ public class PostActivityTest extends TestCase {
         client.addProvider("Github", "https://api.github.com");
         client.addProvider("Github", "https://api.github.com");
         client.addProvider("Github", "https://api.github.com");
-        String url = client.getUrl();
-        log.info(url);
+//        String url = client.getUrl()
+//        log.info(url);
     }
 
     public void testGetResponse() {

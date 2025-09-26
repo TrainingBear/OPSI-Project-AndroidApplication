@@ -115,7 +115,6 @@ public class DevActivity extends AppCompatActivity {
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                Util.debug("ODEBUG", exception.getMessage());
                 exception.printStackTrace();
             }
         });
