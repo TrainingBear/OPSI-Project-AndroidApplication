@@ -86,7 +86,10 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
     /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
     implementation("com.google.guava:guava:31.0.1-android")
-    
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+    implementation("com.google.android.material:material:1.12.0")
+
+
     implementation(libs.okhttp)
     implementation(libs.linkfirebase)
     implementation(libs.appcompat)

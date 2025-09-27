@@ -75,12 +75,21 @@ class MainActivity : AppCompatActivity() {
         val bottomBinding = BottomsheetPageBinding.inflate(getLayoutInflater())
         bottomSheetDialog.setContentView(bottomBinding.getRoot())
 
-        // Tombol Panduan
-        bottomBinding.btnPanduan.setOnClickListener(View.OnClickListener { v: View? ->
-            val intent = Intent(this@MainActivity, BotakuhPanduanActivity::class.java)
+//        // Tombol Panduan
+//        bottomBinding.btnPanduan.setOnClickListener(View.OnClickListener { v: View? ->
+//            val intent = Intent(this@MainActivity, BotakuhPanduanActivity::class.java)
+//            startActivity(intent)
+//            bottomSheetDialog.dismiss()
+//        })
+
+        // Tombol Panduan Baru
+        bottomBinding.btnPanduan.setOnClickListener {
+            val intent = Intent(this@MainActivity, TutorialActivity::class.java)
             startActivity(intent)
             bottomSheetDialog.dismiss()
-        })
+        }
+
+
 
         // Tombol Pengetahuan
         bottomBinding.tombolPengetahuan.setOnClickListener(View.OnClickListener { v: View? ->

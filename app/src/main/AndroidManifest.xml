@@ -45,7 +45,7 @@
             android:exported="true" />
         <activity android:name=".BotakuhPengetahuanActivity"
             android:exported="true" />
-        <activity android:name="com.tbear9.openfarm.BotakuhPanduanActivity"
+        <activity android:name="com.tbear9.openfarm.TutorialActivity"
             android:exported="true" />
 
 
