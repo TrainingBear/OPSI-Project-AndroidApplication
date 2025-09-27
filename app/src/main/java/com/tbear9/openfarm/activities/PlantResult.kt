@@ -36,14 +36,14 @@ import com.trbear9.plants.api.blob.Plant
 fun ResultScreen(
     plants: SnapshotStateMap<Int, List<Plant>>,
     loaded: Boolean,
-    function: () -> Unit
+    onBack: () -> Unit
 ) {
     val scroll = rememberScrollState()
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("Results") },
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = {onBack}) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             },

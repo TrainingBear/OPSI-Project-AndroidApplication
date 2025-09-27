@@ -73,7 +73,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("androidx.navigation:navigation-compose:2.9.4")
-    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:3.0.5-SNAPSHOT"){
+    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:3.0.8"){
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains")
         exclude("messages/JavaOptionBundle.properties")

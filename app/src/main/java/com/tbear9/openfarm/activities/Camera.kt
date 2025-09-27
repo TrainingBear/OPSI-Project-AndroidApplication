@@ -79,6 +79,7 @@ import com.trbear9.plants.api.UserVariable
 import com.trbear9.plants.api.blob.Plant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -116,10 +117,10 @@ class Camera : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun App() {
-        var navController = rememberNavController()
+        var nav = rememberNavController()
         val scope = rememberCoroutineScope()
         var job: Job? = null
-        NavHost(navController = navController, startDestination = "camera") {
+        NavHost(navController = nav, startDestination = "camera") {
             composable("camera") {
                 Scaffold(
                     topBar = {
@@ -142,7 +143,7 @@ class Camera : AppCompatActivity() {
                     }
                 ) {
                     CameraActivity(it, onClick = {
-                        navController.navigate("soil")
+                        nav.navigate("soil")
                     })
                 }
             }
@@ -152,7 +153,7 @@ class Camera : AppCompatActivity() {
                         title = { Text("Soil") },
                         navigationIcon = {
                             IconButton(onClick = {
-                                navController.navigate("camera")
+                                nav.navigate("camera")
                             }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -170,7 +171,7 @@ class Camera : AppCompatActivity() {
                             ph?.let {
                                 val soil = SoilParameters()
                                 soil.pH = (it.replace(",", ".")).toFloat()
-                                variable.add(soil)
+                                variable.soil = soil
                             }
                         } catch (e: NumberFormatException){
                             Toast.makeText(this@Camera, "Invalid pH value of ${e.message}", Toast.LENGTH_SHORT).show()
@@ -189,16 +190,17 @@ class Camera : AppCompatActivity() {
                             for (score in response!!.tanaman.keys) {
                                 Util.debug("Loaded $score with size ${response!!.tanaman[score]!!.size}")
                                 plants[score] = response!!.tanaman[score]!!
+                                delay(50)
                             }
                             Toast.makeText(this@Camera, "finished", Toast.LENGTH_SHORT).show()
                             Util.debug("Job has been finished!")
                         }
-                        navController.navigate("result")
+                        nav.navigate("result")
                     })
                 }
             }
             composable("result") {
-                ResultScreen(plants, loaded)
+                ResultScreen(plants, loaded, onBack = {nav.navigate("soil")})
             }
         }
     }
@@ -233,7 +235,6 @@ class Camera : AppCompatActivity() {
                 OutlinedTextField(
                     value = number,
                     onValueChange = { input ->
-                        // only allow digits
                         if (input.all { it.isDigit() }) {
                             number = input
                         }
@@ -491,10 +492,6 @@ class Camera : AppCompatActivity() {
                     geo.longtitude = it.longitude;
                 }
             };
-        variable.add(geo);
+        variable.geo = geo;
     }
-
-
-
-
 }

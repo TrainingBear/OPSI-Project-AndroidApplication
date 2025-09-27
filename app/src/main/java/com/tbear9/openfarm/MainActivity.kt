@@ -7,15 +7,12 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.ui.AppBarConfiguration
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.tbear9.openfarm.activities.Camera
-import com.tbear9.openfarm.activities.DevActivity
 import com.tbear9.openfarm.databinding.BottomsheetPageBinding
 import com.tbear9.openfarm.databinding.MainmenuBinding
 
 class MainActivity : AppCompatActivity() {
-    private val mAppBarConfiguration: AppBarConfiguration? = null
     private var binding: MainmenuBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,14 +42,9 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    fun enterDev(view: View?) {
-        val intent = Intent(this, DevActivity::class.java)
-        startActivity(intent)
-    }
-
     private fun showPopup(v: View?) {
         val popupMenu = PopupMenu(this, v)
-        val inflater = popupMenu.getMenuInflater()
+        val inflater = popupMenu.menuInflater
         inflater.inflate(R.menu.popup_menu, popupMenu.getMenu())
 
         popupMenu.setOnMenuItemClickListener(object : PopupMenu.OnMenuItemClickListener {
@@ -90,10 +82,5 @@ class MainActivity : AppCompatActivity() {
         })
 
         bottomSheetDialog.show()
-    }
-
-
-    fun initmain() {
-
     }
 }

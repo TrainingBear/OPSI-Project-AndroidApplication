@@ -3,10 +3,11 @@ package com.tbear9.openfarm.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,22 +22,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Biotech
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Coronavirus
-import androidx.compose.material.icons.filled.Eco
-import androidx.compose.material.icons.filled.EnergySavingsLeaf
-import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalHospital
-import androidx.compose.material.icons.filled.Park
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
@@ -57,23 +54,21 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
 import com.trbear9.plants.api.blob.Plant
-import java.util.Locale
 
 class PlantDetail : ComponentActivity(){
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val ref = intent.getSerializableExtra("plant", Plant::class.java)
-            PlantDetail(ref = ref, onExit = { finish() })
+            PlantDetail(ref = ref!!, onExit = { this.finish() })
         }
     }
 }
@@ -96,12 +91,15 @@ class PlantDetail : ComponentActivity(){
     @Composable
     fun PlantDetail(ref: Plant, onExit: () -> Unit, ) {
         val context = LocalContext.current
+        val scroll = rememberScrollState()
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Column {
+            Column(
+                modifier = Modifier.verticalScroll(scroll)
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -118,9 +116,9 @@ class PlantDetail : ComponentActivity(){
                     }else {
                         Image(
                             bitmap = BitmapFactory.decodeByteArray(
-                                ref.thumbnail,
+                                ref.fullsize,
                                 0,
-                                ref.thumbnail.size
+                                ref.fullsize.size
                             ).asImageBitmap(),
                             contentDescription = "Plant image",
                             modifier = Modifier
@@ -312,4 +310,3 @@ class PlantDetail : ComponentActivity(){
             }
         }
     }
-}

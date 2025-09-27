@@ -1,6 +1,7 @@
 package com.tbear9.openfarm.activities
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -27,18 +28,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,12 +49,17 @@ import com.trbear9.plants.E.CATEGORY.*
 @SuppressLint("NotConstructor")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlantCardDisplayer(score: Int, ref: Plant, nav: NavController) {
+fun PlantCardDisplayer(score: Int, ref: Plant) {
+    val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         border = BorderStroke(1.dp, Color.Black),
-        onClick = {},
+        onClick = {
+            val intent = Intent(context, PlantDetail::class.java)
+            intent.putExtra("plant", ref)
+            context.startActivity(intent)
+        },
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
@@ -71,7 +75,9 @@ fun PlantCardDisplayer(score: Int, ref: Plant, nav: NavController) {
                     .background(Color.LightGray)
             ) {
                 if (ref.thumbnail != null) Image(
-                    imageVector = Icons.Default.Image,
+                    bitmap = ref.thumbnail.let {
+                            BitmapFactory.decodeByteArray(it, 0, it.size).asImageBitmap()
+                        },
                     contentDescription = "${ref.nama_ilmiah} image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -83,7 +89,7 @@ fun PlantCardDisplayer(score: Int, ref: Plant, nav: NavController) {
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
+                    Image(
                         imageVector = Icons.Default.Image,
                         contentDescription = "${ref.nama_ilmiah} image",
                         modifier = Modifier
@@ -143,7 +149,7 @@ fun PlantCardDisplayer(score: Int, ref: Plant, nav: NavController) {
                 Kat(ref.difficulty, Color.Black, diffToColor(ref.difficulty))
                 Kat("3-4 hari", bcolor = Color.LightGray)
                 ref.kategori.split(",").forEach {
-                    Kat(it, tcolor = Color.White, bcolor = categoryToColor(it))
+                    Kat(translateCategory(it), tcolor = Color.White, bcolor = categoryToColor(it))
                 }
             }
         }
