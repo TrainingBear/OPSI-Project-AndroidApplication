@@ -85,11 +85,12 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 class Camera : AppCompatActivity() {
-
+    companion object {
+        var response: Response? = null
+        var loaded by mutableStateOf(false)
+        var plants: SnapshotStateMap<Int, List<Plant>> = mutableStateMapOf()
+    }
     val client: PlantClient = PlantClient("TrainingBear/84d0e105aaabce26c8dfbaff74b2280e", size = 200_000)
-    var response: Response? = null
-    var loaded by mutableStateOf(false)
-    var plants: SnapshotStateMap<Int, List<Plant>> = mutableStateMapOf()
     val variable = UserVariable();
     val imgCapture = ImageCapture.Builder()
         .build()
@@ -97,7 +98,6 @@ class Camera : AppCompatActivity() {
     private val perm = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,7 +200,7 @@ class Camera : AppCompatActivity() {
                 }
             }
             composable("result") {
-                ResultScreen(plants, loaded, onBack = {nav.navigate("soil")})
+                ResultScreen(plants, loaded, onBack = {nav.navigate("soil")}, nav)
             }
         }
     }

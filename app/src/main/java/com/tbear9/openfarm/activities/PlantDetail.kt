@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.Coronavirus
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Spa
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,11 +50,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -60,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
+import com.tbear9.openfarm.Util
 import com.trbear9.plants.api.blob.Plant
 
 class PlantDetail : ComponentActivity(){
@@ -68,7 +73,8 @@ class PlantDetail : ComponentActivity(){
         super.onCreate(savedInstanceState)
         setContent {
             val ref = intent.getSerializableExtra("plant", Plant::class.java)
-            PlantDetail(ref = ref!!, onExit = { this.finish() })
+            val score = intent.getIntExtra("score", 1)
+            PlantDetail(ref = ref!!, onExit = { this.finish() }, score = score)
         }
     }
 }
@@ -89,7 +95,7 @@ class PlantDetail : ComponentActivity(){
     @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun PlantDetail(ref: Plant, onExit: () -> Unit, ) {
+    fun PlantDetail(score: Int, ref: Plant, onExit: () -> Unit, ) {
         val context = LocalContext.current
         val scroll = rememberScrollState()
         Box(
@@ -103,10 +109,10 @@ class PlantDetail : ComponentActivity(){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1.7f)
+                        .aspectRatio(16/11f)
                         .background(Color.Gray)
                 ) {
-                    if(ref.thumbnail == null){
+                    if(ref.fullsize == null){
                         Image(
                             imageVector = Icons.Default.WbSunny,
                             contentDescription = "Plant image",
@@ -121,12 +127,42 @@ class PlantDetail : ComponentActivity(){
                                 ref.fullsize.size
                             ).asImageBitmap(),
                             contentDescription = "Plant image",
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
                         )
+                        Row(modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = 10.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .wrapContentSize(Alignment.Center)
+                            .background(Color.Black.copy(alpha = 0.5f))
+                        ) {
+                            val star = (score / 10f) * 5
+                            val half = (star - star.toInt()) > 0.1f
+                            repeat(star.toInt()) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Score",
+                                    tint = Color.Yellow,
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .padding(2.dp)
+                                )
+                            }
+                            if (half) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                    contentDescription = "Half Score",
+                                    tint = Color.Yellow,
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                )
+                            }
+                        }
                     }
                     IconButton(
-                        onClick = { onExit },
+                        onClick = { onExit() },
                         modifier = Modifier
                             .padding(24.dp)
                             .size(40.dp)
@@ -155,12 +191,11 @@ class PlantDetail : ComponentActivity(){
                         fontSize = 16.sp
                     )
                     Row(modifier = Modifier.padding(top = 16.dp)) {
-                        val diff = ref.difficulty.lowercase()
-                        diff.replaceFirstChar { it.uppercase() }
-                        Label("Difficulty", diff, Icons.Default.LocalFireDepartment)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Label("Panen", "${ref.min_panen}-${ref.max_panen} hari", Icons.Default.HourglassEmpty)
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Label("pH", ref.ph, Icons.Default.LocalFireDepartment)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Label("Panen (hari)", if(ref.min_panen != ref.max_panen) "${ref.min_panen}-${ref.max_panen} hari"
+                        else "${ref.min_panen} hari", Icons.Default.HourglassEmpty)
+                        Spacer(modifier = Modifier.width(8.dp))
                         Label("Genus", ref.genus, Icons.Default.Spa)
                     }
                     FlowRow(
@@ -169,7 +204,7 @@ class PlantDetail : ComponentActivity(){
                         crossAxisSpacing = 4.dp
                     ) {
                         ref.kategori.split(",").forEach {
-                            Kat(it)
+                            Kat(Util.translateCategory(it))
                         }
                     }
                     ClickableText(
@@ -214,6 +249,7 @@ class PlantDetail : ComponentActivity(){
                         "Pruning", ref.plantCare.pruning,
                         Icons.Default.ContentCut
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Content2("Rumah Tangga", ref.productSystem.rumah_tangga)
                     Content2("Komersial", ref.productSystem.komersial)
                     Content2("Industri", ref.productSystem.industri)
@@ -227,13 +263,14 @@ class PlantDetail : ComponentActivity(){
     fun Content2(header: String, content: String){
         Text(
             text = header,
-            fontSize = 19.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
+            textDecoration = TextDecoration.Underline,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
         )
         Text(
             text = content,
-            fontSize = 16.sp,
             modifier = Modifier.padding(top = 2.dp)
         )
     }
@@ -292,18 +329,18 @@ class PlantDetail : ComponentActivity(){
                 Column() {
                     Text(
                         text = head,
-                        fontSize = 15.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Row(){
                         Image(
                             imageVector = icon,
-                            contentDescription = "Difficulty",
+                            contentDescription = head,
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = body,
-                            fontSize = 18.sp
+                            fontSize = 15.sp
                         )
                     }
                 }

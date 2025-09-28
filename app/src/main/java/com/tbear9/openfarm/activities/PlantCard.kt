@@ -39,133 +39,142 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.trbear9.plants.api.blob.Plant
 import com.trbear9.plants.E.CATEGORY.*
 
-
-@SuppressLint("NotConstructor")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PlantCardDisplayer(score: Int, ref: Plant) {
-    val context = LocalContext.current
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp),
-        border = BorderStroke(1.dp, Color.Black),
-        onClick = {
-            val intent = Intent(context, PlantDetail::class.java)
-            intent.putExtra("plant", ref)
-            context.startActivity(intent)
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(8.dp)
-    ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            // Plant Image
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16 / 9f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.LightGray)
-            ) {
-                if (ref.thumbnail != null) Image(
-                    bitmap = ref.thumbnail.let {
-                            BitmapFactory.decodeByteArray(it, 0, it.size).asImageBitmap()
-                        },
-                    contentDescription = "${ref.nama_ilmiah} image",
-                    contentScale = ContentScale.Crop,
+    @SuppressLint("NotConstructor")
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun PlantCardDisplayer(score: Int, ref: Plant) {
+        val context = LocalContext.current
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
+            onClick = {
+                val intent = Intent(context, PlantDetail::class.java)
+                intent.putExtra("plant", ref)
+                intent.putExtra("score", score)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(8.dp)
+        ) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                // Plant Image
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9f)
                         .clip(RoundedCornerShape(16.dp))
-                )
-                else Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .background(Color.LightGray)
                 ) {
-                    Image(
-                        imageVector = Icons.Default.Image,
+                    if (ref.thumbnail != null) Image(
+                        bitmap = ref.thumbnail.let {
+                            BitmapFactory.decodeByteArray(it, 0, it.size).asImageBitmap()
+                        },
                         contentDescription = "${ref.nama_ilmiah} image",
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .fillMaxSize(fraction = 0.5f)
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9f)
                             .clip(RoundedCornerShape(16.dp))
                     )
+                    else Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "${ref.nama_ilmiah} image",
+                            modifier = Modifier
+                                .fillMaxSize(fraction = 0.5f)
+                                .clip(RoundedCornerShape(16.dp))
+                        )
+                        Text(
+                            text = "Gambar tidak tersedia untuk ${ref.commonName}",
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                val star = (score / 10f) * 5
+                val half = (star - star.toInt()) > 0.1f
+                // Plant Title
+                androidx.compose.foundation.layout.Row() {
                     Text(
-                        text = "Gambar tidak tersedia untuk ${ref.commonName}",
-                        fontWeight = FontWeight.Bold
+                        text = ref.commonName.split(",")[0],
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 10.dp)
                     )
+                    repeat(star.toInt()) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Score",
+                            tint = Color.Yellow,
+                            modifier = Modifier
+                                .size(30.dp)
+                        )
+                    }
+                    if (half) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                            contentDescription = "Half Score",
+                            tint = Color.Yellow,
+                            modifier = Modifier
+                                .size(30.dp)
+                        )
+                    }
                 }
-            }
 
-            val star = (score / 10f) * 5
-            val half = (star - star.toInt()) > 0.1f
-            // Plant Title
-            androidx.compose.foundation.layout.Row() {
+                // Plant Description
                 Text(
-                    text = ref.commonName,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 10.dp)
+                    text = ref.description.take(100) + if (ref.description.length > 100) "..." else "",
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 6.dp)
                 )
-                repeat(star.toInt()) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Score",
-                        tint = Color.Yellow,
-                        modifier = Modifier
-                            .size(30.dp)
-                    )
-                }
-                if (half) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.StarHalf,
-                        contentDescription = "Half Score",
-                        tint = Color.Yellow,
-                        modifier = Modifier
-                            .size(30.dp)
-                    )
-                }
-            }
 
-            // Plant Description
-            Text(
-                text = ref.description,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-
-            // Plant Tags
-            com.google.accompanist.flowlayout.FlowRow(
-                modifier = Modifier.padding(top = 6.dp),
-                mainAxisSpacing = 2.dp,
-                crossAxisSpacing = 2.dp
-            ) {
-                Kat(ref.difficulty, Color.Black, diffToColor(ref.difficulty))
-                Kat("3-4 hari", bcolor = Color.LightGray)
-                ref.kategori.split(",").forEach {
-                    Kat(translateCategory(it), tcolor = Color.White, bcolor = categoryToColor(it))
+                // Plant Tags
+                com.google.accompanist.flowlayout.FlowRow(
+                    modifier = Modifier.padding(top = 6.dp),
+                    mainAxisSpacing = 2.dp,
+                    crossAxisSpacing = 2.dp
+                ) {
+                    Kat(ref.difficulty, Color.Black, diffToColor(ref.difficulty))
+                    Kat("3-4 hari", bcolor = Color.LightGray)
+                    ref.kategori.split(",").forEach {
+                        Kat(
+                            translateCategory(it),
+                            tcolor = Color.White,
+                            bcolor = categoryToColor(it)
+                        )
+                    }
                 }
             }
         }
     }
-}
 
 
     @Composable
-    fun Kat(text: String, tcolor: Color = Color.Black, bcolor: Color = Color(0xFFFF9800), icon: ImageVector? = null){
+    fun Kat(
+        text: String,
+        tcolor: Color = Color.Black,
+        bcolor: Color = Color(0xFFFF9800),
+        icon: ImageVector? = null
+    ) {
         Box(
             modifier = Modifier.wrapContentSize()
                 .clip(RoundedCornerShape(4.dp))
                 .background(bcolor)
-        ){
-            androidx.compose.foundation.layout.Row () {
-                if(icon != null){
+        ) {
+            androidx.compose.foundation.layout.Row() {
+                if (icon != null) {
                     Icon(
                         imageVector = icon,
                         contentDescription = "Icon",
@@ -174,7 +183,7 @@ fun PlantCardDisplayer(score: Int, ref: Plant) {
                 }
                 Text(
                     text = text,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     color = tcolor,
                     modifier = Modifier.padding(6.dp)
@@ -183,39 +192,6 @@ fun PlantCardDisplayer(score: Int, ref: Plant) {
         }
     }
 
-    fun translateCategory(category: String): String {
-        when (category) {
-            other.head -> return "Lainnya"
-            vegetables.head -> return "Sayur"
-            cereals_pseudocereals.head -> return "Pseudocereal"
-            roots_tubers.head -> return "Akar/Umbi"
-            forage_pastures.head -> return "Padang rumput"
-            fruit_nut.head -> return "Buah & kacang"
-            materials.head -> return "Bahan"
-            ornamentals_turf.head -> return "Rumput hias"
-            medicinals_and_armoatic.head -> return "Obat & aromatik"
-            forest_or_wood.head -> return "Hutan/Kayu"
-            cover_crop.head -> return "Tanaman penutup"
-            environmental.head -> return "Lingkungan"
-            weed.head -> return "Gulma"
-        }
-        return "Lainnya"
-    }
-
-    fun categoryToColor(category: String): Color {
-        return when (category) {
-            other.head -> Color.Gray
-            vegetables.head -> Color.Green
-            cereals_pseudocereals.head -> Color.Yellow
-            roots_tubers.head -> Color.Red
-            forage_pastures.head -> Color.Blue
-            fruit_nut.head -> Color(0xFF9C27B0)
-            materials.head -> Color(0xFFFF9100)
-            ornamentals_turf.head -> Color(0xFFE91E63)
-            medicinals_and_armoatic.head -> Color(0xFF936123)
-            else -> Color(0xFF9E9E9E)
-        }
-    }
 
     fun diffToColor(diff: String): Color {
         return when (diff) {
@@ -234,3 +210,38 @@ fun PlantCardDisplayer(score: Int, ref: Plant) {
             else -> Color.Blue
         }
     }
+
+        fun categoryToColor(category: String): Color {
+            return when (category) {
+                other.head -> Color.Gray
+                vegetables.head -> Color.Green
+                cereals_pseudocereals.head -> Color.Yellow
+                roots_tubers.head -> Color.Red
+                forage_pastures.head -> Color.Blue
+                fruit_nut.head -> Color(0xFF9C27B0)
+                materials.head -> Color(0xFFFF9100)
+                ornamentals_turf.head -> Color(0xFFE91E63)
+                medicinals_and_armoatic.head -> Color(0xFF936123)
+                else -> Color(0xFF9E9E9E)
+            }
+        }
+
+        fun translateCategory(category: String): String {
+            when (category) {
+                other.head -> return "Lainnya"
+                vegetables.head -> return "Sayur"
+                cereals_pseudocereals.head -> return "Pseudocereal"
+                roots_tubers.head -> return "Akar/Umbi"
+                forage_pastures.head -> return "Padang rumput"
+                fruit_nut.head -> return "Buah & kacang"
+                materials.head -> return "Bahan"
+                ornamentals_turf.head -> return "Rumput hias"
+                medicinals_and_armoatic.head -> return "Obat & aromatik"
+                forest_or_wood.head -> return "Hutan/Kayu"
+                cover_crop.head -> return "Tanaman penutup"
+                environmental.head -> return "Lingkungan"
+                weed.head -> return "Gulma"
+            }
+            return "Lainnya"
+        }
+

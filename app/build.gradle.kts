@@ -69,6 +69,11 @@ android {
 }
 
 dependencies {
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m2)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.multiplatform)
+    implementation(libs.vico.views)
     implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
