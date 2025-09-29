@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.tbear9.openfarm.MainActivity
 import com.trbear9.plants.api.blob.Plant
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.PlantClient
@@ -96,7 +97,7 @@ import kotlinx.coroutines.runBlocking
                     }
                     if (ref.thumbnail != null) AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(Camera.url+ PlantClient.IMAGE+"/${ref.thumbnail}")
+                            .data(MainActivity.url+ PlantClient.IMAGE+"/${ref.thumbnail}")
                             .crossfade(true)
                             .build(),
                         contentDescription = "${ref.nama_ilmiah} image",

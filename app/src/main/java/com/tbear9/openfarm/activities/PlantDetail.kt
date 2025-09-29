@@ -66,6 +66,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.tbear9.openfarm.MainActivity
 import com.tbear9.openfarm.Util
 import com.trbear9.plants.PlantClient
 import com.trbear9.plants.api.blob.Plant
@@ -124,7 +125,7 @@ class PlantDetail : ComponentActivity(){
                     if (ref.fullsize != null) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(Camera.url + PlantClient.IMAGE + "/${ref.fullsize}")
+                                .data(MainActivity .url + PlantClient.IMAGE + "/${ref.fullsize}")
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "Plant image",
