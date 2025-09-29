@@ -42,10 +42,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.trbear9.plants.api.blob.Plant
 import com.trbear9.plants.E.CATEGORY.*
+import com.trbear9.plants.PlantClient
+import kotlinx.coroutines.runBlocking
 
-    @SuppressLint("NotConstructor")
+@SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun PlantCardDisplayer(score: Int, ref: Plant) {
@@ -73,18 +77,7 @@ import com.trbear9.plants.E.CATEGORY.*
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.LightGray)
                 ) {
-                    if (ref.thumbnail != null) Image(
-                        bitmap = ref.thumbnail.let {
-                            BitmapFactory.decodeByteArray(it, 0, it.size).asImageBitmap()
-                        },
-                        contentDescription = "${ref.nama_ilmiah} image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f)
-                            .clip(RoundedCornerShape(16.dp))
-                    )
-                    else Column(
+                    Column(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -101,6 +94,18 @@ import com.trbear9.plants.E.CATEGORY.*
                             textAlign = TextAlign.Center
                         )
                     }
+                    if (ref.thumbnail != null) AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(Camera.url+ PlantClient.IMAGE+"/${ref.thumbnail}")
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "${ref.nama_ilmiah} image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9f)
+                            .clip(RoundedCornerShape(16.dp))
+                    )
                 }
 
                 val star = (score / 10f) * 5

@@ -64,7 +64,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.tbear9.openfarm.Util
+import com.trbear9.plants.PlantClient
 import com.trbear9.plants.api.blob.Plant
 
 class PlantDetail : ComponentActivity(){
@@ -109,58 +112,58 @@ class PlantDetail : ComponentActivity(){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16/11f)
+                        .aspectRatio(16 / 11f)
                         .background(Color.Gray)
                 ) {
-                    if(ref.fullsize == null){
-                        Image(
-                            imageVector = Icons.Default.WbSunny,
-                            contentDescription = "Plant image",
-                            modifier = Modifier
-                                .fillMaxSize()
-                        )
-                    }else {
-                        Image(
-                            bitmap = BitmapFactory.decodeByteArray(
-                                ref.fullsize,
-                                0,
-                                ref.fullsize.size
-                            ).asImageBitmap(),
+                    Image(
+                        imageVector = Icons.Default.WbSunny,
+                        contentDescription = "Plant image",
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                    if (ref.fullsize != null) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(Camera.url + PlantClient.IMAGE + "/${ref.fullsize}")
+                                .crossfade(true)
+                                .build(),
                             contentDescription = "Plant image",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
                         )
-                        Row(modifier = Modifier
+                    }
+                    Row(
+                        modifier = Modifier
                             .align(Alignment.BottomStart)
                             .padding(start = 10.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .wrapContentSize(Alignment.Center)
                             .background(Color.Black.copy(alpha = 0.5f))
-                        ) {
-                            val star = (score / 10f) * 5
-                            val half = (star - star.toInt()) > 0.1f
-                            repeat(star.toInt()) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = "Score",
-                                    tint = Color.Yellow,
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                        .padding(2.dp)
-                                )
-                            }
-                            if (half) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.StarHalf,
-                                    contentDescription = "Half Score",
-                                    tint = Color.Yellow,
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                )
-                            }
+                    ) {
+                        val star = (score / 10f) * 5
+                        val half = (star - star.toInt()) > 0.1f
+                        repeat(star.toInt()) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Score",
+                                tint = Color.Yellow,
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .padding(2.dp)
+                            )
+                        }
+                        if (half) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                contentDescription = "Half Score",
+                                tint = Color.Yellow,
+                                modifier = Modifier
+                                    .size(30.dp)
+                            )
                         }
                     }
+
                     IconButton(
                         onClick = { onExit() },
                         modifier = Modifier
@@ -184,17 +187,22 @@ class PlantDetail : ComponentActivity(){
                     Text(
                         text = ref.commonName,
                         fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text =ref.description,
-                        fontSize = 16.sp
+                        text = ref.description,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Row(modifier = Modifier.padding(top = 16.dp)) {
-                        Label("pH", ref.ph, Icons.Default.LocalFireDepartment)
+                        Label("pH ideal", ref.ph, Icons.Default.LocalFireDepartment)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Label("Panen (hari)", if(ref.min_panen != ref.max_panen) "${ref.min_panen}-${ref.max_panen} hari"
-                        else "${ref.min_panen} hari", Icons.Default.HourglassEmpty)
+                        Label(
+                            "Panen (hari)",
+                            if (ref.min_panen != ref.max_panen) "${ref.min_panen}-${ref.max_panen} hari"
+                            else "${ref.min_panen} hari",
+                            Icons.Default.HourglassEmpty
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Label("Genus", ref.genus, Icons.Default.Spa)
                     }
@@ -207,14 +215,26 @@ class PlantDetail : ComponentActivity(){
                             Kat(Util.translateCategory(it))
                         }
                     }
+                    FlowRow(
+                        modifier = Modifier.padding(top = 16.dp),
+                        mainAxisSpacing = 4.dp,
+                        crossAxisSpacing = 4.dp
+                    ) {
+                        ref.common_names.split(", ").forEach {
+                            Kat(it, tcolor = Color.Black, bcolor = Color.Green)
+                        }
+                    }
                     ClickableText(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(fontSize = 16.sp)) {
-                                append("Takson -> ${ref.kingdom} ${ref.family} ${ref.nama_ilmiah}: ")
+                                withStyle(SpanStyle(fontWeight = FontWeight.Light)) {
+                                    append("Takson -> ${ref.kingdom} ${ref.family} ${ref.nama_ilmiah}: ")
+                                }
                                 pushStyle(
                                     SpanStyle(
                                         color = Color.Blue,
-                                        textDecoration = TextDecoration.Underline
+                                        textDecoration = TextDecoration.Underline,
+                                        fontWeight = FontWeight.Light
                                     )
                                 )
                                 append(ref.taxon)
@@ -264,7 +284,7 @@ class PlantDetail : ComponentActivity(){
         Text(
             text = header,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Medium,
             textDecoration = TextDecoration.Underline,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)

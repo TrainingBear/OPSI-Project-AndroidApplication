@@ -70,6 +70,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.location.LocationServices
+import com.tbear9.openfarm.MainActivity
 import com.tbear9.openfarm.Util
 import com.trbear9.plants.PlantClient
 import com.trbear9.plants.api.GeoParameters
@@ -81,6 +82,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
@@ -89,9 +91,19 @@ class Camera : AppCompatActivity() {
         var response: Response? = null
         var loaded by mutableStateOf(false)
         var plants: SnapshotStateMap<Int, List<Plant>> = mutableStateMapOf()
+        val variable = UserVariable();
+        val client: PlantClient = PlantClient("TrainingBear/84d0e105aaabce26c8dfbaff74b2280e",
+            "JitteryAttic/9407ea7ac74364d1d94899f735a23f91", size = 200_000)
+        var url: String? = null
+        var pH: Float? = null
+
+        init {
+            runBlocking {
+                url = client.getUrl()
+                MainActivity.url = url
+            }
+        }
     }
-    val client: PlantClient = PlantClient("TrainingBear/84d0e105aaabce26c8dfbaff74b2280e", size = 200_000)
-    val variable = UserVariable();
     val imgCapture = ImageCapture.Builder()
         .build()
 
@@ -170,8 +182,10 @@ class Camera : AppCompatActivity() {
                         try {
                             ph?.let {
                                 val soil = SoilParameters()
-                                soil.pH = (it.replace(",", ".")).toFloat()
+                                val toFloat = (it.replace(",", ".")).toFloat()
+                                soil.pH = toFloat
                                 variable.soil = soil
+                                pH = toFloat
                             }
                         } catch (e: NumberFormatException){
                             Toast.makeText(this@Camera, "Invalid pH value of ${e.message}", Toast.LENGTH_SHORT).show()
@@ -184,14 +198,13 @@ class Camera : AppCompatActivity() {
                         job = scope.launch {
                             Toast.makeText(this@Camera, "Sending data...", Toast.LENGTH_SHORT).show()
                             response = withContext(Dispatchers.IO) {
-                                client.sendPacket(variable)
+                                client.sendPacket(variable, url = url)
                             }
-                            loaded = true
                             for (score in response!!.tanaman.keys) {
                                 Util.debug("Loaded $score with size ${response!!.tanaman[score]!!.size}")
                                 plants[score] = response!!.tanaman[score]!!
-                                delay(50)
                             }
+                            loaded = true
                             Toast.makeText(this@Camera, "finished", Toast.LENGTH_SHORT).show()
                             Util.debug("Job has been finished!")
                         }
@@ -201,6 +214,9 @@ class Camera : AppCompatActivity() {
             }
             composable("result") {
                 ResultScreen(plants, loaded, onBack = {nav.navigate("soil")}, nav)
+            }
+            composable("tanah"){
+                SoilStats(nav)
             }
         }
     }

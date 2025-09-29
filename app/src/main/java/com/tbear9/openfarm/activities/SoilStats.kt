@@ -1,4 +1,4 @@
-//   Copyright 2025 patrykandpatrick/vico
+//   Copyright 2025 by Patryk Goworowski and Patrick Michalik.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -13,26 +13,28 @@
 //   limitations under the License.
 package com.tbear9.openfarm.activities
 
-import android.annotation.SuppressLint
-import android.text.Spannable
-import android.text.SpannableStringBuilder
+import android.graphics.Typeface
+import android.text.Layout
 import android.text.TextUtils
-import android.text.style.ForegroundColorSpan
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.BlurOn
+import androidx.compose.material.icons.filled.Compost
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Park
@@ -42,97 +44,59 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberEnd
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
-import com.patrykandpatrick.vico.compose.cartesian.cartesianLayerPadding
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.common.VicoTheme
+import com.patrykandpatrick.vico.compose.common.VicoTheme.CandlestickCartesianLayerColors
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.compose.common.vicoTheme
+import com.patrykandpatrick.vico.core.cartesian.axis.Axis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.core.common.component.TextComponent
+import com.patrykandpatrick.vico.core.common.DefaultColors
+import com.patrykandpatrick.vico.core.common.Defaults
+import com.patrykandpatrick.vico.core.common.Insets
+import com.patrykandpatrick.vico.core.common.Position
+import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
-import com.patrykandpatrick.vico.multiplatform.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.multiplatform.cartesian.marker.ColumnCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.multiplatform.cartesian.marker.DefaultCartesianMarker
-import com.patrykandpatrick.vico.multiplatform.cartesian.marker.rememberDefaultCartesianMarker
 import kotlinx.coroutines.runBlocking
-import java.text.DecimalFormat
 
-public val label = listOf("Aluvial", "Andosol", "Entisol", "Humus", "Inceptisol", "Laterit", "Kapur", "Pasir")
-
-@Composable
-private fun JetpackComposeBasicLineChart(
-    modelProducer: CartesianChartModelProducer,
-    modifier: Modifier = Modifier,
-) {
-    CartesianChartHost(
-        chart =
-            rememberCartesianChart(
-                rememberLineCartesianLayer(),
-                startAxis = VerticalAxis.rememberStart(),
-                bottomAxis = HorizontalAxis.rememberBottom(),
-            ),
-        modelProducer = modelProducer,
-        modifier = modifier,
-    )
-}
+val label = listOf("Aluvial", "Andosol", "Entisol", "Humus", "Inceptisol", "Laterit", "Kapur", "Pasir")
+val labelListKey = ExtraStore.Key<List<String>>()
 
 @Composable
-fun JetpackComposeBasicLineChart(modifier: Modifier = Modifier) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            // Learn more: https://patrykandpatrick.com/vmml6t.
-            lineSeries { series(13, 8, 7, 12, 0, 1, 15, 14, 0, 11, 6, 12, 0, 11, 12, 11) }
-        }
-    }
-    JetpackComposeBasicLineChart(modelProducer, modifier)
-}
-
-@Composable
-@Preview
-private fun Preview() {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    // Use `runBlocking` only for previews, which don’t support asynchronous execution.
-    runBlocking {
-        modelProducer.runTransaction {
-            // Learn more: https://patrykandpatrick.com/vmml6t.
-            lineSeries { series(13, 8, 7, 12, 0, 1, 15, 14, 0, 11, 6, 12, 0, 11, 12, 11) }
-        }
-    }
-     JetpackComposeBasicLineChart(modelProducer)
-}
-
-
-@Composable
-@Preview
-fun SoilStats(){
+fun SoilStats(nav: NavController){
+    val scroll = rememberScrollState()
     Scaffold (bottomBar = {
         var selected by remember { mutableIntStateOf(2) }
         NavigationBar {
@@ -140,6 +104,7 @@ fun SoilStats(){
                 selected = selected == 0,
                 onClick = {
                     selected = 0
+                    nav.navigate("home")
                           },
                 icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                 label = { Text("Home") }
@@ -148,6 +113,7 @@ fun SoilStats(){
                 selected = selected == 1,
                 onClick = {
                     selected = 1
+                    nav.navigate("result")
                           },
                 icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                 label = { Text("Tanaman") }
@@ -156,57 +122,179 @@ fun SoilStats(){
                 selected = selected == 2,
                 onClick = {
                     selected = 2
+                    nav.navigate("tanah")
                           },
                 icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                 label = { Text("Tanah") }
             )
         }
     }){
-        Box(modifier = Modifier.padding(it)){
-            Box(modifier = Modifier.fillMaxSize()
-                .padding(start = 12.dp, end = 8.dp, top = 16.dp)
-            ) {
-                val modelProducer = remember { CartesianChartModelProducer() }
-                val data = mapOf(
-                    label[0] to 0.21f, label[1] to 0.134f, label[2] to 0.5f, label[3] to 0.898f,
-                    label[4] to 0.91f, label[5] to 0.75f, label[6] to 0.3f, label[7] to 0.6f
-                )
-                val labelListKey = ExtraStore.Key<List<String>>()
-                runBlocking {
-                    modelProducer.runTransaction {
-                        columnSeries { series(data.values) }
-                        extras { it[labelListKey] = data.keys.toList() }
+        Box(modifier = Modifier.padding(it)) {
+            Column(modifier = Modifier.verticalScroll(scroll)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Diagram Prediksi Tanah",
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(350.dp)
+                            .wrapContentSize()
+                    ) {
+                        if(Camera.response?.soilPrediction == null){
+                            Text(
+                                text = "Tunggu sebentar...",
+                                fontSize = 35.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }else {
+                            val modelProducer = remember { CartesianChartModelProducer() }
+                            runBlocking {
+                                modelProducer.runTransaction {
+                                    columnSeries { series(Camera.response!!.soilPrediction.toList()) }
+                                    extras {
+                                        it[labelListKey] = label
+                                    }
+                                }
+                            }
+                            JetpackComposeBasicColumnChart(
+                                modelProducer,
+                                modifier = Modifier.fillMaxSize()
+                                    .padding(10.dp)
+                            )
+                        }
                     }
                 }
-
-                JetpackComposeBasicColumnChart(modelProducer)
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(
+                        text = "Berikut hasil prediksi dari tanahmu:",
+                        fontWeight = FontWeight.Normal,
+                    )
+                    Map("pH: ", Camera.pH?.toString() ?: "${Camera.variable.soil.pH.toString()} (default)")
+                    Map("tipe: ", Camera.response?.soilName ?: "tak tersedia")
+                    Map("Tekstur: ", Camera.variable.soil.texture?.head ?: "tak tersedia")
+                    Map("Drainase: ", Camera.variable.soil.drainage?.head ?: "tak tersedia")
+                    Map("Kesuburan: ", Camera.variable.soil.fertility?.head ?: "tak tersedia")
+                    Text(
+                        text = Camera.response?.soilCare?.phCorrection?: "Tunggu sebentar...",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Cat(
+                        Icons.Default.Compost, "Natrium: ", Camera.response?.soilCare?.nutrientManagement?.N ?: "Tunggu sebentar..."
+                    )
+                    Cat(
+                        Icons.Default.Grain, "Phospor: ", Camera.response?.soilCare?.nutrientManagement?.P ?: "Tunggu sebentar..."
+                    )
+                    Cat(
+                        Icons.Default.BlurOn, "Kalium: ", Camera.response?.soilCare?.nutrientManagement?.K ?: "Tunggu sebentar..."
+                    )
+                    Text(
+                        text = Camera.response?.soilCare?.organicMatter ?: "Tunggu sebentar... ",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = Camera.response?.soilCare?.waterRetention ?: "Tunggu sebentar... ",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
+    }
+}
+@Composable
+private fun Map(key:String, value:String){
+    Text(
+        text = buildAnnotatedString() {
+            withStyle(style = SpanStyle(fontSize = 16.sp)) { append(key) }
+            withStyle(style = SpanStyle(fontSize = 16.sp)) { append(value) }
+        },
+        fontWeight = FontWeight.Light,
+        modifier = Modifier.padding(start = 5.dp)
+    )
+}
+
+@Composable
+private fun Cat(icon: ImageVector, head:String, body: String) {
+    Row() {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = buildAnnotatedString() {
+                withStyle(style = SpanStyle(fontSize = 18.sp)) { append(head) }
+                withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Light)) { append(body) }
+            },
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
 
 @Composable
 private fun JetpackComposeBasicColumnChart(
     modelProducer: CartesianChartModelProducer,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    val labelListKey = ExtraStore.Key<List<String>>()
+    val scroll = rememberVicoScrollState()
     CartesianChartHost(
         chart =
             rememberCartesianChart(
                 rememberColumnCartesianLayer(
-                    dataLabelValueFormatter = CartesianValueFormatter { context, x, _ ->
-                    context.model.extraStore[labelListKey][x.toInt()]
-                }
+                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                            rememberLineComponent(
+                                fill = fill(Color(0xFF20750E)),
+                                thickness = 20.dp,
+                                shadow = Shadow(3f),
+                                margins = Insets(1f)
+                            )
+                        ,
+                    ),
+                    columnCollectionSpacing = 2.dp,
+                    dataLabel = rememberTextComponent(
+                        textAlignment = Layout.Alignment.ALIGN_NORMAL,
+                    ),
+//                    dataLabelValueFormatter = CartesianValueFormatter { context, x, _ ->
+//                        context.model.extraStore[labelListKey][x.toInt()]
+//                    },
                 ),
-                startAxis = VerticalAxis.rememberStart(),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    title = "Soil Parameter",
+                startAxis = VerticalAxis.rememberStart(
+                    labelRotationDegrees = 0f
+                ),
+                topAxis = HorizontalAxis.rememberTop(
+                    label = rememberTextComponent(
+                        textSize = 12.sp,
+                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                        typeface = Typeface.MONOSPACE,
+                        lineCount = 1,
+                        lineHeight = 16.sp,
+                    ),
+                    valueFormatter = CartesianValueFormatter { context, x, _ ->
+                        context.model.extraStore[labelListKey][x.toInt()]
+                    },
+                    labelRotationDegrees = -80f
                 ),
             ),
         animateIn = true,
         modelProducer = modelProducer,
         modifier = modifier,
+        scrollState = scroll
     )
 }
 

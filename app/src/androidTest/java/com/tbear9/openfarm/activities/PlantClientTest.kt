@@ -46,9 +46,9 @@ class PlantClientTest {
     @Test
     fun getPlant(){
         val data= UserVariable()
-        data.add(SoilParameters.ALLUVIAL)
-        data.add(GeoParameters())
-        data.add(
+        data.soil = (SoilParameters.ALLUVIAL)
+        data.geo = (GeoParameters())
+        data.custom = (
             CustomParameters().apply {
                 category = CATEGORY.vegetables
             }
