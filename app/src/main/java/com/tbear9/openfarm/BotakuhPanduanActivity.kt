@@ -1,11 +1,8 @@
-//package com.tbear9.openfarm
-//
-//import android.content.Intent
-//import android.os.Bundle
-//import androidx.appcompat.app.AppCompatActivity
-//import com.tbear9.openfarm.databinding.BotakuhpanduanBinding
-//
-//class BotakuhPanduanActivity : AppCompatActivity() {
+package com.tbear9.openfarm
+
+import androidx.appcompat.app.AppCompatActivity
+
+class BotakuhPanduanActivity : AppCompatActivity() {
 //
 //    private lateinit var binding: BotakuhpanduanBinding
 //
@@ -21,4 +18,4 @@
 //            finish() // Supaya tidak kembali ke halaman ini saat menekan tombol back
 //        }
 //    }
-//}
+}

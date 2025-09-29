@@ -1,7 +1,6 @@
 package com.tbear9.openfarm.Fragments;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,9 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.tbear9.openfarm.R;
-import com.tbear9.openfarm.activities.PostActivity;
 import com.tbear9.openfarm.databinding.FragmentPostPageNavBinding;
 
 import lombok.Setter;

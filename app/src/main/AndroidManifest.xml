@@ -33,13 +33,20 @@
         android:banner="@style/Theme.OpenFarm"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/oak_sapling"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/oak_sapling"
         android:supportsRtl="true"
         android:theme="@style/Theme.OpenFarm"
         tools:targetApi="31">
+        <activity android:name="com.tbear9.openfarm.activities.PlantResult"
+            android:launchMode="singleTask"
+            android:exported="true" />
+        <activity android:name="com.tbear9.openfarm.activities.PlantDetail"
+            android:launchMode="singleTop"
+            android:exported="true" />
         <activity android:name="com.tbear9.openfarm.activities.Camera"
+            android:launchMode="singleTop"
             android:exported="true" />
         <activity android:name=".AboutMeActivity"
             android:exported="true" />
@@ -48,11 +55,6 @@
         <activity android:name="com.tbear9.openfarm.TutorialActivity"
             android:exported="true" />
 
-
-        <activity
-            android:name=".activities.PostActivity"
-            android:exported="false"
-            tools:targetApi="33" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -63,14 +65,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity
-            android:name=".activities.DevActivity"
-            android:exported="true">
-            <intent-filter>
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".MainActivity"
