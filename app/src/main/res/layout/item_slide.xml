@@ -7,20 +7,23 @@
     android:padding="16dp">
 
     <!-- Gambar -->
+
+    <!-- Judul -->
     <ImageView
         android:id="@+id/imgSlide"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:src="@drawable/ic_launcher_foreground"
+        android:layout_marginBottom="16dp"
         android:contentDescription="@string/app_name"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_launcher_foreground"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        android:layout_marginBottom="16dp" />
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.37"
+        app:layout_constraintVertical_chainStyle="packed" />
 
-    <!-- Judul -->
     <TextView
         android:id="@+id/tvSlideTitle"
         android:layout_width="wrap_content"
