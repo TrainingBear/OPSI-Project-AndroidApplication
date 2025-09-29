@@ -48,7 +48,7 @@ object Util {
                 vegetables.head -> Color.Green
                 cereals_pseudocereals.head -> Color.Yellow
                 roots_tubers.head -> Color.Red
-                forage_pastures.head -> Color.Blue
+                "forage/pasture" -> Color.Blue
                 fruit_nut.head -> Color(0xFF9C27B0)
                 materials.head -> Color(0xFFFF9100)
                 ornamentals_turf.head -> Color(0xFFE91E63)
@@ -63,12 +63,12 @@ object Util {
                 vegetables.head -> return "Sayur"
                 cereals_pseudocereals.head -> return "Pseudocereal"
                 roots_tubers.head -> return "Akar/Umbi"
-                forage_pastures.head -> return "Padang rumput"
+                "forage/pasture" -> return "Padang rumput"
                 fruit_nut.head -> return "Buah & kacang"
                 materials.head -> return "Bahan"
                 ornamentals_turf.head -> return "Rumput hias"
                 medicinals_and_armoatic.head -> return "Obat & aromatik"
-                forest_or_wood.head -> return "Hutan/Kayu"
+                "forest/wood" -> return "Hutan/Kayu"
                 cover_crop.head -> return "Tanaman penutup"
                 environmental.head -> return "Lingkungan"
                 weed.head -> return "Gulma"

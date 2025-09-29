@@ -24,11 +24,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -69,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -121,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         var url: String? = null
         var pH: Float? = null
     }
+    var cam: Boolean = false
+    var gps: Boolean = false
 
     private val imgCapture = ImageCapture.Builder().build()
 
@@ -131,7 +132,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         runBlocking {
-            url = client.getUrl()
+            try {
+                url = client.getUrl()
+            } catch (_: RuntimeException){}
         }
         setContent {
             App()
@@ -140,8 +143,8 @@ class MainActivity : AppCompatActivity() {
         perm.launch(arrayOf(Manifest.permission.CAMERA))
         if (ContextCompat.checkSelfPermission
                 (this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-        ) finish()
-        else {
+        ) else {
+            cam = true
             Toast.makeText(this, "Camera permission granted!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -168,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                         selected = selected == 1,
                         onClick = {
                             selected = 1
-                             nav?.navigate("result")
+                            nav?.navigate("result")
                         },
                         icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                         label = { Text("Tanaman") }
@@ -177,7 +180,7 @@ class MainActivity : AppCompatActivity() {
                         selected = selected == 2,
                         onClick = {
                             selected = 2
-                             nav?.navigate("tanah")
+                            nav?.navigate("tanah")
                         },
                         icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                         label = { Text("Tanah") }
@@ -206,7 +209,7 @@ class MainActivity : AppCompatActivity() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Default.EnergySavingsLeaf,
+                                painter = painterResource(id = R.drawable.oak_sapling),
                                 contentDescription = "Help",
                                 tint = Color(0xFF1C8604),
                                 modifier = Modifier.padding(10.dp)
@@ -228,13 +231,10 @@ class MainActivity : AppCompatActivity() {
                                         if (url != null) withStyle(
                                             style = SpanStyle(
                                                 fontWeight = FontWeight.Medium,
-                                                color = Color.Green
+                                                color = Color(0xFF1C8604)
                                             )
                                         ) {
-                                            append("Online ")
-                                            withStyle(style = SpanStyle(fontWeight = FontWeight.Light)) {
-                                                append(url)
-                                            }
+                                            append("Online")
                                         } else withStyle(
                                             style = SpanStyle(
                                                 fontWeight = FontWeight.Medium,
@@ -314,21 +314,31 @@ class MainActivity : AppCompatActivity() {
                                 .padding(top = 10.dp)
                         )
                     }
-                    Box(
+                    Button(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 30.dp, end = 30.dp, top = 60.dp)
                             .aspectRatio(16 / 3f)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White)
-                    ) {
-                        Button(
-                            modifier = Modifier.fillMaxSize(),
-                            onClick = {
-                                context.startActivity(intent)
+                            .background(Color.White),
+                        onClick = {
+                            perm.launch(arrayOf(Manifest.permission.CAMERA))
+                            if (ContextCompat.checkSelfPermission (this@MainActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                            ) else {
+                                cam = true
+                                Toast.makeText(this@MainActivity, "Camera permission granted!", Toast.LENGTH_SHORT).show()
+                                if(gps) nav?.navigate("camera")
+                                else getLocation()
                             }
-                        ) {
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = Color.White)
+                    ) {
+                        Text(
+                            text = "Get Started",
+                            fontSize = 35.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black
+                        )
                     }
                 }
             }
@@ -492,8 +502,7 @@ class MainActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             Toast.makeText(this, "Tolong aktifkan dan izikan GPS", Toast.LENGTH_SHORT).show();
-            finish();
-        }
+        } else gps = true
 
         val geo = GeoParameters();
         LocationServices.getFusedLocationProviderClient(this)
@@ -537,7 +546,7 @@ class MainActivity : AppCompatActivity() {
                 OutlinedTextField(
                     value = number,
                     onValueChange = { input ->
-                        if (input.all { it.isDigit() }) {
+                        if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
                             number = input
                         }
                     },

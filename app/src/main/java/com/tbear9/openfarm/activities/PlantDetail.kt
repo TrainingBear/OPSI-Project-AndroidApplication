@@ -212,7 +212,7 @@ class PlantDetail : ComponentActivity(){
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        ref.kategori.split(",").forEach {
+                        ref.kategori.split(", ").forEach {
                             Kat(Util.translateCategory(it))
                         }
                     }
@@ -286,13 +286,13 @@ class PlantDetail : ComponentActivity(){
             text = header,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            textDecoration = TextDecoration.Underline,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
         )
         Text(
             text = content,
-            modifier = Modifier.padding(top = 2.dp)
+            modifier = Modifier.padding(top = 2.dp),
+            fontWeight = FontWeight.Normal
         )
     }
     @Composable

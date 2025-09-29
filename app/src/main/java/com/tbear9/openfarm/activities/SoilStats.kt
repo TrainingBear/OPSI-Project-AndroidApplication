@@ -183,9 +183,9 @@ fun SoilStats(nav: NavController){
                     )
                     Map("pH: ", MainActivity.pH?.toString() ?: "${MainActivity.variable.soil.pH.toString()} (default)")
                     Map("tipe: ", MainActivity.response?.soilName ?: "tak tersedia")
-                    Map("Tekstur: ", MainActivity.variable.soil.texture?.head ?: "tak tersedia")
-                    Map("Drainase: ", MainActivity.variable.soil.drainage?.head ?: "tak tersedia")
-                    Map("Kesuburan: ", MainActivity.variable.soil.fertility?.head ?: "tak tersedia")
+                    Map("Tekstur: ", MainActivity.response?.soil?.texture?.head ?: "tak tersedia")
+                    Map("Drainase: ", MainActivity.response?.soil?.drainage?.head ?: "tak tersedia")
+                    Map("Kesuburan: ", MainActivity.response?.soil?.fertility?.head ?: "tak tersedia")
                     Text(
                         text = MainActivity.response?.soilCare?.phCorrection?: "Tunggu sebentar...",
                         fontSize = 16.sp,
