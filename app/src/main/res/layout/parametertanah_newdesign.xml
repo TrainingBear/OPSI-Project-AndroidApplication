@@ -87,8 +87,8 @@
             android:background="@color/custom_green"
             android:title="Hasil Analisis"
             android:titleTextColor="@color/black"
-            app:menu="@menu/filter_menu"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/filter_menu" />
 
         <!-- Scroll hasil tanaman -->
         <ScrollView

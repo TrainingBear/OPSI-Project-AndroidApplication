@@ -22,12 +22,15 @@
         <!-- Tombol panah kiri atas -->
         <ImageButton
             android:id="@+id/tombolKembali"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_margin="16dp"
-            android:layout_gravity="top|start"
             android:background="@android:color/transparent"
-            android:src="@drawable/panahkiri_removebg_preview_1"
-            android:contentDescription="@string/TombolKembali" />
+            android:src="@drawable/arrow_left"
+            android:adjustViewBounds="true"
+            android:padding="0dp"
+            android:contentDescription="Back"
+            android:scaleType="fitXY"
+            />
     </FrameLayout>
 </ScrollView>

@@ -89,6 +89,7 @@ import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.tbear9.openfarm.MainActivity
 import kotlinx.coroutines.runBlocking
 
 val label = listOf("Aluvial", "Andosol", "Entisol", "Humus", "Inceptisol", "Laterit", "Kapur", "Pasir")
@@ -150,7 +151,7 @@ fun SoilStats(nav: NavController){
                             .height(350.dp)
                             .wrapContentSize()
                     ) {
-                        if(Camera.response?.soilPrediction == null){
+                        if(MainActivity .response?.soilPrediction == null){
                             Text(
                                 text = "Tunggu sebentar...",
                                 fontSize = 35.sp,
@@ -161,7 +162,7 @@ fun SoilStats(nav: NavController){
                             val modelProducer = remember { CartesianChartModelProducer() }
                             runBlocking {
                                 modelProducer.runTransaction {
-                                    columnSeries { series(Camera.response!!.soilPrediction.toList()) }
+                                    columnSeries { series(MainActivity.response!!.soilPrediction.toList()) }
                                     extras {
                                         it[labelListKey] = label
                                     }
@@ -180,34 +181,34 @@ fun SoilStats(nav: NavController){
                         text = "Berikut hasil prediksi dari tanahmu:",
                         fontWeight = FontWeight.Normal,
                     )
-                    Map("pH: ", Camera.pH?.toString() ?: "${Camera.variable.soil.pH.toString()} (default)")
-                    Map("tipe: ", Camera.response?.soilName ?: "tak tersedia")
-                    Map("Tekstur: ", Camera.variable.soil.texture?.head ?: "tak tersedia")
-                    Map("Drainase: ", Camera.variable.soil.drainage?.head ?: "tak tersedia")
-                    Map("Kesuburan: ", Camera.variable.soil.fertility?.head ?: "tak tersedia")
+                    Map("pH: ", MainActivity.pH?.toString() ?: "${MainActivity.variable.soil.pH.toString()} (default)")
+                    Map("tipe: ", MainActivity.response?.soilName ?: "tak tersedia")
+                    Map("Tekstur: ", MainActivity.variable.soil.texture?.head ?: "tak tersedia")
+                    Map("Drainase: ", MainActivity.variable.soil.drainage?.head ?: "tak tersedia")
+                    Map("Kesuburan: ", MainActivity.variable.soil.fertility?.head ?: "tak tersedia")
                     Text(
-                        text = Camera.response?.soilCare?.phCorrection?: "Tunggu sebentar...",
+                        text = MainActivity.response?.soilCare?.phCorrection?: "Tunggu sebentar...",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
                     )
                     Cat(
-                        Icons.Default.Compost, "Natrium: ", Camera.response?.soilCare?.nutrientManagement?.N ?: "Tunggu sebentar..."
+                        Icons.Default.Compost, "Natrium: ", MainActivity.response?.soilCare?.nutrientManagement?.N ?: "Tunggu sebentar..."
                     )
                     Cat(
-                        Icons.Default.Grain, "Phospor: ", Camera.response?.soilCare?.nutrientManagement?.P ?: "Tunggu sebentar..."
+                        Icons.Default.Grain, "Phospor: ", MainActivity.response?.soilCare?.nutrientManagement?.P ?: "Tunggu sebentar..."
                     )
                     Cat(
-                        Icons.Default.BlurOn, "Kalium: ", Camera.response?.soilCare?.nutrientManagement?.K ?: "Tunggu sebentar..."
+                        Icons.Default.BlurOn, "Kalium: ", MainActivity.response?.soilCare?.nutrientManagement?.K ?: "Tunggu sebentar..."
                     )
                     Text(
-                        text = Camera.response?.soilCare?.organicMatter ?: "Tunggu sebentar... ",
+                        text = MainActivity.response?.soilCare?.organicMatter ?: "Tunggu sebentar... ",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = Camera.response?.soilCare?.waterRetention ?: "Tunggu sebentar... ",
+                        text = MainActivity.response?.soilCare?.waterRetention ?: "Tunggu sebentar... ",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium

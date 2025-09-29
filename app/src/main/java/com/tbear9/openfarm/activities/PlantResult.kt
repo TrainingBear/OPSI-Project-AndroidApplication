@@ -46,8 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.tbear9.openfarm.activities.Camera.Companion.loaded
-import com.tbear9.openfarm.activities.Camera.Companion.plants
 import com.trbear9.plants.api.blob.Plant
 
 @OptIn(ExperimentalMaterial3Api::class)
