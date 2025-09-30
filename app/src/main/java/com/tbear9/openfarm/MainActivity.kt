@@ -111,8 +111,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         var response: Response? = null
         var loaded by mutableStateOf(false)
-        var plants: SnapshotStateMap<Int, List<Plant>> = mutableStateMapOf()
-        val variable = UserVariable();
+        var plants: SnapshotStateMap<Int, MutableList<Plant>> = mutableStateMapOf()
+        val variable = UserVariable().apply{}
         val client: PlantClient = PlantClient(
             "TrainingBear/84d0e105aaabce26c8dfbaff74b2280e",
             "JitteryAttic/9407ea7ac74364d1d94899f735a23f91", size = 200_000
@@ -131,10 +131,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        runBlocking {
-            try {
+        try {
+            runBlocking {
                 url = client.getUrl()
-            } catch (_: RuntimeException){}
+            }
+        } catch (_: Exception) {
         }
         setContent {
             App()
@@ -421,6 +422,8 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(this@MainActivity, "Sending data...", Toast.LENGTH_SHORT)
                                 .show()
                             response = withContext(Dispatchers.IO) {
+                                variable.geo.rainfall = 2000.0
+                                variable.geo.min = 18.0
                                 client.sendPacket(variable, url = url)
                             }
                             for (score in response!!.tanaman.keys) {

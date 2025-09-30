@@ -46,6 +46,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,13 +66,13 @@ import androidx.navigation.NavController
 import com.tbear9.openfarm.Util
 import com.trbear9.plants.api.blob.Plant
 
-var plantByCategory = mutableMapOf<String, HashMap<Int, ArrayList<Plant>>>()
+var plantByCategory = mutableMapOf<String, SnapshotStateMap<Int, MutableList<Plant>>>()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun ResultScreen(
-    plants: SnapshotStateMap<Int, List<Plant>>? = null,
+    plants: SnapshotStateMap<Int, MutableList<Plant>>? = null,
     loaded: Boolean = false,
     onBack: () -> Unit = {},
     nav: NavController? = null
@@ -82,12 +84,16 @@ fun ResultScreen(
     var order by remember { mutableStateOf("Tertinggi") }
     var scroll = rememberScrollState()
     LaunchedEffect(Unit) {
-        plants?.keys?.forEach { score ->
-            plants[score]?.forEach { plant ->
-                plant.kategori.split(", ").forEach { kat ->
-                    plantByCategory.computeIfAbsent(kat) { HashMap() }
-                        .computeIfAbsent(score) {ArrayList()}
-                        .add(plant)
+        if (plants != null) {
+            plantByCategory["All"] = plants
+            plantByCategory.clear()
+            plants.forEach { (score, list) ->
+                list.forEach { plant ->
+                    plant.kategori.split(", ").forEach { kat ->
+                        val categoryMap = plantByCategory.getOrPut(kat) { mutableStateMapOf() }
+                        val plantList = categoryMap.getOrPut(score) { mutableStateListOf() }
+                        plantList.add(plant)
+                    }
                 }
             }
         }
@@ -121,7 +127,7 @@ fun ResultScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Box(
                             modifier = Modifier.wrapContentSize()
-                                .clickable{expandCat = !expandCat}
+                                .clickable { expandCat = !expandCat }
                         ) {
                             Text(
                                 text = order,
@@ -163,7 +169,7 @@ fun ResultScreen(
                         ) {
                             Row {
                                 Text(
-                                    text = selected.take(10)+if(selected.length > 10) ".." else "",
+                                    text = selected.take(10) + if (selected.length > 10) ".." else "",
                                     fontSize = 20.sp
                                 )
                                 Icon(
@@ -204,38 +210,38 @@ fun ResultScreen(
             )
         },
         bottomBar = {
-        var selected by remember { mutableIntStateOf(1) }
-        NavigationBar {
-            NavigationBarItem(
-                selected = selected == 0,
-                onClick = {
-                    selected = 0
-                    onBack()
-                    nav?.navigate("home")
-                          },
-                icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                label = { Text("Home") }
-            )
-            NavigationBarItem(
-                selected = selected == 1,
-                onClick = {
-                    selected = 1
-                    nav?.navigate("result")
-                          },
-                icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
-                label = { Text("Tanaman") }
-            )
-            NavigationBarItem(
-                selected = selected == 2,
-                onClick = {
-                    selected = 2
-                    nav?.navigate("tanah")
-                          },
-                icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
-                label = { Text("Tanah") }
-            )
-        }
-    }) { padding ->
+            var selected by remember { mutableIntStateOf(1) }
+            NavigationBar {
+                NavigationBarItem(
+                    selected = selected == 0,
+                    onClick = {
+                        selected = 0
+                        onBack()
+                        nav?.navigate("home")
+                    },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = selected == 1,
+                    onClick = {
+                        selected = 1
+                        nav?.navigate("result")
+                    },
+                    icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
+                    label = { Text("Tanaman") }
+                )
+                NavigationBarItem(
+                    selected = selected == 2,
+                    onClick = {
+                        selected = 2
+                        nav?.navigate("tanah")
+                    },
+                    icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
+                    label = { Text("Tanah") }
+                )
+            }
+        }) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -250,34 +256,33 @@ fun ResultScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Loading plants...", fontSize = 16.sp)
                 }
-            } else if (plants?.isEmpty() == false) {
+            } else if (plants?.isEmpty() == true) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    when {
-                        selected == "All" -> items(
-                            if (order == "Tertinggi") plants.toList().asReversed()
-                            else plants.toList()
-                        ) { (score, plant) ->
-                            plant.forEach {
-                                PlantCardDisplayer(score, it)
+                    if (selected == "All") items(
+                        if (order == "Tertinggi") plants.toList().asReversed()
+                        else plants.toList()
+                    ) { (score, plant) ->
+                        plant.forEach {
+                            PlantCardDisplayer(score, it)
+                        }
+                    }
+                    else if (plantByCategory[selected].isNullOrEmpty())
+                        item {
+                            Column {
+                                Text(
+                                    text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 28.sp,
+                                    modifier = Modifier.padding(top = 100.dp)
+                                )
                             }
                         }
-                        plantByCategory[selected].isNullOrEmpty() ->
-                            item {
-                                Column {
-                                    Text(
-                                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 28.sp,
-                                    )
-                                }
-                            }
-                        else -> items(plantByCategory[selected]!!.toList()) { (score, plant) ->
-                            plant.forEach {
-                                PlantCardDisplayer(score, it)
-                            }
+                    else items(plantByCategory[selected]!!.toList()) { (score, plant) ->
+                        plant.forEach {
+                            PlantCardDisplayer(score, it)
                         }
                     }
                 }
