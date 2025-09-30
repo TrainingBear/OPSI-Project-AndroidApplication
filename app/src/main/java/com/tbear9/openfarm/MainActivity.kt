@@ -359,7 +359,6 @@ class MainActivity : AppCompatActivity() {
                             title = { Text("Camera") },
                             navigationIcon = {
                                 IconButton(onClick = {
-                                    finish()
                                 }) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,

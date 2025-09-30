@@ -42,37 +42,43 @@ object Util {
         }
     }
 
-        fun categoryToColor(category: String): Color {
-            return when (category) {
-                other.head -> Color.Gray
-                vegetables.head -> Color.Green
-                cereals_pseudocereals.head -> Color.Yellow
-                roots_tubers.head -> Color.Red
-                "forage/pasture" -> Color.Blue
-                fruit_nut.head -> Color(0xFF9C27B0)
-                materials.head -> Color(0xFFFF9100)
-                ornamentals_turf.head -> Color(0xFFE91E63)
-                medicinals_and_armoatic.head -> Color(0xFF936123)
-                else -> Color(0xFF9E9E9E)
-            }
+    fun categoryToColor(category: String): Color {
+        return when (category) {
+            other.head -> Color.Gray
+            vegetables.head -> Color.Green
+            cereals_pseudocereals.head -> Color.Yellow
+            roots_tubers.head -> Color.Red
+            "forage/pasture" -> Color.Blue
+            fruit_nut.head -> Color(0xFF9C27B0)
+            materials.head -> Color(0xFFFF9100)
+            ornamentals_turf.head -> Color(0xFFE91E63)
+            medicinals_and_armoatic.head -> Color(0xFF936123)
+            else -> Color(0xFF9E9E9E)
         }
+    }
 
-        fun translateCategory(category: String): String {
-            when (category) {
-                other.head -> return "Lainnya"
-                vegetables.head -> return "Sayur"
-                cereals_pseudocereals.head -> return "Pseudocereal"
-                roots_tubers.head -> return "Akar/Umbi"
-                "forage/pasture" -> return "Padang rumput"
-                fruit_nut.head -> return "Buah & kacang"
-                materials.head -> return "Bahan"
-                ornamentals_turf.head -> return "Rumput hias"
-                medicinals_and_armoatic.head -> return "Obat & aromatik"
-                "forest/wood" -> return "Hutan/Kayu"
-                cover_crop.head -> return "Tanaman penutup"
-                environmental.head -> return "Lingkungan"
-                weed.head -> return "Gulma"
-            }
-            return "Lainnya"
+    fun translateCategory(category: String): String {
+        when (category) {
+            other.head -> return "Lainnya"
+            vegetables.head -> return "Sayur"
+            cereals_pseudocereals.head -> return "Pseudocereal"
+            roots_tubers.head -> return "Akar/Umbi"
+            "forage/pasture" -> return "Padang rumput"
+            fruit_nut.head -> return "Buah & kacang"
+            materials.head -> return "Bahan"
+            ornamentals_turf.head -> return "Rumput hias"
+            medicinals_and_armoatic.head -> return "Obat & aromatik"
+            "forest/wood" -> return "Hutan/Kayu"
+            cover_crop.head -> return "Tanaman penutup"
+            environmental.head -> return "Lingkungan"
+            weed.head -> return "Gulma"
         }
+        return "Lainnya"
+    }
+    fun getCategory(): List<String>{
+        return listOf("Lainya", "Sayur", "Pseudocereal", "Akar/Umbi", "Padang rumput",
+            "Buah & kacang", "Bahan", "Rumput hias", "Obat & aromatik", "Hutan/Kayu",
+            "Tanaman penutup", "Lingkungan", "Gulma"
+            )
+    }
 }
