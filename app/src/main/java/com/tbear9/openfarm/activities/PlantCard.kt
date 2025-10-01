@@ -154,7 +154,7 @@ import kotlinx.coroutines.runBlocking
                 ) {
                     Kat(ref.difficulty, Color.Black, diffToColor(ref.difficulty))
                     Kat("3-4 hari", bcolor = Color.LightGray)
-                    ref.kategori.split(",").forEach {
+                    ref.kategori.split(", ").forEach {
                         Kat(
                             translateCategory(it),
                             tcolor = Color.White,
@@ -221,7 +221,7 @@ import kotlinx.coroutines.runBlocking
             return when (category) {
                 other.head -> Color.Gray
                 vegetables.head -> Color.Green
-                cereals_pseudocereals.head -> Color.Yellow
+                cereals_pseudocereals.head -> Color(0xFF4CAF50)
                 roots_tubers.head -> Color.Red
                 forage_pastures.head -> Color.Blue
                 fruit_nut.head -> Color(0xFF9C27B0)

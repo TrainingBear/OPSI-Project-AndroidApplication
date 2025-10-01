@@ -1,10 +1,17 @@
 package com.tbear9.openfarm
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_MOVE
+import android.view.ScaleGestureDetector
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +26,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -56,6 +65,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -112,13 +122,16 @@ class MainActivity : AppCompatActivity() {
         var response: Response? = null
         var loaded by mutableStateOf(false)
         var plants: SnapshotStateMap<Int, MutableList<Plant>> = mutableStateMapOf()
+        var plantByCategory = SnapshotStateMap<String, SnapshotStateMap<Int, MutableList<Plant>>>()
         val variable = UserVariable().apply{}
         val client: PlantClient = PlantClient(
             "TrainingBear/84d0e105aaabce26c8dfbaff74b2280e",
+            "FannPann8/dfc4ae7919abdf8e3d3bf9b456cabf06",
             "JitteryAttic/9407ea7ac74364d1d94899f735a23f91", size = 200_000
         )
-        var url: String? = null
+        var url by mutableStateOf("null")
         var pH: Float? = null
+        var started = false;
     }
     var cam: Boolean = false
     var gps: Boolean = false
@@ -129,17 +142,25 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    fun refresh(){
         try {
             runBlocking {
-                url = client.getUrl()
+                try{
+                    url = client.getUrl()?.toString() ?: "null"
+                } catch (_: Exception){
+
+                }
             }
         } catch (_: Exception) {
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContent {
             App()
         }
+        refresh()
         getLocation()
         perm.launch(arrayOf(Manifest.permission.CAMERA))
         if (ContextCompat.checkSelfPermission
@@ -157,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         val context = LocalContext.current
         Scaffold(
             bottomBar = {
-                var selected by remember { mutableIntStateOf(1) }
+                var selected by remember { mutableIntStateOf(0) }
                 NavigationBar {
                     NavigationBarItem(
                         selected = selected == 0,
@@ -172,7 +193,7 @@ class MainActivity : AppCompatActivity() {
                         selected = selected == 1,
                         onClick = {
                             selected = 1
-                            nav?.navigate("result")
+                            if(started) nav?.navigate("result")
                         },
                         icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                         label = { Text("Tanaman") }
@@ -181,7 +202,7 @@ class MainActivity : AppCompatActivity() {
                         selected = selected == 2,
                         onClick = {
                             selected = 2
-                            nav?.navigate("tanah")
+                            if(started) nav?.navigate("tanah")
                         },
                         icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                         label = { Text("Tanah") }
@@ -202,6 +223,9 @@ class MainActivity : AppCompatActivity() {
                                 contentDescription = "Help",
                                 modifier = Modifier.padding(10.dp)
                                     .size(30.dp)
+                                    .clickable {
+                                        nav?.navigate("tutor")
+                                    }
                             )
                         }
                         Row(
@@ -209,45 +233,52 @@ class MainActivity : AppCompatActivity() {
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.oak_sapling),
-                                contentDescription = "Help",
-                                tint = Color(0xFF1C8604),
-                                modifier = Modifier.padding(10.dp)
-                                    .size(40.dp)
-                            )
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxSize()
+                            Box(modifier = Modifier.wrapContentSize()
+                                .clickable{
+                                    nav?.navigate("about")
+                                }
                             ) {
-                                Text(
-                                    text = "OpenFarm",
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color(0xFF1C8604)
+                                Image(
+                                    painter = painterResource(id = R.drawable.oak_sapling),
+                                    contentDescription = "Help",
+                                    modifier = Modifier.padding(10.dp)
+                                        .size(40.dp)
                                 )
-                                Text(
-                                    text = buildAnnotatedString {
-                                        append("Server: ")
-                                        if (url != null) withStyle(
-                                            style = SpanStyle(
-                                                fontWeight = FontWeight.Medium,
-                                                color = Color(0xFF1C8604)
-                                            )
-                                        ) {
-                                            append("Online")
-                                        } else withStyle(
-                                            style = SpanStyle(
-                                                fontWeight = FontWeight.Medium,
-                                                color = Color.Red
-                                            )
-                                        ) {
-                                            append("Offline")
-                                        }
-                                    },
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.Start,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Row {
+                                        Text(
+                                            text = "OpenFarm",
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF1C8604),
+                                            fontSize = 24.sp
+                                        )
+                                        Text(
+                                            text = buildAnnotatedString {
+                                                if (url != "null") withStyle(
+                                                    style = SpanStyle(
+                                                        fontWeight = FontWeight.Medium,
+                                                        color = Color(0xFF1C8604)
+                                                    )
+                                                ) {
+                                                    append("Online")
+                                                } else withStyle(
+                                                    style = SpanStyle(
+                                                        fontWeight = FontWeight.Medium,
+                                                        color = Color.Red
+                                                    )
+                                                ) {
+                                                    append("Offline")
+                                                }
+                                            },
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -359,8 +390,7 @@ class MainActivity : AppCompatActivity() {
                         TopAppBar(
                             title = { Text("Camera") },
                             navigationIcon = {
-                                IconButton(onClick = {
-                                }) {
+                                IconButton(onClick = {nav.navigate("home")}) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = "Back"
@@ -398,54 +428,122 @@ class MainActivity : AppCompatActivity() {
                     )
                 }) {
                     SoilActivity(it, onClick = { ph ->
-                        try {
-                            ph?.let {
-                                val soil = SoilParameters()
-                                val toFloat = (it.replace(",", ".")).toFloat()
-                                soil.pH = toFloat
-                                variable.soil = soil
-                                pH = toFloat
+                        if(url == "null"){
+                            refresh()
+                            Toast.makeText(this@MainActivity, "Tolong tunggu kembali hingga server online!", Toast.LENGTH_SHORT).show()
+                        }else {
+                            try {
+                                ph?.let {
+                                    val soil = SoilParameters()
+                                    val toFloat = (it.replace(",", ".")).toFloat()
+                                    soil.pH = toFloat
+                                    variable.soil = soil
+                                    pH = toFloat
+                                }
+                            } catch (e: NumberFormatException) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Invalid pH value of ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-                        } catch (e: NumberFormatException) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Invalid pH value of ${e.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            response = null;
+                            job?.cancel()
+                            loaded = false
+                            plants.clear()
+                            Util.debug("Launching job coroutine... ")
+                            job = scope.launch {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Sending data...",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                                response = withContext(Dispatchers.IO) {
+                                    variable.geo.rainfall = 2000.0
+                                    variable.geo.min = 18.0
+                                    client.sendPacket(variable, url = url)
+                                }
+                                for (score in response!!.tanaman.keys) {
+                                    Util.debug("Loaded $score with size ${response!!.tanaman[score]!!.size}")
+                                    plants[score] = response!!.tanaman[score]!!
+                                }
+                                plantByCategory["All"] = plants
+                                plantByCategory.clear()
+                                plants.forEach { (score, list) ->
+                                    list.forEach { plant ->
+                                        plant.kategori.split(", ").forEach { kat ->
+                                            plantByCategory.computeIfAbsent(
+                                                Util.translateCategory(
+                                                    kat
+                                                )
+                                            ) { mutableStateMapOf() }
+                                                .computeIfAbsent(score) { mutableStateListOf() }
+                                                .add(plant)
+                                        }
+                                    }
+                                }
+                                Util.getCategory().forEach { kat ->
+                                    plantByCategory[kat]?.let {
+                                        Util.debug("Adding $kat with size ${it.size}")
+                                    } ?: Util.debug("$kat is null")
+                                }
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "${plants.size} Plants loaded",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                started = true
+                                loaded = true
+                                Toast.makeText(this@MainActivity, "finished", Toast.LENGTH_SHORT)
+                                    .show()
+                                Util.debug("Job has been finished!")
+                            }
+                            nav.navigate("result")
                         }
-                        response = null;
-                        job?.cancel()
-                        loaded = false
-                        plants.clear()
-                        Util.debug("Launching job coroutine... ")
-                        job = scope.launch {
-                            Toast.makeText(this@MainActivity, "Sending data...", Toast.LENGTH_SHORT)
-                                .show()
-                            response = withContext(Dispatchers.IO) {
-                                variable.geo.rainfall = 2000.0
-                                variable.geo.min = 18.0
-                                client.sendPacket(variable, url = url)
-                            }
-                            for (score in response!!.tanaman.keys) {
-                                Util.debug("Loaded $score with size ${response!!.tanaman[score]!!.size}")
-                                plants[score] = response!!.tanaman[score]!!
-                            }
-                            loaded = true
-                            Toast.makeText(this@MainActivity, "finished", Toast.LENGTH_SHORT).show()
-                            Util.debug("Job has been finished!")
-                        }
-                        nav.navigate("result")
                     })
                 }
             }
             composable("result") {
-                ResultScreen(plants, loaded, onBack = { nav.navigate("soil") }, nav)
+                ResultScreen(plants, plantByCategory, loaded, onBack = { nav.navigate("soil") }, nav)
             }
             composable("tanah") {
                 SoilStats(nav)
             }
             composable("home") {
                 Home(nav)
+            }
+            composable("tutor") {
+                AndroidView(
+                    factory = { ctx ->
+                        // 👇 Inflate your XML layout
+                        LayoutInflater.from(ctx)
+                            .inflate(R.layout.activity_tutorial, null, false)
+                    },
+                    update = { view ->
+                        // You can access child views here
+                        val button = view.findViewById<Button>(R.id.tombolKembali)
+
+                        button.setOnClickListener {
+                            nav.navigate("home")
+                        }
+                    }
+                )
+            }
+            composable("about") {
+                AndroidView(
+                    factory = { ctx ->
+                        LayoutInflater.from(ctx)
+                            .inflate(R.layout.activity_tutorial, null, false)
+                    },
+                    update = { view ->
+                        val button = view.findViewById<Button>(R.id.buttonBackmenuabout)
+
+                        button.setOnClickListener {
+                            nav.navigate("home")
+                        }
+                    }
+                )
             }
         }
     }
@@ -658,6 +756,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Composable
     fun CameraPreviewView(
         lensFacing: Int = CameraSelector.LENS_FACING_BACK,
@@ -687,13 +786,37 @@ class MainActivity : AppCompatActivity() {
 
                     try {
                         cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
+                        val camera = cameraProvider.bindToLifecycle(
                             lifecycleOwner,
                             cameraSelector,
                             imgCapture,
                             preview
                         )
-                    } catch (e: Exception) {
+
+                        val scaleGestureDetector = ScaleGestureDetector(
+                            context,
+                            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                                    val currentZoom =
+                                        camera.cameraInfo.zoomState.value?.zoomRatio ?: 1f
+                                    val scale = detector.scaleFactor
+                                    val newZoom = (currentZoom * scale)
+                                        .coerceIn(
+                                            camera.cameraInfo.zoomState.value?.minZoomRatio ?: 1f,
+                                            camera.cameraInfo.zoomState.value?.maxZoomRatio ?: 10f
+                                        )
+                                    camera.cameraControl.setZoomRatio(newZoom)
+                                    return true
+                                }
+                            }
+                        )
+
+                        previewView.setOnTouchListener { _, event ->
+                            scaleGestureDetector.onTouchEvent(event)
+                            true // consume gesture
+                        }
+
+                    }catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }, ContextCompat.getMainExecutor(context))

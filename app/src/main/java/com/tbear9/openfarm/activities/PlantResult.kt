@@ -1,5 +1,6 @@
 package com.tbear9.openfarm.activities
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -66,13 +68,13 @@ import androidx.navigation.NavController
 import com.tbear9.openfarm.Util
 import com.trbear9.plants.api.blob.Plant
 
-var plantByCategory = mutableMapOf<String, SnapshotStateMap<Int, MutableList<Plant>>>()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun ResultScreen(
     plants: SnapshotStateMap<Int, MutableList<Plant>>? = null,
+    plantByCategory: SnapshotStateMap<String, SnapshotStateMap<Int, MutableList<Plant>>>? = null,
     loaded: Boolean = false,
     onBack: () -> Unit = {},
     nav: NavController? = null
@@ -83,21 +85,6 @@ fun ResultScreen(
     var expandCat by remember { mutableStateOf(false) }
     var order by remember { mutableStateOf("Tertinggi") }
     var scroll = rememberScrollState()
-    LaunchedEffect(Unit) {
-        if (plants != null) {
-            plantByCategory["All"] = plants
-            plantByCategory.clear()
-            plants.forEach { (score, list) ->
-                list.forEach { plant ->
-                    plant.kategori.split(", ").forEach { kat ->
-                        val categoryMap = plantByCategory.getOrPut(kat) { mutableStateMapOf() }
-                        val plantList = categoryMap.getOrPut(score) { mutableStateListOf() }
-                        plantList.add(plant)
-                    }
-                }
-            }
-        }
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -134,27 +121,28 @@ fun ResultScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
                             )
+                            DropdownMenu(
+                                expanded = expandCat,
+                                onDismissRequest = { expandCat = false },
+                                modifier = Modifier.width(150.dp)
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Tertinggi") },
+                                    onClick = {
+                                        order = "Tertinggi"
+                                        expandCat = false
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Terendah") },
+                                    onClick = {
+                                        order = "Terendah"
+                                        expandCat = false
+                                    },
+                                )
+                            }
                         }
-                        DropdownMenu(
-                            expanded = expandCat,
-                            onDismissRequest = { expandCat = false },
-                            modifier = Modifier.width(150.dp)
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Tertinggi") },
-                                onClick = {
-                                    order = "Tertinggi"
-                                    expandCat = false
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Terendah") },
-                                onClick = {
-                                    order = "Terendah"
-                                    expandCat = false
-                                },
-                            )
-                        }
+
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Order",
@@ -256,7 +244,7 @@ fun ResultScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Loading plants...", fontSize = 16.sp)
                 }
-            } else if (plants?.isEmpty() == true) {
+            } else if (plants?.isEmpty() == false) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -269,7 +257,7 @@ fun ResultScreen(
                             PlantCardDisplayer(score, it)
                         }
                     }
-                    else if (plantByCategory[selected].isNullOrEmpty())
+                    else if (plantByCategory==null || plantByCategory[selected].isNullOrEmpty())
                         item {
                             Column {
                                 Text(
@@ -280,7 +268,10 @@ fun ResultScreen(
                                 )
                             }
                         }
-                    else items(plantByCategory[selected]!!.toList()) { (score, plant) ->
+                    else items(
+                        if (order == "Tertinggi") plantByCategory[selected]!!.toList().asReversed()
+                        else plantByCategory[selected]!!.toList()
+                    ) { (score, plant) ->
                         plant.forEach {
                             PlantCardDisplayer(score, it)
                         }

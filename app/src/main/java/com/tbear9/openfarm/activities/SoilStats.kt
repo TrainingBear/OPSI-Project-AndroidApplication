@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Compost
 import androidx.compose.material.icons.filled.Grain
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.auto
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
@@ -75,38 +75,36 @@ import com.patrykandpatrick.vico.compose.common.VicoTheme.CandlestickCartesianLa
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.vicoTheme
-import com.patrykandpatrick.vico.core.cartesian.axis.Axis
+import com.patrykandpatrick.vico.core.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.core.common.DefaultColors
-import com.patrykandpatrick.vico.core.common.Defaults
 import com.patrykandpatrick.vico.core.common.Insets
-import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.tbear9.openfarm.MainActivity
 import kotlinx.coroutines.runBlocking
+import kotlin.random.Random
 
-val label = listOf("Aluvial", "Andosol", "Entisol", "Humus", "Inceptisol", "Laterit", "Kapur", "Pasir")
+val label = listOf("Aluvial", "Andosol", "Humus", "Kapur", "Laterit", "Pasir")
 val labelListKey = ExtraStore.Key<List<String>>()
 
+@Preview
 @Composable
-fun SoilStats(nav: NavController){
+fun SoilStats(nav: NavController? = null) {
     val scroll = rememberScrollState()
-    Scaffold (bottomBar = {
+    Scaffold(bottomBar = {
         var selected by remember { mutableIntStateOf(2) }
         NavigationBar {
             NavigationBarItem(
                 selected = selected == 0,
                 onClick = {
                     selected = 0
-                    nav.navigate("home")
-                          },
+                    nav?.navigate("home")
+                },
                 icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                 label = { Text("Home") }
             )
@@ -114,8 +112,8 @@ fun SoilStats(nav: NavController){
                 selected = selected == 1,
                 onClick = {
                     selected = 1
-                    nav.navigate("result")
-                          },
+                    if(MainActivity.started) nav?.navigate("result")
+                },
                 icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                 label = { Text("Tanaman") }
             )
@@ -123,19 +121,58 @@ fun SoilStats(nav: NavController){
                 selected = selected == 2,
                 onClick = {
                     selected = 2
-                    nav.navigate("tanah")
-                          },
+                    nav?.navigate("tanah")
+                },
                 icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                 label = { Text("Tanah") }
             )
         }
-    }){
+    }) {
         Box(modifier = Modifier.padding(it)) {
             Column(modifier = Modifier.verticalScroll(scroll)) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom
                 ) {
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(350.dp)
+                            .wrapContentSize()
+                    ) {
+
+                        if (MainActivity.response?.soilPrediction == null) Text(
+                            text = "Tunggu sebentar...",
+                            fontSize = 35.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                        val modelProducer = remember { CartesianChartModelProducer() }
+                        runBlocking {
+                            modelProducer.runTransaction {
+                                columnSeries {
+                                    series(
+                                        MainActivity.response?.soilPrediction?.toList()
+//                                                ?: listOf(1,2,3,4,5,6)
+                                            ?: listOf(
+                                                Random.nextFloat(), Random.nextFloat(),
+                                                Random.nextFloat(), Random.nextFloat(),
+                                                Random.nextFloat(), Random.nextFloat(),
+                                            )
+                                    )
+                                }
+                                extras {
+                                    it[labelListKey] = label
+                                }
+                            }
+                        }
+                        JetpackComposeBasicColumnChart(
+                            modelProducer,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(10.dp)
+                        )
+
+                    }
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
@@ -146,69 +183,61 @@ fun SoilStats(nav: NavController){
                             fontFamily = FontFamily.Monospace
                         )
                     }
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                            .height(350.dp)
-                            .wrapContentSize()
-                    ) {
-                        if(MainActivity .response?.soilPrediction == null){
-                            Text(
-                                text = "Tunggu sebentar...",
-                                fontSize = 35.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }else {
-                            val modelProducer = remember { CartesianChartModelProducer() }
-                            runBlocking {
-                                modelProducer.runTransaction {
-                                    columnSeries { series(MainActivity.response!!.soilPrediction.toList()) }
-                                    extras {
-                                        it[labelListKey] = label
-                                    }
-                                }
-                            }
-                            JetpackComposeBasicColumnChart(
-                                modelProducer,
-                                modifier = Modifier.fillMaxSize()
-                                    .padding(10.dp)
-                            )
-                        }
-                    }
                 }
+
+
                 Column(modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = "Berikut hasil prediksi dari tanahmu:",
                         fontWeight = FontWeight.Normal,
                     )
-                    Map("pH: ", MainActivity.pH?.toString() ?: "${MainActivity.variable.soil.pH.toString()} (default)")
+                    Map(
+                        "pH: ",
+                        MainActivity.pH?.toString()
+                            ?: (MainActivity.response?.soil?.pH.toString() + " (default)")
+                    )
                     Map("tipe: ", MainActivity.response?.soilName ?: "tak tersedia")
                     Map("Tekstur: ", MainActivity.response?.soil?.texture?.head ?: "tak tersedia")
                     Map("Drainase: ", MainActivity.response?.soil?.drainage?.head ?: "tak tersedia")
-                    Map("Kesuburan: ", MainActivity.response?.soil?.fertility?.head ?: "tak tersedia")
+                    Map(
+                        "Kesuburan: ",
+                        MainActivity.response?.soil?.fertility?.head ?: "tak tersedia"
+                    )
                     Text(
-                        text = MainActivity.response?.soilCare?.phCorrection?: "Tunggu sebentar...",
+                        text = MainActivity.response?.soilCare?.phCorrection
+                            ?: "Tunggu sebentar...",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
                     )
                     Cat(
-                        Icons.Default.Compost, "Natrium: ", MainActivity.response?.soilCare?.nutrientManagement?.N ?: "Tunggu sebentar..."
+                        Icons.Default.Compost,
+                        "Natrium: ",
+                        MainActivity.response?.soilCare?.nutrientManagement?.N
+                            ?: "Tunggu sebentar..."
                     )
                     Cat(
-                        Icons.Default.Grain, "Phospor: ", MainActivity.response?.soilCare?.nutrientManagement?.P ?: "Tunggu sebentar..."
+                        Icons.Default.Grain,
+                        "Phospor: ",
+                        MainActivity.response?.soilCare?.nutrientManagement?.P
+                            ?: "Tunggu sebentar..."
                     )
                     Cat(
-                        Icons.Default.BlurOn, "Kalium: ", MainActivity.response?.soilCare?.nutrientManagement?.K ?: "Tunggu sebentar..."
+                        Icons.Default.BlurOn,
+                        "Kalium: ",
+                        MainActivity.response?.soilCare?.nutrientManagement?.K
+                            ?: "Tunggu sebentar..."
                     )
                     Text(
-                        text = MainActivity.response?.soilCare?.organicMatter ?: "Tunggu sebentar... ",
+                        text = MainActivity.response?.soilCare?.organicMatter
+                            ?: "Tunggu sebentar... ",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = MainActivity.response?.soilCare?.waterRetention ?: "Tunggu sebentar... ",
+                        text = MainActivity.response?.soilCare?.waterRetention
+                            ?: "Tunggu sebentar... ",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
@@ -218,12 +247,13 @@ fun SoilStats(nav: NavController){
         }
     }
 }
+
 @Composable
 private fun Map(key:String, value:String){
     Text(
         text = buildAnnotatedString() {
-            withStyle(style = SpanStyle(fontSize = 16.sp)) { append(key) }
-            withStyle(style = SpanStyle(fontSize = 16.sp)) { append(value) }
+            withStyle(style = SpanStyle(fontSize = 18.sp)) { append(key) }
+            withStyle(style = SpanStyle(fontSize = 18.sp)) { append(value) }
         },
         fontWeight = FontWeight.Light,
         modifier = Modifier.padding(start = 5.dp)
@@ -260,8 +290,8 @@ private fun JetpackComposeBasicColumnChart(
                 rememberColumnCartesianLayer(
                     columnProvider = ColumnCartesianLayer.ColumnProvider.series(
                             rememberLineComponent(
-                                fill = fill(Color(0xFF20750E)),
-                                thickness = 20.dp,
+                                fill = fill(Color(0xFF2979FF)),
+                                thickness = 12.dp,
                                 shadow = Shadow(3f),
                                 margins = Insets(1f)
                             )
@@ -271,12 +301,10 @@ private fun JetpackComposeBasicColumnChart(
                     dataLabel = rememberTextComponent(
                         textAlignment = Layout.Alignment.ALIGN_NORMAL,
                     ),
-//                    dataLabelValueFormatter = CartesianValueFormatter { context, x, _ ->
-//                        context.model.extraStore[labelListKey][x.toInt()]
-//                    },
                 ),
                 startAxis = VerticalAxis.rememberStart(
-                    labelRotationDegrees = 0f
+                    labelRotationDegrees = 0f,
+                    size = BaseAxis.Size.auto(0.dp, 45.dp)
                 ),
                 topAxis = HorizontalAxis.rememberTop(
                     label = rememberTextComponent(

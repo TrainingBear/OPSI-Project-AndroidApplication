@@ -35,10 +35,12 @@ import androidx.compose.material.icons.filled.Coronavirus
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -196,16 +198,16 @@ class PlantDetail : ComponentActivity(){
                         fontWeight = FontWeight.Medium
                     )
                     Row(modifier = Modifier.padding(top = 16.dp)) {
-                        Label("pH ideal", ref.ph, Icons.Default.LocalFireDepartment)
+                        Label("PH Ideal", ref.ph.replace("-", " - "), Icons.Default.Science)
                         Spacer(modifier = Modifier.width(8.dp))
                         Label(
-                            "Panen (hari)",
+                            "Waktu Panen",
                             if (ref.min_panen != ref.max_panen) "${ref.min_panen}-${ref.max_panen} hari"
                             else "${ref.min_panen} hari",
                             Icons.Default.HourglassEmpty
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Label("Genus", ref.genus, Icons.Default.Spa)
+                        Label("Temperatur", ref.temp, Icons.Default.Whatshot)
                     }
                     FlowRow(
                         modifier = Modifier.padding(top = 16.dp),
@@ -228,25 +230,30 @@ class PlantDetail : ComponentActivity(){
                     ClickableText(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(fontSize = 16.sp)) {
-                                withStyle(SpanStyle(fontWeight = FontWeight.Light)) {
-                                    append("Takson -> ${ref.kingdom} ${ref.family} ${ref.nama_ilmiah}: ")
+                                withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                                    append("Taxonomy dari ${ref.kingdom} ${ref.family} ${ref.nama_ilmiah}: ")
                                 }
-                                pushStyle(
-                                    SpanStyle(
-                                        color = Color.Blue,
-                                        textDecoration = TextDecoration.Underline,
-                                        fontWeight = FontWeight.Light
+                                if(ref.taxon != null) {
+                                    pushStyle(
+                                        SpanStyle(
+                                            color = Color.Blue,
+                                            textDecoration = TextDecoration.Underline,
+                                            fontWeight = FontWeight.Light
+                                        )
                                     )
-                                )
-                                append(ref.taxon)
-                                pop()
+                                    append(ref.taxon)
+                                    pop()
+                                }
+                                append("Tidak tersedia")
                             }
                         },
-                        modifier = Modifier.padding(top = 3.dp),
+                        modifier = Modifier.padding(top = 8.dp),
                         onClick = { offset ->
-                            val url = ref.taxon
-                            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                            context.startActivity(intent)
+                            if (ref.taxon != null) {
+                                val url = ref.taxon
+                                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                context.startActivity(intent)
+                            }
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))

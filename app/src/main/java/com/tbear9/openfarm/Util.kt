@@ -46,7 +46,7 @@ object Util {
         return when (category) {
             other.head -> Color.Gray
             vegetables.head -> Color.Green
-            cereals_pseudocereals.head -> Color.Yellow
+            cereals_pseudocereals.head -> Color(0xFF4CAF50)
             roots_tubers.head -> Color.Red
             "forage/pasture" -> Color.Blue
             fruit_nut.head -> Color(0xFF9C27B0)
