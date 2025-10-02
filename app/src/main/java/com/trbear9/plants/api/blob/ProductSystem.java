@@ -12,8 +12,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductSystem implements Serializable {
-    private String rumah_tangga;
-    private String komersial;
-    private String industri;
+    public String rumah_tangga;
+    public String komersial;
+    public String industri;
 }
 

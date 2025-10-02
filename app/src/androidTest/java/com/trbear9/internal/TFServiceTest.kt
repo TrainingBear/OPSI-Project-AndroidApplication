@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 class TFServiceTest {
     val log = LoggerFactory.getLogger(TFServiceTest::class.java)!!
     val context = ApplicationProvider.getApplicationContext<Context>()
+
     @Test
     fun predict(){
         val bitmap = BitmapFactory.decodeStream(context.assets.open("dataset/Aluvial/aluvial-004.jpg"))

@@ -96,6 +96,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.location.LocationServices
+import com.trbear9.internal.ServerHandler
 import com.trbear9.openfarm.activities.ResultScreen
 import com.trbear9.openfarm.activities.SoilStats
 import com.trbear9.plants.PlantClient
@@ -118,11 +119,6 @@ class MainActivity : AppCompatActivity() {
         var plants: SnapshotStateMap<Int, MutableList<Plant?>> = mutableStateMapOf()
         var plantByCategory = SnapshotStateMap<String, SnapshotStateMap<Int, MutableList<Plant?>>>()
         val variable = UserVariable().apply{}
-        val client: PlantClient = PlantClient(
-            "TrainingBear/84d0e105aaabce26c8dfbaff74b2280e",
-            "FannPann8/dfc4ae7919abdf8e3d3bf9b456cabf06",
-            "JitteryAttic/9407ea7ac74364d1d94899f735a23f91", size = 200_000
-        )
         var url by mutableStateOf("null")
         var pH: Float? = null
         var started = false;
@@ -136,25 +132,11 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
 
-    fun refresh(){
-        try {
-            runBlocking {
-                try{
-                    url = client.getUrl()?.toString() ?: "null"
-                } catch (_: Exception){
-
-                }
-            }
-        } catch (_: Exception) {
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             App()
         }
-        refresh()
         getLocation()
         perm.launch(arrayOf(Manifest.permission.CAMERA))
         if (ContextCompat.checkSelfPermission
@@ -349,8 +331,7 @@ class MainActivity : AppCompatActivity() {
                             .background(Color.White),
                         onClick = {
                             perm.launch(arrayOf(Manifest.permission.CAMERA))
-                            if (ContextCompat.checkSelfPermission (this@MainActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                            ) else {
+                            if (ContextCompat.checkSelfPermission (this@MainActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) else {
                                 cam = true
                                 Toast.makeText(this@MainActivity, "Camera permission granted!", Toast.LENGTH_SHORT).show()
                                 if(gps) nav?.navigate("camera")
@@ -423,7 +404,6 @@ class MainActivity : AppCompatActivity() {
                 }) {
                     SoilActivity(it, onClick = { ph ->
                         if(url == "null"){
-                            refresh()
                             Toast.makeText(this@MainActivity, "Tolong tunggu kembali hingga server online!", Toast.LENGTH_SHORT).show()
                         }else {
                             try {
@@ -456,7 +436,7 @@ class MainActivity : AppCompatActivity() {
                                 response = withContext(Dispatchers.IO) {
                                     variable.geo.rainfall = 2000.0
                                     variable.geo.min = 18.0
-                                    client.sendPacket(variable, url = url)
+                                    ServerHandler.process(this@MainActivity, variable)
                                 }
                                 for (score in response!!.tanaman.keys) {
                                     Util.debug("Loaded $score with size ${response!!.tanaman[score]!!.size}")
@@ -551,27 +531,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    val bitmap = image.toBitmap()
-
-                    // Crop to 320x320
-                    val size = 320
-                    val cropped = Bitmap.createBitmap(
-                        bitmap,
-                        (bitmap.width - size) / 2, // center X
-                        (bitmap.height - size) / 2, // center Y
-                        size,
-                        size
-                    )
-
-                    val stream = ByteArrayOutputStream();
-                    image.toBitmap().compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    variable.setImage(stream.toByteArray(), "${System.currentTimeMillis()}.jpg")
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Image has been taken with size of ${variable.image!!.size} bytes}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
+                    variable.image = image.toBitmap()
                     onFinish()
                     image.close()
                 }

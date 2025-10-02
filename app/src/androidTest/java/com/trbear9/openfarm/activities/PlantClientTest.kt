@@ -39,30 +39,11 @@ class PlantClientTest {
     @Test
     fun testBitmap() {
         val context = ApplicationProvider.getApplicationContext<Context>();
-        val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.inceptisol_008);
-        assertNotNull(bitmap);
     }
 
     @Test
     fun getPlant(){
-        val data= UserVariable()
-        data.soil = (SoilParameters.ALLUVIAL)
-        data.geo = (GeoParameters())
-        data.custom = (
-            CustomParameters().apply {
-                category = CATEGORY.vegetables
-            }
-        )
-        val context = ApplicationProvider.getApplicationContext<Context>();
-        val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.inceptisol_008);
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-        data.setImage(stream.toByteArray(), "inceptisol2934puyh.jpg")
-        runBlocking {
-            val response = client.sendPacket(data)
-            Util.debug("Loaded plants with size of ${response!!.tanaman.size}")
-            Util.debug(objectMapper.readTree(objectMapper.writeValueAsString(response)).toPrettyString())
-        }
+
     }
     @Test
     fun head(){

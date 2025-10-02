@@ -20,7 +20,7 @@ import java.io.IOException
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 @Getter
-class ServerHandler {
+object ServerHandler {
     fun who(): String {
         return """
                             
@@ -85,11 +85,11 @@ class ServerHandler {
     }
 
     private fun writeTaxonomy(context:Context,plant: Plant) {
-        plant.genus = plant.nama_ilmiah.split(" ")[0]
+        plant.genus = plant.nama_ilmiah?.split(" ")[0]
         try {
             context.assets.open("plants/${plant.nama_ilmiah}.json").use {
                 plant.taxon = ObjectMapper().readTree(it)
-                plant.link = "https://powo.science.kew.org/" + plant.taxon["url"]?.asText()
+                plant.link = "https://powo.science.kew.org/" + plant.taxon?.get("url")?.asText()
             }
             log.warn("No taxonomy found for ${plant.nama_ilmiah}")
             return
@@ -141,7 +141,6 @@ class ServerHandler {
         geo.max = max
     }
 
-    companion object {
         val log: org.slf4j.Logger = LoggerFactory.getLogger(ServerHandler::class.java)!!
         private val objectMapper = ObjectMapper()
 
@@ -156,5 +155,4 @@ class ServerHandler {
                     .build()
             )
         }
-    }
 }

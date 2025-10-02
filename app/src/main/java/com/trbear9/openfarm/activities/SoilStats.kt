@@ -76,11 +76,11 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.trbear9.internal.TFService
 import com.trbear9.openfarm.MainActivity
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
-val label = listOf("Aluvial", "Andosol", "Humus", "Kapur", "Laterit", "Pasir")
 val labelListKey = ExtraStore.Key<List<String>>()
 
 @Preview
@@ -142,10 +142,13 @@ fun SoilStats(nav: NavController? = null) {
                         runBlocking {
                             modelProducer.runTransaction {
                                 columnSeries {
-                                    series(
-                                        MainActivity.response?.soilPrediction?.toList()
-//                                                ?: listOf(1,2,3,4,5,6)
-                                            ?: listOf(
+                                    var list: MutableList<Float>? = null
+                                    MainActivity.response?.soilPrediction?.run {
+                                        list = mutableListOf()
+                                        forEach { pair ->
+                                        list.add(pair.second) }
+                                    }
+                                    series(list ?: listOf(
                                                 Random.nextFloat(), Random.nextFloat(),
                                                 Random.nextFloat(), Random.nextFloat(),
                                                 Random.nextFloat(), Random.nextFloat(),
@@ -153,7 +156,7 @@ fun SoilStats(nav: NavController? = null) {
                                     )
                                 }
                                 extras {
-                                    it[labelListKey] = label
+                                    it[labelListKey] = TFService.labels
                                 }
                             }
                         }
@@ -195,8 +198,7 @@ fun SoilStats(nav: NavController? = null) {
                         MainActivity.response?.soil?.fertility?.head ?: "tak tersedia"
                     )
                     Text(
-                        text = MainActivity.response?.soilCare?.phCorrection
-                            ?: "Tunggu sebentar...",
+                        text = MainActivity.response?.soilCare?.pHCorrection?: "Tunggu sebentar...",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
@@ -242,7 +244,7 @@ fun SoilStats(nav: NavController? = null) {
 @Composable
 private fun Map(key:String, value:String){
     Text(
-        text = buildAnnotatedString() {
+        text = buildAnnotatedString {
             withStyle(style = SpanStyle(fontSize = 18.sp)) { append(key) }
             withStyle(style = SpanStyle(fontSize = 18.sp)) { append(value) }
         },

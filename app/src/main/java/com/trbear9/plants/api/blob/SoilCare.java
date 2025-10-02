@@ -14,15 +14,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SoilCare {
     @JsonProperty("pH_correction")
-    private String pHCorrection;
+    public String pHCorrection;
 
     @JsonProperty("organic_matter")
-    private String organicMatter;
+    public String organicMatter;
 
     @JsonProperty("water_retention")
-    private String waterRetention;
+    public String waterRetention;
 
     @JsonProperty("nutrient_management")
-    private NutrientManagement nutrientManagement;
+    public NutrientManagement nutrientManagement;
 
 }

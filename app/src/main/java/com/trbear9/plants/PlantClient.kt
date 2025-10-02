@@ -139,7 +139,6 @@ class PlantClient {
     ): Response? {
         val url = url?:getUrl();
         return suspendCancellableCoroutine { sus ->
-            data.computeHash()
             val request = Request.Builder()
                 .url(url + PROCESS)
                 .post(objectMapper.writeValueAsString(data).toRequestBody())

@@ -1,7 +1,10 @@
 package com.trbear9.openfarm.activities
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -38,15 +41,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.trbear9.openfarm.MainActivity
+import com.trbear9.plants.E
 import com.trbear9.plants.api.blob.Plant
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.PlantClient
+import java.io.File
 
 @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun PlantCardDisplayer(score: Int, ref: Plant?) {
-        val context = LocalContext.current
+    val context = LocalContext.current
+    if (ref != null) {
         Card(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
@@ -76,7 +82,7 @@ import com.trbear9.plants.PlantClient
                     ) {
                         Image(
                             imageVector = Icons.Default.Image,
-                            contentDescription = "${ref?.nama_ilmiah?: "no"} image",
+                            contentDescription = "${ref?.nama_ilmiah ?: "no"} image",
                             modifier = Modifier
                                 .fillMaxSize(fraction = 0.5f)
                                 .clip(RoundedCornerShape(16.dp))
@@ -87,12 +93,13 @@ import com.trbear9.plants.PlantClient
                             textAlign = TextAlign.Center
                         )
                     }
-                    if (ref.thumbnail != null) AsyncImage(
+                    val image = ImageAsset.getImage(context, ref?.name.toString())
+                    if (image != null) AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(MainActivity.url+ PlantClient.IMAGE+"/${ref.thumbnail}")
+                            .data(image)
                             .crossfade(true)
                             .build(),
-                        contentDescription = "${ref.nama_ilmiah} image",
+                        contentDescription = "${ref?.nama_ilmiah} image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -106,7 +113,7 @@ import com.trbear9.plants.PlantClient
                 // Plant Title
                 androidx.compose.foundation.layout.Row() {
                     Text(
-                        text = ref.commonName.split(",")[0],
+                        text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 10.dp)
@@ -133,7 +140,7 @@ import com.trbear9.plants.PlantClient
 
                 // Plant Description
                 Text(
-                    text = ref.description.take(100) + if (ref.description.length > 100) "..." else "",
+                    text = ref.description?.take(100) + if (ref.description?.length ?: 0 > 100) "..." else "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 6.dp)
                 )
@@ -144,12 +151,15 @@ import com.trbear9.plants.PlantClient
                     mainAxisSpacing = 2.dp,
                     crossAxisSpacing = 2.dp
                 ) {
-                    Kat(ref.difficulty, Color.Black, diffToColor(ref.difficulty))
+                    Kat(
+                        ref.difficulty.toString(),
+                        Color.Black,
+                        diffToColor(ref.difficulty.toString())
+                    )
                     Kat("3-4 hari", bcolor = Color.LightGray)
-                    ref.kategori.split(", ").forEach {
+                    ref.kategori?.split(", ")?.forEach {
                         Kat(
-                            translateCategory(it),
-                            tcolor = Color.White,
+                            translateCategory(it), tcolor = Color.White,
                             bcolor = categoryToColor(it)
                         )
                     }
@@ -157,6 +167,7 @@ import com.trbear9.plants.PlantClient
             }
         }
     }
+}
 
 
     @Composable
@@ -242,4 +253,24 @@ import com.trbear9.plants.PlantClient
             }
             return "Lainnya"
         }
+class ImageAsset {
+    companion object {
+        val images = mutableMapOf<String, Bitmap>()
+
+
+        public fun getImage(context: Context, name: String): Bitmap? {
+            if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
+            try {
+                context.assets.open("images/$name.webp").use {
+                    val decodeStream = BitmapFactory.decodeStream(it)
+                    ImageAsset.images[name] = decodeStream
+                    return decodeStream
+                }
+            } catch (_: Exception) {
+                return null
+            }
+        }
+    }
+}
+
 
