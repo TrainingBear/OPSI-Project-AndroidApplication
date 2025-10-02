@@ -120,10 +120,11 @@ class PlantDetail : ComponentActivity(){
                         modifier = Modifier
                             .fillMaxSize()
                     )
-                    if (ref.fullsize != null) {
+                    val image = ImageAsset.getImage(context, ref.name.toString())
+                    if (image!=null) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(MainActivity .url + PlantClient.IMAGE + "/${ref.fullsize}")
+                                .data(image)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "Plant image",
@@ -184,17 +185,17 @@ class PlantDetail : ComponentActivity(){
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = ref.commonName,
+                        text = ref.commonName.toString(),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = ref.description,
+                    text = ref.description.toString(),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Row(modifier = Modifier.padding(top = 16.dp)) {
-                        Label("PH Ideal", ref.ph.replace("-", " - "), Icons.Default.Science)
+                        Label("PH Ideal", ref.ph?.replace("-", " - ")?:"NA", Icons.Default.Science)
                         Spacer(modifier = Modifier.width(8.dp))
                         Label(
                             "Waktu Panen",
@@ -203,14 +204,14 @@ class PlantDetail : ComponentActivity(){
                             Icons.Default.HourglassEmpty
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Label("Temperatur", ref.temp, Icons.Default.Whatshot)
+                        Label("Temperatur", ref.temp?:"NA", Icons.Default.Whatshot)
                     }
                     FlowRow(
                         modifier = Modifier.padding(top = 16.dp),
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        ref.kategori.split(", ").forEach {
+                        ref.kategori?.split(", ")?.forEach {
                             Kat(Util.translateCategory(it))
                         }
                     }
@@ -219,7 +220,7 @@ class PlantDetail : ComponentActivity(){
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        ref.common_names.split(", ").forEach {
+                        ref.common_names?.split(", ")?.forEach {
                             Kat(it, tcolor = Color.Black, bcolor = Color.Green)
                         }
                     }
@@ -237,7 +238,7 @@ class PlantDetail : ComponentActivity(){
                                             fontWeight = FontWeight.Light
                                         )
                                     )
-                                    append(ref.taxon)
+                                    append(ref.taxon.toString())
                                     pop()
                                 }
                                 append("Tidak tersedia")
@@ -247,36 +248,36 @@ class PlantDetail : ComponentActivity(){
                         onClick = { offset ->
                             if (ref.taxon != null) {
                                 val url = ref.taxon
-                                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                val intent = Intent(Intent.ACTION_VIEW, url.toString().toUri())
                                 context.startActivity(intent)
                             }
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Content(
-                        "Penyiraman", ref.plantCare.watering,
+                        "Penyiraman", ref.plantCare?.watering?: "Belum Tersedia",
                         Icons.Default.WaterDrop
                     )
                     Content(
-                        "Kontrol Hama", ref.plantCare.pestDiseaseManagement,
+                        "Kontrol Hama", ref.plantCare?.pestDiseaseManagement?: "Belum Tersedia",
                         Icons.Default.Coronavirus
                     )
                     Content(
-                        "Pemupukan", ref.plantCare.fertilization,
+                        "Pemupukan", ref.plantCare?.fertilization?:"Belum Tersedia",
                         Icons.Default.LocalHospital
                     )
                     Content(
-                        "Sinar Matahari", ref.plantCare.sunlight,
+                        "Sinar Matahari", ref.plantCare?.sunlight?:"Belum Tersedia",
                         Icons.Default.WbSunny
                     )
                     Content(
-                        "Pruning", ref.plantCare.pruning,
+                        "Pruning", ref.plantCare?.pruning?:"Belum Tersedia",
                         Icons.Default.ContentCut
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Content2("Rumah Tangga", ref.productSystem.rumah_tangga)
-                    Content2("Komersial", ref.productSystem.komersial)
-                    Content2("Industri", ref.productSystem.industri)
+                    Content2("Rumah Tangga", ref.productSystem?.rumah_tangga?:"Belum Tersedia")
+                    Content2("Komersial", ref.productSystem?.komersial?:"Belum Tersedia")
+                    Content2("Industri", ref.productSystem?.industri?:"Belum Tersedia")
                 }
             }
         }
