@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.AndroidResources
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.tbear9.openfarm"
+    namespace = "com.trbear9.openfarm"
     compileSdk = 36
 
     lint {
@@ -13,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.tbear9.openfarm"
+        applicationId = "com.trbear9.openfarm"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
@@ -65,10 +67,19 @@ android {
                 pickFirsts += "mozilla/public-suffix-list.txt"
             }
     }
-
+    fun AndroidResources.() {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert
+    implementation("com.google.ai.edge.litert:litert:2.0.2")
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation("com.open-meteo:open-meteo-api-kotlin:0.7.1-beta.1")
+    implementation("org.apache.commons:commons-csv:1.10.0")
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation("org.slf4j:slf4j-api:2.0.17")
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m2)
     implementation(libs.vico.compose.m3)
@@ -81,11 +92,11 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("androidx.navigation:navigation-compose:2.9.4")
-    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:3.1.3"){
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "org.jetbrains")
-        exclude("messages/JavaOptionBundle.properties")
-    }
+//    implementation("com.github.TrainingBear.OPSI-PlantAPI:api:3.1.3"){
+//        exclude(group = "org.jetbrains.kotlin")
+//        exclude(group = "org.jetbrains")
+//        exclude("messages/JavaOptionBundle.properties")
+//    }
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     implementation("org.apache.commons:commons-lang3:3.18.0")
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
