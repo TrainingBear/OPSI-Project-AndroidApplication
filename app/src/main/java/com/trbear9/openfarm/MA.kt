@@ -57,6 +57,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -171,7 +172,7 @@ class MA : AppCompatActivity() {
                         selected = selected == 1,
                         onClick = {
                             selected = 1
-                            if(started) nav?.navigate("result")
+                            nav?.navigate("result")
                         },
                         icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                         label = { Text("Tanaman") }
@@ -180,7 +181,7 @@ class MA : AppCompatActivity() {
                         selected = selected == 2,
                         onClick = {
                             selected = 2
-                            if(started) nav?.navigate("tanah")
+                            nav?.navigate("tanah")
                         },
                         icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                         label = { Text("Tanah") }
@@ -413,33 +414,14 @@ class MA : AppCompatActivity() {
                 }
             }
             composable("soil") {
-                Scaffold(topBar = {
-                    TopAppBar(
-                        title = { Text("Soil") },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                nav.navigate("camera")
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.LightGray,
-                        )
-                    )
-                }) {
-                    SoilActivity(it, onClick = { ph ->
+                SoilActivity(nav, onClick = { (pH, depth) ->
+                    {
                         val variable = UserVariable()
                         try {
-                            ph?.let {
+                            if(pH != -1){
                                 val soil = SoilParameters()
-                                val toFloat = (it.replace(",", ".")).toFloat()
-                                soil.pH = toFloat
+                                soil.pH = pH
                                 MA.soil = soil
-                                pH = toFloat
                             }
                         } catch (e: NumberFormatException) {
                             Toast.makeText(
@@ -452,16 +434,15 @@ class MA : AppCompatActivity() {
                         variable.geo.rainfall = 2000.0
                         variable.geo.min = 18.0
                         variable.image = image
-                            response = Data.process(this@MA, variable)
+                        response = Data.process(this@MA, variable)
 
-                            Toast.makeText(this@MA, "finished", Toast.LENGTH_SHORT)
-                                .show()
-                            Util.debug("Job has been finished!")
+                        Toast.makeText(this@MA, "finished", Toast.LENGTH_SHORT)
+                            .show()
+                        Util.debug("Job has been finished!")
 
                         nav.navigate("result")
-
-                    })
-                }
+                    }
+                })
             }
             composable("result") {
                 ResultScreen(response, onBack = { nav.navigate("soil") }, nav)
@@ -555,62 +536,97 @@ class MA : AppCompatActivity() {
         MA.geo = geo;
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun SoilActivity(innerPadding: PaddingValues, onClick: (number: String?) -> Unit) = Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center),
-            ) {
-                var number by remember { mutableStateOf("") }
-
-                Text(
-                    text = "Nilai pH lebih baik di kosongkan jika tak memiliki pH meter",
-                    fontSize = 20.sp,
-                    color = Color.Black,
-                    style = TextStyle.Default,
-                    textAlign = TextAlign.Center
-                )
-                OutlinedTextField(
-                    value = number,
-                    onValueChange = { input ->
-                        if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
-                            number = input
+    @Preview
+    fun SoilActivity(nav: NavController? = null, onClick: (pH: Float, depth: Int) -> Unit? = {a, b ->}) =
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Soil") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            nav?.navigate("camera")
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
                     },
-                    label = { Text("masukan nilai pH tanah") },
-                    placeholder = { Text("3.54") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.LightGray,
+                    )
                 )
-
-                Button(
-                    onClick = { onClick(number) },
+            }) { padding ->
+            Box(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .background(Color.White)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 80.dp, vertical = 8.dp)
+                        .fillMaxSize()
+                        .align(Alignment.Center),
                 ) {
-                    Text(text = "Next")
+                    var pH by remember { mutableStateOf<Float>() }
+                    var depth by remember { mutableStateOf(40) }
+
+                    Text(
+                        text = "Nilai pH lebih baik di kosongkan jika tak memiliki pH meter",
+                        fontSize = 20.sp,
+                        color = Color.Black,
+                        style = TextStyle.Default,
+                        textAlign = TextAlign.Center
+                    )
+                    OutlinedTextField(
+                        value = pH,
+                        onValueChange = { input ->
+                            if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
+                                pH = input
+                            }
+                        },
+                        label = { Text("pH tanah") },
+                        placeholder = { Text("") },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp)
+                    )
+                    OutlinedTextField(
+                        value = depth,
+                        onValueChange = { input ->
+                            if (input.all { padding.isDigit() || (padding == ',' || padding == '.') }) {
+                                depth = input.toInt()
+                            }
+                        },
+                        label = { Text("Kedalaman tanah (cm)") },
+                        placeholder = { Text("40") },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp)
+                    )
+
+                    Button(
+                        onClick = { onClick(pH, depth) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 80.dp, vertical = 8.dp)
+                    ) {
+                        Text(text = "Next")
+                    }
                 }
             }
         }
-    }
 
     @Composable
     fun CameraActivity(innerPadding: PaddingValues, onClick: () -> Unit) {

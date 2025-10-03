@@ -13,6 +13,7 @@ import java.io.Serializable
 @NoArgsConstructor
 @AllArgsConstructor
 class Response : Serializable {
+    var numericDepth: Int = 150
     var progress: Int = 0
     var target: Int = 0
     var predicted = false
