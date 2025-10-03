@@ -67,7 +67,7 @@
         </provider>
 
         <activity
-            android:name="com.trbear9.openfarm.MainActivity"
+            android:name="com.trbear9.openfarm.MA"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

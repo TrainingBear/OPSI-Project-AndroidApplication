@@ -13,6 +13,12 @@ import java.io.Serializable
 @NoArgsConstructor
 @AllArgsConstructor
 class Response : Serializable {
+    var progress: Int = 0
+    var target: Int = 0
+    var predicted = false
+    var parameterLoaded = false
+    var current = "Tanaman"
+    var loaded = false
     var hashCode: String? = null
     var soilName: String? = null
     var soilCare: SoilCare? = null
@@ -21,12 +27,12 @@ class Response : Serializable {
     var total = 0
     var soil: SoilParameters? = null
     var geo: GeoParameters? = null
-    val tanaman: MutableMap<Int?, MutableList<Plant?>?> =
-        HashMap<Int?, MutableList<Plant?>?>()
+    val tanaman: MutableMap<Int, MutableList<Plant>> =
+        HashMap<Int, MutableList<Plant>>()
 
     //{score: [{nama tanaman: response rag}, {...}]}
-    fun put(score: Int, plant: Plant?) {
-        tanaman.computeIfAbsent(score) { k: kotlin.Int? -> java.util.ArrayList<Plant?>() }!!
+    fun put(score: Int, plant: Plant) {
+        tanaman.computeIfAbsent(score) { k: Int? -> java.util.ArrayList<Plant>() }
             .add(plant)
         total++
     }

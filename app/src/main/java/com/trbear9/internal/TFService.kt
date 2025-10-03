@@ -3,10 +3,13 @@ package com.trbear9.internal
 
 import android.content.Context
 import android.graphics.Bitmap
+import com.google.ai.edge.litert.CompiledModel
 import com.trbear9.plants.api.SoilParameters
-import org.tensorflow.lite.task.vision.classifier.ImageClassifier
-import org.tensorflow.lite.task.vision.classifier.ImageClassifier.ImageClassifierOptions
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
 
 object TFService {
     val labels = listOf("Aluvial", "Andosol", "Humus", "Kapur", "Laterit", "Pasir")
@@ -18,37 +21,56 @@ object TFService {
             "Laterit" to SoilParameters.LATERITE,
             "Pasir" to SoilParameters.PASIR)
 
-    fun predict(context: Context, bitmap: Bitmap): List<Pair<String, Float>> {
-        val options = ImageClassifierOptions.builder()
-            .setMaxResults(5)  // return top-5 predictions
+    fun predict(context: Context, bitmap: Bitmap): FloatArray {
+        val model = CompiledModel.create(context.assets, "model.tflite")
+        // Preallocate input/output buffers
+        val inputBuffers = model.createInputBuffers()
+        val outputBuffers = model.createOutputBuffers()
+
+        val tensorImage = TensorImage(DataType.FLOAT32)
+        tensorImage.load(bitmap)
+        val image = ImageProcessor.Builder()
+            .add(ResizeOp(320, 320, ResizeOp.ResizeMethod.BILINEAR))
+            .add(NormalizeOp(0.0f, 1.0f))
             .build()
+            .process(tensorImage)
 
-        // Load model from assets
-        val classifier = ImageClassifier.createFromFileAndOptions(
-            context,
-            "model.tflite",
-            options
-        )
+        val buffer = image.buffer
+        buffer.rewind()
+        val floatArray = FloatArray(buffer.remaining() / 4)
+        buffer.asFloatBuffer().get(floatArray)
 
-        // Convert Bitmap → TensorImage
-        val tensorImage = TensorImage.fromBitmap(bitmap)
+        // Fill the first input
+        inputBuffers[0].writeFloat(floatArray)
+        // Invoke
+        model.run(inputBuffers, outputBuffers)
+        // Read the output
+        val outputFloatArray = outputBuffers[0].readFloat()
 
-        // Run inference
-        val results = classifier.classify(tensorImage)
-
-        // Parse predictions
-        return results.flatMap { it.categories.map { cat -> cat.label to cat.score } }
+        // Clean up buffers and model
+        inputBuffers.forEach { it.close() }
+        outputBuffers.forEach { it.close() }
+        model.close()
+        return outputFloatArray
     }
 
-    fun argmax(prediction: List<Pair<String, Float>>): Pair<String, Float> {
+    fun argmax(prediction: FloatArray): Pair<String, Float> {
         var max = Float.MIN_VALUE;
         var soil = ""
         for (i in 0..prediction.size - 1) {
-            if (prediction[i].second > max) {
-                max = prediction[i].second;
-                soil = prediction[i].first;
+            if (prediction[i]> max) {
+                max = prediction[i]
+                soil = labels[i]
             }
         }
         return Pair(soil, max)
+    }
+
+    fun getPredictions(prediction: FloatArray): List<Pair<String, Float>> {
+        val predictions = mutableListOf<Pair<String, Float>>()
+        for (i in 0..prediction.size - 1) {
+            predictions.add(Pair(labels[i], prediction[i]))
+        }
+        return predictions
     }
 }

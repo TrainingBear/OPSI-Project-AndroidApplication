@@ -19,11 +19,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +40,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -77,7 +79,9 @@ import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.trbear9.internal.TFService
-import com.trbear9.openfarm.MainActivity
+import com.trbear9.openfarm.MA
+import com.trbear9.plants.api.Response
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
@@ -87,6 +91,8 @@ val labelListKey = ExtraStore.Key<List<String>>()
 @Composable
 fun SoilStats(nav: NavController? = null) {
     val scroll = rememberScrollState()
+    val response = MA.response?.collectAsState(Response())
+
     Scaffold(bottomBar = {
         var selected by remember { mutableIntStateOf(2) }
         NavigationBar {
@@ -103,7 +109,7 @@ fun SoilStats(nav: NavController? = null) {
                 selected = selected == 1,
                 onClick = {
                     selected = 1
-                    if(MainActivity.started) nav?.navigate("result")
+                    if(MA.started) nav?.navigate("result")
                 },
                 icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                 label = { Text("Tanaman") }
@@ -131,28 +137,23 @@ fun SoilStats(nav: NavController? = null) {
                             .height(350.dp)
                             .wrapContentSize()
                     ) {
-
-                        if (MainActivity.response?.soilPrediction == null) Text(
-                            text = "Tunggu sebentar...",
-                            fontSize = 35.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
                         val modelProducer = remember { CartesianChartModelProducer() }
                         runBlocking {
                             modelProducer.runTransaction {
                                 columnSeries {
                                     var list: MutableList<Float>? = null
-                                    MainActivity.response?.soilPrediction?.run {
+                                    response?.value?.soilPrediction?.run {
                                         list = mutableListOf()
                                         forEach { pair ->
-                                        list.add(pair.second) }
+                                            list.add(pair.second)
+                                        }
                                     }
-                                    series(list ?: listOf(
-                                                Random.nextFloat(), Random.nextFloat(),
-                                                Random.nextFloat(), Random.nextFloat(),
-                                                Random.nextFloat(), Random.nextFloat(),
-                                            )
+                                    series(
+                                        list ?: listOf(
+                                            Random.nextFloat(), Random.nextFloat(),
+                                            Random.nextFloat(), Random.nextFloat(),
+                                            Random.nextFloat(), Random.nextFloat(),
+                                        )
                                     )
                                 }
                                 extras {
@@ -162,8 +163,8 @@ fun SoilStats(nav: NavController? = null) {
                         }
                         JetpackComposeBasicColumnChart(
                             modelProducer,
-                            modifier = Modifier.fillMaxSize()
-                                .padding(10.dp)
+                            modifier = Modifier.fillMaxHeight()
+                                .width(400.dp)
                         )
 
                     }
@@ -171,7 +172,11 @@ fun SoilStats(nav: NavController? = null) {
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
+                        if (response?.value?.soilPrediction == null) Text(
+                            text = "Tunggu sebentar...",
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily.Monospace
+                        )else Text(
                             text = "Diagram Prediksi Tanah",
                             fontSize = 20.sp,
                             fontFamily = FontFamily.Monospace
@@ -181,24 +186,25 @@ fun SoilStats(nav: NavController? = null) {
 
 
                 Column(modifier = Modifier.padding(10.dp)) {
+                    val value = response?.value
                     Text(
                         text = "Berikut hasil prediksi dari tanahmu:",
                         fontWeight = FontWeight.Normal,
                     )
                     Map(
                         "pH: ",
-                        MainActivity.pH?.toString()
-                            ?: (MainActivity.response?.soil?.pH.toString() + " (default)")
+                        MA.pH?.toString()
+                            ?: (value?.soil?.pH.toString() + " (default)")
                     )
-                    Map("tipe: ", MainActivity.response?.soilName ?: "tak tersedia")
-                    Map("Tekstur: ", MainActivity.response?.soil?.texture?.head ?: "tak tersedia")
-                    Map("Drainase: ", MainActivity.response?.soil?.drainage?.head ?: "tak tersedia")
+                    Map("tipe: ", value?.soilName ?: "tak tersedia")
+                    Map("Tekstur: ", value?.soil?.texture?.head ?: "tak tersedia")
+                    Map("Drainase: ", value?.soil?.drainage?.head ?: "tak tersedia")
                     Map(
                         "Kesuburan: ",
-                        MainActivity.response?.soil?.fertility?.head ?: "tak tersedia"
+                        value?.soil?.fertility?.head ?: "tak tersedia"
                     )
                     Text(
-                        text = MainActivity.response?.soilCare?.pHCorrection?: "Tunggu sebentar...",
+                        text = value?.soilCare?.pHCorrection?: "Tunggu sebentar...",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
@@ -206,30 +212,30 @@ fun SoilStats(nav: NavController? = null) {
                     Cat(
                         Icons.Default.Compost,
                         "Natrium: ",
-                        MainActivity.response?.soilCare?.nutrientManagement?.N
+                        value?.soilCare?.nutrientManagement?.N
                             ?: "Tunggu sebentar..."
                     )
                     Cat(
                         Icons.Default.Grain,
                         "Phospor: ",
-                        MainActivity.response?.soilCare?.nutrientManagement?.P
+                        value?.soilCare?.nutrientManagement?.P
                             ?: "Tunggu sebentar..."
                     )
                     Cat(
                         Icons.Default.BlurOn,
                         "Kalium: ",
-                        MainActivity.response?.soilCare?.nutrientManagement?.K
+                        value?.soilCare?.nutrientManagement?.K
                             ?: "Tunggu sebentar..."
                     )
                     Text(
-                        text = MainActivity.response?.soilCare?.organicMatter
+                        text = value?.soilCare?.organicMatter
                             ?: "Tunggu sebentar... ",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = MainActivity.response?.soilCare?.waterRetention
+                        text = value?.soilCare?.waterRetention
                             ?: "Tunggu sebentar... ",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 10.dp),

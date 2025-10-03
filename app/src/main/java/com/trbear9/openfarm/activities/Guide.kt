@@ -27,7 +27,7 @@ fun Guide(){
     Box( modifier = Modifier
         .size(400.dp, 700.dp)
         .background(Color.LightGray)
-        .clip(RoundedCornerShape(10.dp))
+        .clip(RoundedCornerShape(24.dp))
     ){
         Column(
             horizontalAlignment = Alignment.Start

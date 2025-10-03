@@ -64,9 +64,9 @@ import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.trbear9.openfarm.MainActivity
+import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
-import com.trbear9.plants.PlantClient
+import com.trbear9.plants.E
 import com.trbear9.plants.api.blob.Plant
 
 class PlantDetail : ComponentActivity(){
@@ -120,8 +120,8 @@ class PlantDetail : ComponentActivity(){
                         modifier = Modifier
                             .fillMaxSize()
                     )
-                    val image = ImageAsset.getImage(context, ref.name.toString())
-                    if (image!=null) {
+                    val image = ImageAsset.getImage(context, ref.nama_ilmiah)
+                    if (ref.fullsize != null) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(image)
@@ -195,23 +195,31 @@ class PlantDetail : ComponentActivity(){
                         fontWeight = FontWeight.Medium
                     )
                     Row(modifier = Modifier.padding(top = 16.dp)) {
-                        Label("PH Ideal", ref.ph?.replace("-", " - ")?:"NA", Icons.Default.Science)
+                        val ph_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_minimum_ph)
+                        val ph_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_maximum_ph)
+                        Label("PH Ideal", "$ph_min - $ph_max", Icons.Default.Science)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Label(
-                            "Waktu Panen",
-                            if (ref.min_panen != ref.max_panen) "${ref.min_panen}-${ref.max_panen} hari"
-                            else "${ref.min_panen} hari",
-                            Icons.Default.HourglassEmpty
-                        )
+                        val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
+                        val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
+                        if(panen_max != "0") {
+                            Label(
+                                "Waktu Panen",
+                                if (panen_min != panen_max) "$panen_min-$panen_max hari"
+                                else "$panen_min hari",
+                                Icons.Default.HourglassEmpty
+                            )
+                        }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Label("Temperatur", ref.temp?:"NA", Icons.Default.Whatshot)
+                        val temp_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_minimum_temperature)
+                        val temp_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_maximum_temperature)
+                        Label("Temperatur", "$temp_min - $temp_max", Icons.Default.Whatshot)
                     }
                     FlowRow(
                         modifier = Modifier.padding(top = 16.dp),
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        ref.kategori?.split(", ")?.forEach {
+                        Data.ecocrop[ref.nama_ilmiah]?.get(E.Category)?.toString()?.split(", ")?.forEach {
                             Kat(Util.translateCategory(it))
                         }
                     }
@@ -220,15 +228,18 @@ class PlantDetail : ComponentActivity(){
                         mainAxisSpacing = 4.dp,
                         crossAxisSpacing = 4.dp
                     ) {
-                        ref.common_names?.split(", ")?.forEach {
+                        Data.ecocrop[ref.nama_ilmiah]?.get(E.Common_names)?.split(", ")?.forEach {
                             Kat(it, tcolor = Color.Black, bcolor = Color.Green)
                         }
                     }
                     ClickableText(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(fontSize = 16.sp)) {
+                                val tax = ref.full_taxon
                                 withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                                    append("Taxonomy dari ${ref.kingdom} ${ref.family} ${ref.nama_ilmiah}: ")
+                                    append("Taxonomy dari ${tax["kingdom"].asText().replace("\"", "")} " +
+                                            "${tax["family"].asText().replace("\"", "")} " +
+                                            tax["name"].asText().replace("\"", ""))
                                 }
                                 if(ref.taxon != null) {
                                     pushStyle(
@@ -241,7 +252,6 @@ class PlantDetail : ComponentActivity(){
                                     append(ref.taxon.toString())
                                     pop()
                                 }
-                                append("Tidak tersedia")
                             }
                         },
                         modifier = Modifier.padding(top = 8.dp),

@@ -73,9 +73,11 @@ android {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert-support
+    implementation("com.google.ai.edge.litert:litert-support:1.4.0")
     // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert
-    runtimeOnly("com.google.ai.edge.litert:litert:2.0.2")
-    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation("com.google.ai.edge.litert:litert:2.0.2")
+//    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
     implementation("com.open-meteo:open-meteo-api-kotlin:0.7.1-beta.1")
     implementation("org.apache.commons:commons-csv:1.10.0")
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api

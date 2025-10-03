@@ -89,7 +89,7 @@ object CsvHandler {
                                 continue
                             }
                             if (floatVar in min .. max) {
-                                score += 2
+                                score += 1
                                 flag = true
                             }
                         }
@@ -163,7 +163,7 @@ object CsvHandler {
                                 continue
                             }
                             if (floatVar in min..max) {
-                                score+=2
+                                score+=1
                                 flag = true
                             }
                         }
@@ -185,7 +185,7 @@ object CsvHandler {
                                  continue
                             }
                             if (floatVar in min..max) {
-                                score += 3
+                                score += 2
                                 flag = true
                             }
                             else score -= (floatVar.coerceIn(Math.min(min, max), Math.max(min, max)).absoluteValue).toInt()
@@ -196,7 +196,7 @@ object CsvHandler {
                             if ((col == E.O_soil_texture || col == E.A_soil_texture) &&
                                 record.get(col).contains("wide")
                             ) {
-                                score += 2
+                                score += 3
                                 flag = true
                                 continue
                             }

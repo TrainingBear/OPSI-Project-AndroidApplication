@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,17 +41,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.trbear9.openfarm.MainActivity
+import com.trbear9.internal.Data
 import com.trbear9.plants.E
-import com.trbear9.plants.api.blob.Plant
 import com.trbear9.plants.E.CATEGORY.*
-import com.trbear9.plants.PlantClient
-import java.io.File
+import com.trbear9.plants.api.blob.Plant
 
 @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun PlantCardDisplayer(score: Int, ref: Plant?) {
+    fun PlantCardDisplayer(score: Int, ref: Plant) {
     val context = LocalContext.current
     if (ref != null) {
         Card(
@@ -82,7 +81,7 @@ import java.io.File
                     ) {
                         Image(
                             imageVector = Icons.Default.Image,
-                            contentDescription = "${ref?.nama_ilmiah ?: "no"} image",
+                            contentDescription = "${ref.nama_ilmiah ?: "no"} image",
                             modifier = Modifier
                                 .fillMaxSize(fraction = 0.5f)
                                 .clip(RoundedCornerShape(16.dp))
@@ -93,13 +92,16 @@ import java.io.File
                             textAlign = TextAlign.Center
                         )
                     }
-                    val image = ImageAsset.getImage(context, ref?.name.toString())
-                    if (image != null) AsyncImage(
+                    val image = remember {
+                        ImageAsset.getImage(context, ref.nama_ilmiah)
+                    }
+                    if (ref.fullsize != null)
+                        AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(image)
                             .crossfade(true)
                             .build(),
-                        contentDescription = "${ref?.nama_ilmiah} image",
+                        contentDescription = "${ref.nama_ilmiah} image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -152,12 +154,18 @@ import java.io.File
                     crossAxisSpacing = 2.dp
                 ) {
                     Kat(
-                        ref.difficulty.toString(),
+                        ref.difficulty?.toString()?:"EASY",
                         Color.Black,
-                        diffToColor(ref.difficulty.toString())
+                        diffToColor(ref.difficulty?.toString()?:"EASY")
                     )
-                    Kat("3-4 hari", bcolor = Color.LightGray)
-                    ref.kategori?.split(", ")?.forEach {
+                    val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
+                    val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
+                    Kat(
+                        if(panen_min != panen_max) "$panen_min-$panen_max hari"
+                        else if(panen_max == "0") ""
+                        else "$panen_min hari",
+                        bcolor = Color.LightGray)
+                    Data.ecocrop[ref.nama_ilmiah]?.get(E.Category)?.toString()?.split(", ")?.forEach {
                         Kat(
                             translateCategory(it), tcolor = Color.White,
                             bcolor = categoryToColor(it)
@@ -258,7 +266,8 @@ class ImageAsset {
         val images = mutableMapOf<String, Bitmap>()
 
 
-        public fun getImage(context: Context, name: String): Bitmap? {
+        public fun getImage(context: Context, name: String?): Bitmap? {
+            if(name == null) return null
             if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
             try {
                 context.assets.open("images/$name.webp").use {
@@ -271,6 +280,9 @@ class ImageAsset {
             }
         }
     }
+}
+
+fun test() {
 }
 
 

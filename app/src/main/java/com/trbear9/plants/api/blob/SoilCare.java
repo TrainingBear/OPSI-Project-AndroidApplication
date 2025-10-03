@@ -1,8 +1,6 @@
 package com.trbear9.plants.api.blob;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.trbear9.plants.api.blob.NutrientManagement;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -40,12 +40,15 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,17 +60,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.trbear9.openfarm.MA
 import com.trbear9.openfarm.Util
-import com.trbear9.plants.api.blob.Plant
+import com.trbear9.plants.api.Response
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onCompletion
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun ResultScreen(
-    plants: SnapshotStateMap<Int, MutableList<Plant?>>? = null,
-    plantByCategory: SnapshotStateMap<String, SnapshotStateMap<Int, MutableList<Plant?>>>? = null,
-    loaded: Boolean = false,
+    res: Flow<Response>? = null,
     onBack: () -> Unit = {},
     nav: NavController? = null
 ) {
@@ -76,7 +80,28 @@ fun ResultScreen(
     var expanded by remember { mutableStateOf(false) }
     var expandCat by remember { mutableStateOf(false) }
     var order by remember { mutableStateOf("Tertinggi") }
+    var response by remember { mutableStateOf(Response()) }
     var scroll = rememberScrollState()
+
+    var loaded by remember { mutableStateOf(false) }
+    var current by remember { mutableStateOf("Tanduran") }
+    var progress by remember { mutableStateOf(0) }
+    var target by remember { mutableStateOf(0) }
+    var predicted by remember { mutableStateOf(false) }
+    var parameterLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        res?.collect {
+            loaded = it.loaded
+            current = it.current
+            progress = it.progress
+            target = it.target
+            predicted = it.predicted
+            parameterLoaded = it.parameterLoaded
+        }
+        Util.debug("Is everything loaded? : ${response.loaded}")
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -92,7 +117,7 @@ fun ResultScreen(
                             onValueChange = { input ->
                                 querry = input
                             },
-                            label = { Text("Query") },
+                            label = { Text("Cari tanaman") },
                             placeholder = { Text("Kangkung") },
                             keyboardOptions = KeyboardOptions.Default.copy(
                                 keyboardType = KeyboardType.Text
@@ -234,22 +259,29 @@ fun ResultScreen(
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Loading plants...", fontSize = 16.sp)
+                    Text(
+                        text = if (predicted) "Menganalisa tanahmu.."
+                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
+                        else "Mencari data tanaman $current (${progress}/${target})",
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(20.dp)
+                    )
                 }
-            } else if (plants?.isEmpty() == false) {
+            } else if (MA.plants.isEmpty() == false) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (selected == "All") items(
-                        if (order == "Tertinggi") plants.toList().asReversed()
-                        else plants.toList()
+                        if (order == "Tertinggi") MA.plants.toList().asReversed()
+                        else MA.plants.toList()
                     ) { (score, plant) ->
                         plant.forEach {
                             PlantCardDisplayer(score, it)
                         }
                     }
-                    else if (plantByCategory==null || plantByCategory[selected].isNullOrEmpty())
+                    else if (MA.plantByCategory==null || MA.plantByCategory[selected].isNullOrEmpty())
                         item {
                             Column {
                                 Text(
@@ -261,8 +293,8 @@ fun ResultScreen(
                             }
                         }
                     else items(
-                        if (order == "Tertinggi") plantByCategory[selected]!!.toList().asReversed()
-                        else plantByCategory[selected]!!.toList()
+                        if (order == "Tertinggi") MA.plantByCategory[selected]!!.toList().asReversed()
+                        else MA.plantByCategory[selected]!!.toList()
                     ) { (score, plant) ->
                         plant.forEach {
                             PlantCardDisplayer(score, it)

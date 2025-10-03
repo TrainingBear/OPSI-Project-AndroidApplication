@@ -13,12 +13,27 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlantCare implements Serializable {
-    public String watering;
-    public String pruning;
-    public String fertilization;
-    public String sunlight;
+    public
+    String
+            watering
+            ;
+    public
+    String
+            pruning
+            ;
+    public
+    String
+            fertilization
+            ;
+    public
+    String
+            sunlight
+            ;
 
     @JsonProperty("pest_disease_management")
-    public String pestDiseaseManagement;
+    public
+    String
+            pestDiseaseManagement
+            ;
 }
 
