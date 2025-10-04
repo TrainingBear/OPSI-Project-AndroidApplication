@@ -27,7 +27,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,12 +49,15 @@ import com.trbear9.internal.Data
 import com.trbear9.plants.E
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.api.blob.Plant
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun PlantCardDisplayer(score: Int, ref: Plant) {
+    fun PlantCardDisplayer(score: Int = 0, ref: Plant?) {
     val context = LocalContext.current
+
     if (ref != null) {
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -92,53 +99,54 @@ import com.trbear9.plants.api.blob.Plant
                             textAlign = TextAlign.Center
                         )
                     }
-                    val image = remember {
-                        ImageAsset.getImage(context, ref.nama_ilmiah)
-                    }
+
                     if (ref.fullsize != null)
-                        AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(image)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "${ref.nama_ilmiah} image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f)
-                            .clip(RoundedCornerShape(16.dp))
-                    )
+                        Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "${ref.nama_ilmiah} image",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                            if (score != 0) {
+                                val star = (score / 10f) * 5
+                                val half = (star - star.toInt()) > 0.1f
+                                androidx.compose.foundation.layout.Row(Modifier.align(Alignment.BottomStart)) {
+                                    repeat(star.toInt()) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Score",
+                                            tint = Color.Yellow,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                        )
+                                    }
+                                    if (half) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                            contentDescription = "Half Score",
+                                            tint = Color.Yellow,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                 }
 
-                val star = (score / 10f) * 5
-                val half = (star - star.toInt()) > 0.1f
                 // Plant Title
-                androidx.compose.foundation.layout.Row() {
-                    Text(
-                        text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 10.dp)
-                    )
-                    repeat(star.toInt()) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Score",
-                            tint = Color.Yellow,
-                            modifier = Modifier
-                                .size(30.dp)
-                        )
-                    }
-                    if (half) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.StarHalf,
-                            contentDescription = "Half Score",
-                            tint = Color.Yellow,
-                            modifier = Modifier
-                                .size(30.dp)
-                        )
-                    }
-                }
+                Text(
+                    text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
 
                 // Plant Description
                 Text(
@@ -154,23 +162,25 @@ import com.trbear9.plants.api.blob.Plant
                     crossAxisSpacing = 2.dp
                 ) {
                     Kat(
-                        ref.difficulty?.toString()?:"EASY",
+                        ref.difficulty?.toString() ?: "EASY",
                         Color.Black,
-                        diffToColor(ref.difficulty?.toString()?:"EASY")
+                        diffToColor(ref.difficulty?.toString() ?: "EASY")
                     )
                     val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
                     val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
                     Kat(
-                        if(panen_min != panen_max) "$panen_min-$panen_max hari"
-                        else if(panen_max == "0") ""
+                        if (panen_min != panen_max) "$panen_min-$panen_max hari"
+                        else if (panen_max == "0") ""
                         else "$panen_min hari",
-                        bcolor = Color.LightGray)
-                    Data.ecocrop[ref.nama_ilmiah]?.get(E.Category)?.toString()?.split(", ")?.forEach {
-                        Kat(
-                            translateCategory(it), tcolor = Color.White,
-                            bcolor = categoryToColor(it)
-                        )
-                    }
+                        bcolor = Color.LightGray
+                    )
+                    Data.ecocrop[ref.nama_ilmiah]?.get(E.Category)?.toString()?.split(", ")
+                        ?.forEach {
+                            Kat(
+                                translateCategory(it), tcolor = Color.White,
+                                bcolor = categoryToColor(it)
+                            )
+                        }
                 }
             }
         }
@@ -266,7 +276,7 @@ class ImageAsset {
         val images = mutableMapOf<String, Bitmap>()
 
 
-        public fun getImage(context: Context, name: String?): Bitmap? {
+        fun getImage(context: Context, name: String?): Bitmap? {
             if(name == null) return null
             if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
             try {
@@ -283,6 +293,20 @@ class ImageAsset {
 }
 
 fun test() {
+
+}
+fun getImage(context: Context, name: String?): Bitmap? {
+    if (name == null) return null
+    if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
+    try {
+        context.assets.open("images/$name.webp").use {
+            val decodeStream = BitmapFactory.decodeStream(it)
+            ImageAsset.images[name] = decodeStream
+            return decodeStream
+        }
+    } catch (_: Exception) {
+        return null
+    }
 }
 
 

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,6 +18,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class Plant implements Serializable {
     public JsonNode full_taxon;
+    public Set<String> nama_umum = new HashSet<>();
+    public Set<String> category = new HashSet<>();
 
     public String fullsize, thumbnail;
     @JsonProperty("nama_ilmiah")
@@ -35,8 +39,8 @@ public class Plant implements Serializable {
     @JsonProperty("plant_care")
     public PlantCare plantCare;
 
-    public String difficulty;
-    public String description;
+    public String difficulty = "?";
+    public String description = "Tidak tersedia untuk tanaman ini";
 
     @JsonProperty("product_system")
     public ProductSystem productSystem;

@@ -3,6 +3,7 @@ package com.trbear9.internal
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.ai.edge.litert.CompiledModel
 import com.trbear9.plants.api.SoilParameters
 import org.tensorflow.lite.DataType
@@ -20,12 +21,20 @@ object TFService {
             "Kapur" to SoilParameters.KAPUR,
             "Laterit" to SoilParameters.LATERITE,
             "Pasir" to SoilParameters.PASIR)
+    var model: CompiledModel? = null
+    fun load(context: Context){
+        model = CompiledModel.create(context.assets, "model.tflite")
+    }
 
-    fun predict(context: Context, bitmap: Bitmap): FloatArray {
-        val model = CompiledModel.create(context.assets, "model.tflite")
+    fun close(){
+        model?.close()
+    }
+
+    fun predict(bitmap: Bitmap): FloatArray {
         // Preallocate input/output buffers
-        val inputBuffers = model.createInputBuffers()
-        val outputBuffers = model.createOutputBuffers()
+        Log.d("TFService", "predicting... ")
+        val inputBuffers = model!!.createInputBuffers()
+        val outputBuffers = model!!.createOutputBuffers()
 
         val tensorImage = TensorImage(DataType.FLOAT32)
         tensorImage.load(bitmap)
@@ -43,14 +52,14 @@ object TFService {
         // Fill the first input
         inputBuffers[0].writeFloat(floatArray)
         // Invoke
-        model.run(inputBuffers, outputBuffers)
+        model!!.run(inputBuffers, outputBuffers)
         // Read the output
         val outputFloatArray = outputBuffers[0].readFloat()
 
         // Clean up buffers and model
         inputBuffers.forEach { it.close() }
         outputBuffers.forEach { it.close() }
-        model.close()
+        Log.d("TFService", "Predict Done! ")
         return outputFloatArray
     }
 

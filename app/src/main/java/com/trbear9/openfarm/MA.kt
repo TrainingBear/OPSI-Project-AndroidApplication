@@ -24,6 +24,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -67,6 +67,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -82,11 +83,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,12 +99,19 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.android.gms.location.LocationServices
 import com.trbear9.internal.Data
+import com.trbear9.internal.TFService
 import com.trbear9.openfarm.activities.ResultScreen
+import com.trbear9.openfarm.activities.Search
+import com.trbear9.openfarm.activities.SearchLayout
+import com.trbear9.openfarm.activities.SearchResult
+import com.trbear9.openfarm.activities.SoilResult
 import com.trbear9.openfarm.activities.SoilStats
 import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.api.GeoParameters
@@ -115,15 +126,13 @@ class MA : AppCompatActivity() {
     companion object {
         var response: Flow<Response>? = null
         var loaded by mutableStateOf(false)
-        var plants: SnapshotStateMap<Int, MutableList<Plant>> = mutableStateMapOf()
-        var plantByCategory = SnapshotStateMap<String, SnapshotStateMap<Int, MutableList<Plant>>>()
         var url by mutableStateOf("null")
         var geo = GeoParameters()
         var soil = SoilParameters()
         var pH: Float? = null
         var image: Bitmap? = null
-        var started = false;
     }
+
     var cam: Boolean = false
     var gps: Boolean = false
 
@@ -135,7 +144,7 @@ class MA : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CsvHandler.load(this)
+        Data.load(this)
         setContent {
             App()
         }
@@ -149,10 +158,15 @@ class MA : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        TFService.close()
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Preview
     @Composable
-    fun Home(nav:NavController? = null) {
+    fun Home(nav: NavController? = null) {
         val context = LocalContext.current
         var scroll = rememberScrollState()
         Scaffold(
@@ -198,74 +212,49 @@ class MA : AppCompatActivity() {
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row{
-//                                Column(
-//                                    verticalArrangement = Arrangement.Center,
-//                                    horizontalAlignment = Alignment.CenterHorizontally,
-//                                    modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
-//                                        .fillMaxHeight()
-//                                    ,
-//                                ) {
-//                                    Text(
-//                                        text = "Belikan kami",
-//                                        fontWeight = FontWeight.Light,
-//                                        fontSize = 16.sp
-//                                    )
-//                                    Text(
-//                                        text = "segelas kopi!",
-//                                        fontWeight = FontWeight.Light,
-//                                        fontSize = 16.sp
-//                                    )
-//                                }
-                                Icon(
-                                    imageVector = Icons.Default.Coffee,
-                                    tint = Color.Black,
-                                    contentDescription = "Buy us a coffe!",
-                                    modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
-                                        .size(30.dp)
-                                        .clickable {
-                                        }
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Default.QuestionMark,
-                                tint = Color.Black,
-                                contentDescription = "Help",
-                                modifier = Modifier.padding(20.dp)
-                                    .size(30.dp)
-                                    .clickable {
-                                        nav?.navigate("tutor")
+                            Box(Modifier.fillMaxHeight().weight(7f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.oak_sapling),
+                                        contentDescription = "Help",
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                    )
+                                    Column(
+                                        horizontalAlignment = Alignment.Start,
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Text(
+                                            text = "OpenFarm",
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF1C8604),
+                                            fontSize = 24.sp
+                                        )
                                     }
-                            )
-                        }
-                        Box(
-                            modifier = Modifier.wrapContentSize()
-                                .clickable {
-                                    nav?.navigate("about")
                                 }
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            }
 
-                                Image(
-                                    painter = painterResource(id = R.drawable.oak_sapling),
-                                    contentDescription = "Help",
-                                    modifier = Modifier.padding()
-                                        .size(40.dp)
-                                )
-                                Column(
-                                    horizontalAlignment = Alignment.Start,
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Text(
-                                        text = "OpenFarm",
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF1C8604),
-                                        fontSize = 24.sp
+                            Box(Modifier.fillMaxHeight().weight(3f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Coffee,
+                                        tint = Color.Black,
+                                        contentDescription = "Buy us a coffe!",
+                                        modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
+                                            .size(30.dp)
+                                            .clickable {}
+                                    )
+
+                                    Icon(
+                                        imageVector = Icons.Default.QuestionMark,
+                                        tint = Color.Black,
+                                        contentDescription = "Help",
+                                        modifier = Modifier.padding(20.dp)
+                                            .size(30.dp)
+                                            .clickable {
+                                                nav?.navigate("tutor")
+                                            }
                                     )
                                 }
                             }
@@ -274,111 +263,128 @@ class MA : AppCompatActivity() {
                 )
             }
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
                     .background(Color(0xFF6FAD4F))
+                    .verticalScroll(scroll),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.verticalScroll(scroll)
-                ) {
-                    TextField(
-                        value = "",
-                        onValueChange = {},
-                        label = {
-                            Row {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Text(
-                                    text = "Cari tanaman apa aja di sini",
-                                    fontWeight = FontWeight.Light
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .height(70.dp)
-                            .padding(10.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color.White)
-                    )
-                    Text(
-                        text = "Open Farm",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 40.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        modifier = Modifier.padding(top = 20.dp)
-                    )
-                    Text(
-                        text = "Teman belajar bertani anda",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 20.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        modifier = Modifier.padding(top = 5.dp, start = 30.dp, end = 30.dp)
-                    )
-                    Text(
-                        text = "kapan saja dan dimana saja!",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 20.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        modifier = Modifier.padding(start = 30.dp, end = 30.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(3946 / 2523f)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
-                            contentDescription = null,
-                            contentScale = ContentScale.FillBounds,
+                Box(Modifier.fillMaxWidth().weight(1f)) {
+                    BoxWithConstraints(Modifier.fillMaxSize()) {
+                        val dynamicFontSize = (maxHeight.value / 5).sp
+                        val icon = (maxHeight/ 3)
+                        Button(
+                            onClick = {nav?.navigate("search")},
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(top = 10.dp)
-                        )
+                                .padding(10.dp)
+                                .clip(RoundedCornerShape(10.dp)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White
+                            ),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                modifier = Modifier.size(icon),
+                                tint = Color.Black
+                            )
+                            Text(
+                                text = "Cari tanaman apa aja di sini",
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Light,
+                                color = Color(0xFF1C8604),
+                                fontSize = dynamicFontSize,
+                            )
+
+                        }
                     }
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 30.dp, end = 30.dp, top = 30.dp)
-                            .aspectRatio(16 / 3f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .wrapContentSize(),
-                        onClick = {
-                            perm.launch(arrayOf(Manifest.permission.CAMERA))
-                            if (ContextCompat.checkSelfPermission(
-                                    this@MA,
-                                    Manifest.permission.CAMERA
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) else {
-                                cam = true
-                                Toast.makeText(
-                                    this@MA,
-                                    "Camera permission granted!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                if (gps) nav?.navigate("camera")
-                                else getLocation()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Gray
-                        )
-                    ) {
+                }
+                Box(Modifier.fillMaxWidth().weight(2f)) {
+                    BoxWithConstraints(Modifier.fillMaxSize()) {
+                        val dynamicFontSize = (maxHeight.value / 4).sp
+                        val dy2 = (maxHeight.value / 9).sp
                         Text(
-                            text = "Scan tanahmu!",
-                            fontSize = 35.sp,
+                            text = buildAnnotatedString {
+                                append("Open Farm")
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = dy2,
+                                        fontFamily = FontFamily.SansSerif,
+                                    )
+                                ) {
+                                    append("\n")
+                                    append("Teman belajar bertani anda\nkapan saja dan dimana saja!")
+                                }
+                            },
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
+                            fontSize = dynamicFontSize,
+                            fontFamily = FontFamily.SansSerif,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center).fillMaxSize()
+                                .padding(top = 20.dp)
                         )
                     }
                 }
+                Box(modifier = Modifier.fillMaxWidth().weight(3f)) {
+                    Image(
+                        painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
+                Box(Modifier.fillMaxWidth().weight(1f)) {
+                    BoxWithConstraints(Modifier.fillMaxSize()) {
+                        val dynamicFontSize = (maxHeight.value / 3).sp
+                        Button(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = 30.dp, end = 30.dp, bottom = 20.dp)
+                                .wrapContentSize(),
+                            onClick = {
+                                perm.launch(arrayOf(Manifest.permission.CAMERA))
+                                if (ContextCompat.checkSelfPermission(
+                                        this@MA,
+                                        Manifest.permission.CAMERA
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) else {
+                                    cam = true
+                                    Toast.makeText(
+                                        this@MA,
+                                        "Camera permission granted!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    if (gps) nav?.navigate("camera")
+                                    else getLocation()
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF2E7D32)
+                            )
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.Center
+                                ,modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = "Scan tanahmu!",
+                                    fontSize = dynamicFontSize,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White,
+                                    modifier = Modifier.fillMaxSize(),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
             }
+
         }
     }
 
@@ -387,65 +393,62 @@ class MA : AppCompatActivity() {
     fun App() {
         var nav = rememberNavController()
         val scope = rememberCoroutineScope()
+        val searchResult = SearchResult()
+        val soilResult = SoilResult()
         var job: Job? = null
         NavHost(navController = nav, startDestination = "home") {
             composable("camera") {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text("Camera") },
-                            navigationIcon = {
-                                IconButton(onClick = {nav.navigate("home")}) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Back"
-                                    )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.LightGray,
-                            )
-                        )
-                    }
-                ) {
-                    CameraActivity(it, onClick = {
-                        nav.navigate("soil")
-                    })
-                }
+                CameraActivity(onClick = {
+                    nav.navigate("soil")
+                })
             }
             composable("soil") {
-                SoilActivity(nav, onClick = { (pH, depth) ->
-                    {
-                        val variable = UserVariable()
-                        try {
-                            if(pH != -1){
-                                val soil = SoilParameters()
-                                soil.pH = pH
-                                MA.soil = soil
-                            }
-                        } catch (e: NumberFormatException) {
-                            Toast.makeText(
-                                this@MA,
-                                "Invalid pH value of ${e.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        plants.clear()
-                        variable.geo.rainfall = 2000.0
-                        variable.geo.min = 18.0
-                        variable.image = image
-                        response = Data.process(this@MA, variable)
-
-                        Toast.makeText(this@MA, "finished", Toast.LENGTH_SHORT)
-                            .show()
-                        Util.debug("Job has been finished!")
-
-                        nav.navigate("result")
-                    }
+                SoilActivity(nav, onClick = { pH: Float?, depth: Int? ->
+                    val variable = UserVariable()
+                    val soil = SoilParameters()
+                    if (pH != null) soil.pH = pH
+                    if (depth != null) soil.numericDepth = depth
+                    MA.soil = soil
+                    variable.geo.rainfall = 2000.0
+                    variable.geo.min = 18.0
+                    variable.image = image
+                    response = Data.process(this@MA, variable, soilResult)
+                    Toast.makeText(this@MA, "finished", Toast.LENGTH_SHORT)
+                        .show()
+                    Util.debug("Job has been finished!")
+                    nav.navigate("result")
                 })
             }
             composable("result") {
-                ResultScreen(response, onBack = { nav.navigate("soil") }, nav)
+                if (soilResult.plants.isNullOrEmpty()) {
+                    ResultScreen(
+                        searchResult = if(searchResult.plants.isNullOrEmpty())
+                            SearchResult().apply {
+                                plants = Data.plant.keys
+                                plantByCategory = Data.plantByTag
+                            }
+                        else searchResult,
+                        onBack = { nav.navigateUp() },
+                        nav = nav
+                    )
+                } else ResultScreen(
+                    soilResult = soilResult,
+                    onBack = { nav.navigate("soil") },
+                    nav = nav
+                )
+            }
+            composable("search_result") {
+                ResultScreen(
+                    searchResult = searchResult,
+                    onBack = { nav.navigateUp() },
+                    nav = nav
+                )
+            }
+            composable("search"){
+                SearchLayout(
+                    searchResult = searchResult,
+                    nav = nav
+                )
             }
             composable("tanah") {
                 SoilStats(nav)
@@ -454,36 +457,9 @@ class MA : AppCompatActivity() {
                 Home(nav)
             }
             composable("tutor") {
-//                AndroidView(
-//                    factory = { ctx ->
-//                        // 👇 Inflate your XML layout
-//                        LayoutInflater.from(ctx)
-//                            .inflate(R.layout.activity_tutorial, null, false)
-//                    },
-//                    update = { view ->
-//                        // You can access child views here
-//                        val button = view.findViewById<Button>(R.id.tombolKembali)
-//
-//                        button.setOnClickListener {
-//                            nav.navigate("home")
-//                        }
-//                    }
-//                )
             }
             composable("about") {
-//                AndroidView(
-//                    factory = { ctx ->
-//                        LayoutInflater.from(ctx)
-//                            .inflate(R.layout.activity_tutorial, null, false)
-//                    },
-//                    update = { view ->
-//                        val button = view.findViewById<Button>(R.id.buttonBackmenuabout)
-//
-//                        button.setOnClickListener {
-//                            nav.navigate("home")
-//                        }
-//                    }
-//                )
+
             }
         }
     }
@@ -539,11 +515,18 @@ class MA : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     @Preview
-    fun SoilActivity(nav: NavController? = null, onClick: (pH: Float, depth: Int) -> Unit? = {a, b ->}) =
+    fun SoilActivity(
+        nav: NavController? = null,
+        onClick: (pH: Float?, depth: Int?) -> Unit? = { a, b -> }) {
+        var pH by remember { mutableStateOf("") }
+        var depth by remember { mutableStateOf("40") }
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Soil") },
+                    title = { Text(
+                        text = "Soil",
+                        fontWeight = FontWeight.Bold,
+                    ) },
                     navigationIcon = {
                         IconButton(onClick = {
                             nav?.navigate("camera")
@@ -555,11 +538,13 @@ class MA : AppCompatActivity() {
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.LightGray,
+                        containerColor = Color.White,
                     )
                 )
-            }) { padding ->
-            Box(modifier = Modifier
+            }
+        ) { padding ->
+            Box(
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .background(Color.White)
@@ -571,9 +556,6 @@ class MA : AppCompatActivity() {
                         .fillMaxSize()
                         .align(Alignment.Center),
                 ) {
-                    var pH by remember { mutableStateOf<Float>() }
-                    var depth by remember { mutableStateOf(40) }
-
                     Text(
                         text = "Nilai pH lebih baik di kosongkan jika tak memiliki pH meter",
                         fontSize = 20.sp,
@@ -593,7 +575,6 @@ class MA : AppCompatActivity() {
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number
                         ),
-                        singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 32.dp)
@@ -601,8 +582,8 @@ class MA : AppCompatActivity() {
                     OutlinedTextField(
                         value = depth,
                         onValueChange = { input ->
-                            if (input.all { padding.isDigit() || (padding == ',' || padding == '.') }) {
-                                depth = input.toInt()
+                            if (input.all { it.isDigit() || (it == ',' || it == '.') }) {
+                                depth = input
                             }
                         },
                         label = { Text("Kedalaman tanah (cm)") },
@@ -616,6 +597,8 @@ class MA : AppCompatActivity() {
                             .padding(horizontal = 32.dp)
                     )
 
+                    val pH = pH.replace(",", ".").toFloatOrNull()
+                    val depth = depth.replace(",", ".").toFloatOrNull()?.toInt()
                     Button(
                         onClick = { onClick(pH, depth) },
                         modifier = Modifier
@@ -627,84 +610,108 @@ class MA : AppCompatActivity() {
                 }
             }
         }
+    }
 
+
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CameraActivity(innerPadding: PaddingValues, onClick: () -> Unit) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
+    @Preview
+    fun CameraActivity(nav: NavController? = null,onClick: () -> Unit = {}) {
+        Scaffold(
+            topBar =
+                {
+                    TopAppBar(
+                        title = { Text("Camera") },
+                        navigationIcon = {
+                            IconButton(onClick = { nav?.navigate("home") }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.LightGray,
+                        )
+                    )
+                }
+                ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black)
+                    .padding(it)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 24.dp, vertical = 24.dp),
-                    verticalArrangement = Arrangement.Top
+                        .background(Color.Black)
                 ) {
-                    Text(
-                        text = "Foto tanahmu!\n",
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        fontSize = 30.sp,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    Text(
-                        text =
-                            "Pastikan tanah tidak tertutupi objek apapun \n" +
-                                    "seperti batu, ranting, rumput, dsb",
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Start,
-                        color = Color.White,
-                    )
-
-                }
-                Box(
-                    modifier = Modifier
-                        .size(336.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .align(Alignment.Center)
-                        .aspectRatio(1f)
-                ) {
-                    CameraPreviewView(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                    drawOutline(15f, 60f)
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .background(Color.Green.copy(alpha = 0.4f))
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .align(Alignment.Center)
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        shape = CircleShape,
-                        color = Color.Unspecified,
-                        shadowElevation = 8.dp,
-                        border = BorderStroke(4.dp, Color(0xFF0AF10D)), // blue border
-                        onClick = {
-                            takePhoto(this@MA, imgCapture, onClick)
-                        }
+                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                        verticalArrangement = Arrangement.Top
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.PhotoCamera,
-                            contentDescription = "Circle Button",
-                            tint = Color(0xFF2196F3),
+                        Text(
+                            text = "Foto tanahmu!\n",
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            fontSize = 30.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Text(
+                            text =
+                                "Pastikan tanah tidak tertutupi objek apapun \n" +
+                                        "seperti batu, ranting, rumput, dsb",
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Start,
+                            color = Color.White,
+                        )
+
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(336.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .align(Alignment.Center)
+                            .aspectRatio(1f)
+                    ) {
+                        CameraPreviewView(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(8.dp)
+                                .padding(16.dp)
+                                .clip(RoundedCornerShape(8.dp))
                         )
+                        drawOutline(15f, 60f)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .background(Color.Green.copy(alpha = 0.4f))
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .align(Alignment.Center)
+                                .padding(top = 16.dp, bottom = 16.dp),
+                            shape = CircleShape,
+                            color = Color.Unspecified,
+                            shadowElevation = 8.dp,
+                            border = BorderStroke(4.dp, Color(0xFF0AF10D)), // blue border
+                            onClick = {
+                                takePhoto(this@MA, imgCapture, onClick)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PhotoCamera,
+                                contentDescription = "Circle Button",
+                                tint = Color(0xFF2196F3),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp)
+                            )
+                        }
                     }
                 }
             }

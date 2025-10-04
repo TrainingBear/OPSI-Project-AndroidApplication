@@ -1,9 +1,11 @@
 package com.trbear9.openfarm.activities
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Grain
@@ -35,49 +39,59 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.trbear9.openfarm.MA
+import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
 import com.trbear9.plants.api.Response
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onCompletion
 
+class SoilResult {
+    var plants: SnapshotStateMap<Int, MutableSet<String>>? = null
+    var plantByCategory: SnapshotStateMap<String, SnapshotStateMap<Int, MutableSet<String>>>? = null
+    var res: Flow<Response>? = null
+    var search: Set<String>? = null
+}
+
+class SearchResult {
+    var plants: MutableSet<String>? = null
+    var plantByCategory: SnapshotStateMap<String, MutableSet<String>>? = null
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun ResultScreen(
-    res: Flow<Response>? = null,
+    soilResult: SoilResult? = null,
+    searchResult: SearchResult? = null,
     onBack: () -> Unit = {},
     nav: NavController? = null
 ) {
     var querry by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf("All") }
     var expanded by remember { mutableStateOf(false) }
+    var expandedSearch by remember { mutableStateOf(false) }
     var expandCat by remember { mutableStateOf(false) }
     var order by remember { mutableStateOf("Tertinggi") }
     var response by remember { mutableStateOf(Response()) }
@@ -90,16 +104,18 @@ fun ResultScreen(
     var predicted by remember { mutableStateOf(false) }
     var parameterLoaded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        res?.collect {
-            loaded = it.loaded
-            current = it.current
-            progress = it.progress
-            target = it.target
-            predicted = it.predicted
-            parameterLoaded = it.parameterLoaded
+    if(soilResult != null) {
+        LaunchedEffect(Unit) {
+            soilResult.res?.collect {
+                loaded = it.loaded
+                current = it.current
+                progress = it.progress
+                target = it.target
+                predicted = it.predicted
+                parameterLoaded = it.parameterLoaded
+            }
+            Util.debug("Is everything loaded? : ${response.loaded}")
         }
-        Util.debug("Is everything loaded? : ${response.loaded}")
     }
 
     Scaffold(
@@ -112,60 +128,132 @@ fun ResultScreen(
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextField(
-                            value = querry,
-                            onValueChange = { input ->
-                                querry = input
-                            },
-                            label = { Text("Cari tanaman") },
-                            placeholder = { Text("Kangkung") },
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Text
-                            ),
-                            singleLine = true,
-                            colors = TextFieldDefaults.colors(),
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 4.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Box(
-                            modifier = Modifier.wrapContentSize()
-                                .clickable { expandCat = !expandCat }
-                        ) {
-                            Text(
-                                text = order,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                        if(soilResult != null) {
+                            BasicTextField(
+                                value = querry,
+                                onValueChange = { input ->
+                                    if (input.all { !it.isDigit() }) {
+                                        querry = input
+                                    }
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Search
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onSearch = {
+                                        if(querry.isEmpty()){
+                                            soilResult.search = null
+                                        }else {
+                                            val search = Data.search(querry)
+                                            val result = mutableSetOf<String>()
+                                            search.forEach {
+                                                Data.plantByTag[it]?.forEach { plant ->
+                                                    result.add(plant)
+                                                }
+                                            }
+                                            soilResult.search = result
+                                        }
+                                    }
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(35.dp)
+                                    .align(Alignment.CenterVertically)
+                                .onFocusChanged { focusState ->
+                                    val hasFocus = focusState.isFocused
+                                    if (hasFocus && querry.isNotEmpty()) expandedSearch = true
+                                    if (!hasFocus) expandedSearch = false
+                                }
+                                ,
+                                decorationBox = { innerTextField ->
+                                    BoxWithConstraints(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                                    ) {
+                                        val size = (maxHeight.value / 2).sp
+                                        Column(verticalArrangement = Arrangement.Center) {
+                                            if (querry.isEmpty()) {
+                                                Text(
+                                                    "Masukan nama tanaman",
+                                                    color = Color.Gray,
+                                                    fontSize = size,
+                                                    modifier = Modifier
+                                                        .padding(start = 10.dp)
+                                                )
+                                            } else
+                                                Box(
+                                                    Modifier.wrapContentSize()
+                                                        .padding(start = 10.dp)
+                                                ) {
+                                                    innerTextField()
+                                                }
+                                        }
+                                    }
+                                }
                             )
                             DropdownMenu(
-                                expanded = expandCat,
-                                onDismissRequest = { expandCat = false },
-                                modifier = Modifier.width(150.dp)
+                                expanded = expandedSearch,
+                                onDismissRequest = { expandedSearch = false },
                             ) {
-                                DropdownMenuItem(
-                                    text = { Text("Tertinggi") },
-                                    onClick = {
-                                        order = "Tertinggi"
-                                        expandCat = false
-                                    },
+                                soilResult.plants?.forEach {
+                                    it.value.forEach { plant ->
+                                        val commonName = Data.plant[plant]?.commonName
+                                        if(commonName != null && commonName.startsWith(querry) || plant.contains(querry)){
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text = commonName.toString(),
+                                                        fontSize = 16.sp,
+                                                        fontWeight = FontWeight.Light
+                                                    )
+                                                },
+                                                onClick = {querry = commonName.toString() }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Box(
+                                modifier = Modifier.wrapContentSize()
+                                    .clickable { expandCat = !expandCat }
+                            ) {
+                                Text(
+                                    text = order,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
                                 )
-                                DropdownMenuItem(
-                                    text = { Text("Terendah") },
-                                    onClick = {
-                                        order = "Terendah"
-                                        expandCat = false
-                                    },
-                                )
+                                DropdownMenu(
+                                    expanded = expandCat,
+                                    onDismissRequest = { expandCat = false },
+                                    modifier = Modifier.width(150.dp)
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Tertinggi") },
+                                        onClick = {
+                                            order = "Tertinggi"
+                                            expandCat = false
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Terendah") },
+                                        onClick = {
+                                            order = "Terendah"
+                                            expandCat = false
+                                        },
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Order",
+                                        tint = Color.Yellow,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+
+                                }
                             }
                         }
-
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Order",
-                            tint = Color.Yellow,
-                            modifier = Modifier.size(16.dp)
-                        )
 
                         Spacer(modifier = Modifier.width(10.dp))
                         Box(
@@ -260,7 +348,7 @@ fun ResultScreen(
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = if (predicted) "Menganalisa tanahmu.."
+                        text = if (!predicted) "Menganalisa tanahmu.."
                         else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
                         else "Mencari data tanaman $current (${progress}/${target})",
                         fontSize = 16.sp,
@@ -268,20 +356,30 @@ fun ResultScreen(
                         modifier = Modifier.padding(20.dp)
                     )
                 }
-            } else if (MA.plants.isEmpty() == false) {
+            } else if (soilResult != null && soilResult.plants?.isEmpty() == false) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (selected == "All") items(
-                        if (order == "Tertinggi") MA.plants.toList().asReversed()
-                        else MA.plants.toList()
-                    ) { (score, plant) ->
-                        plant.forEach {
-                            PlantCardDisplayer(score, it)
+                    val map = soilResult.plantByCategory
+                    val lplants = soilResult.plants
+                    val search = soilResult.search
+                    if(search !=null && search.isNotEmpty()){
+                        items(search.toList()){
+                            PlantCardDisplayer(0,Data.plant[it])
                         }
-                    }
-                    else if (MA.plantByCategory==null || MA.plantByCategory[selected].isNullOrEmpty())
+                    }else if (selected == "All" && lplants != null) {
+                        items(
+                            if (order == "Tertinggi") lplants.toList().asReversed()
+                            else lplants.toList()
+                        )
+                        { (score, plant) ->
+                            plant.forEach {
+                                PlantCardDisplayer(score, Data.plant[it])
+                            }
+                        }
+
+                    } else if (map == null || map[selected].isNullOrEmpty())
                         item {
                             Column {
                                 Text(
@@ -292,16 +390,59 @@ fun ResultScreen(
                                 )
                             }
                         }
-                    else items(
-                        if (order == "Tertinggi") MA.plantByCategory[selected]!!.toList().asReversed()
-                        else MA.plantByCategory[selected]!!.toList()
-                    ) { (score, plant) ->
-                        plant.forEach {
-                            PlantCardDisplayer(score, it)
+                    else {
+                        val map = soilResult.plantByCategory
+                        if(map != null) {
+                            val map1 = map[selected]
+                            if(map1 != null) {
+                                items(
+                                    if (order == "Tertinggi") map1.toList().asReversed()
+                                    else map1.toList()
+                                ) { (score, plant) ->
+                                    plant.forEach {
+                                        PlantCardDisplayer(score, Data.plant[it])
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-            } else {
+            }
+            else if(searchResult != null && searchResult.plants?.isEmpty() == false) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val plants = searchResult.plants
+                    val plantByCategory = searchResult.plantByCategory
+                    if (selected == "All" && plants != null) {
+                        items(plants.toList()) { plant ->
+                            plant.forEach {
+                                PlantCardDisplayer(ref = Data.plant[plant])
+                            }
+                        }
+                    } else {
+                        if (plantByCategory == null || plantByCategory.isEmpty()) {
+                            item {
+                                Column {
+                                    Text(
+                                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 28.sp,
+                                        modifier = Modifier.padding(top = 100.dp)
+                                    )
+                                }
+                            }
+                        } else {
+                            val map = plantByCategory[selected]
+                            if (map != null) items(map.toList()) {
+                                PlantCardDisplayer(ref = Data.plant[it])
+                            }
+                        }
+                    }
+                }
+            }
+            else {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,

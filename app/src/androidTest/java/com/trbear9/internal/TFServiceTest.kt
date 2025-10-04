@@ -3,20 +3,13 @@ package com.trbear9.internal
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.test.core.app.ApplicationProvider
 import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.api.GeoParameters
-import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.SoilParameters
 import com.trbear9.plants.api.UserVariable
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
 import org.junit.Test
-import org.slf4j.LoggerFactory
 
 class TFServiceTest {
     val context = ApplicationProvider.getApplicationContext<Context>()
@@ -32,7 +25,7 @@ class TFServiceTest {
             BitmapFactory.decodeStream(context.assets.open("dataset/Pasir/asdgwecf.jpg"))
         )
         for(i in bit) {
-            val prediction = TFService.predict(context, i)
+            val prediction = TFService.predict(i)
 
             val argmax = TFService.argmax(prediction)
             Log.i("TEST", "Max prediction: ${argmax.first} with confidence ${argmax.second}")

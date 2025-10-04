@@ -28,13 +28,12 @@ class Response : Serializable {
     var total = 0
     var soil: SoilParameters? = null
     var geo: GeoParameters? = null
-    val tanaman: MutableMap<Int, MutableList<Plant>> =
-        HashMap<Int, MutableList<Plant>>()
+    val tanaman: MutableMap<Int, MutableSet<String>> =
+        HashMap<Int, MutableSet<String>>()
 
-    //{score: [{nama tanaman: response rag}, {...}]}
     fun put(score: Int, plant: Plant) {
-        tanaman.computeIfAbsent(score) { k: Int? -> java.util.ArrayList<Plant>() }
-            .add(plant)
+        tanaman.computeIfAbsent(score) { k: Int? -> mutableSetOf<String>() }
+            .add(plant.nama_ilmiah)
         total++
     }
 }

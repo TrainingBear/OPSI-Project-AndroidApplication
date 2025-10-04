@@ -10,6 +10,7 @@ import lombok.*
 @NoArgsConstructor
 @AllArgsConstructor
 class SoilParameters : Parameters {
+    var numericDepth: Int = 40
     var depth: DEPTH? = null
     var texture: TEXTURE? = null
     var fertility: FERTILITY? = null // tingkat kesuburan

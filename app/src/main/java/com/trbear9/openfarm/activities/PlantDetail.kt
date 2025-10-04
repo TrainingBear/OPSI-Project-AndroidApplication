@@ -2,6 +2,7 @@ package com.trbear9.openfarm.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -43,6 +44,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,7 +74,10 @@ import coil.request.ImageRequest
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
 import com.trbear9.plants.E
+import com.trbear9.plants.E.*
 import com.trbear9.plants.api.blob.Plant
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class PlantDetail : ComponentActivity(){
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -96,10 +106,21 @@ class PlantDetail : ComponentActivity(){
 
     @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
+    @Preview
     @Composable
-    fun PlantDetail(score: Int, ref: Plant, onExit: () -> Unit, ) {
+    fun PlantDetail(score: Int = 0, ref: Plant? = null, onExit: () -> Unit = {}) {
         val context = LocalContext.current
         val scroll = rememberScrollState()
+        var image by remember { mutableStateOf<Bitmap?>(null) }
+
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                if(ref != null) {
+                    image = ImageAsset.getImage(context, ref.fullsize)
+                }
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -108,20 +129,14 @@ class PlantDetail : ComponentActivity(){
             Column(
                 modifier = Modifier.verticalScroll(scroll)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16 / 11f)
-                        .background(Color.Gray)
-                ) {
+                Box(modifier = Modifier.fillMaxWidth().weight(2f).background(Color.Gray)) {
                     Image(
                         imageVector = Icons.Default.WbSunny,
                         contentDescription = "Plant image",
                         modifier = Modifier
                             .fillMaxSize()
                     )
-                    val image = ImageAsset.getImage(context, ref.nama_ilmiah)
-                    if (ref.fullsize != null) {
+                    if (ref?.fullsize != null) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(image)
@@ -179,115 +194,148 @@ class PlantDetail : ComponentActivity(){
                         )
                     }
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = ref.commonName.toString(),
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Text(
-                    text = ref.description.toString(),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Row(modifier = Modifier.padding(top = 16.dp)) {
-                        val ph_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_minimum_ph)
-                        val ph_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_maximum_ph)
-                        Label("PH Ideal", "$ph_min - $ph_max", Icons.Default.Science)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
-                        val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
-                        if(panen_max != "0") {
-                            Label(
-                                "Waktu Panen",
-                                if (panen_min != panen_max) "$panen_min-$panen_max hari"
-                                else "$panen_min hari",
-                                Icons.Default.HourglassEmpty
+                Box(modifier = Modifier.fillMaxWidth().weight(5f).background(Color.White)) {
+                    if (ref != null) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = ref.commonName.toString(),
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            Text(
+                                text = ref.description.toString(),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Row(modifier = Modifier.padding(top = 16.dp)) {
+                                val ph_min = Data.ecocrop[ref.nama_ilmiah]?.get(A_minimum_ph)
+                                val ph_max = Data.ecocrop[ref.nama_ilmiah]?.get(A_maximum_ph)
+                                Label("PH Ideal", "$ph_min - $ph_max", Icons.Default.Science)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                val panen_min =
+                                    Data.ecocrop[ref.nama_ilmiah]?.get(MIN_crop_cycle)
+                                val panen_max =
+                                    Data.ecocrop[ref.nama_ilmiah]?.get(MAX_crop_cycle)
+                                if (panen_max != "0") {
+                                    Label(
+                                        "Waktu Panen",
+                                        if (panen_min != panen_max) "$panen_min-$panen_max hari"
+                                        else "$panen_min hari",
+                                        Icons.Default.HourglassEmpty
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                val temp_min =
+                                    Data.ecocrop[ref.nama_ilmiah]?.get(A_minimum_temperature)
+                                val temp_max =
+                                    Data.ecocrop[ref.nama_ilmiah]?.get(A_maximum_temperature)
+                                Label(
+                                    "Temperatur",
+                                    "$temp_min - $temp_max",
+                                    Icons.Default.Whatshot
+                                )
+                            }
+                            FlowRow(
+                                modifier = Modifier.padding(top = 16.dp),
+                                mainAxisSpacing = 4.dp,
+                                crossAxisSpacing = 4.dp
+                            ) {
+                                Data.ecocrop[ref.nama_ilmiah]?.get(Category)?.toString()
+                                    ?.split(", ")
+                                    ?.forEach {
+                                        Kat(Util.translateCategory(it))
+                                    }
+                            }
+                            FlowRow(
+                                modifier = Modifier.padding(top = 16.dp),
+                                mainAxisSpacing = 4.dp,
+                                crossAxisSpacing = 4.dp
+                            ) {
+                                Data.ecocrop[ref.nama_ilmiah]?.get(Common_names)?.split(", ")
+                                    ?.forEach {
+                                        Kat(it, tcolor = Color.Black, bcolor = Color.Green)
+                                    }
+                            }
+                            ClickableText(
+                                text = buildAnnotatedString {
+                                    withStyle(SpanStyle(fontSize = 16.sp)) {
+                                        val tax = ref.full_taxon
+                                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                                            append(
+                                                "Taxonomy dari ${
+                                                    tax["kingdom"].asText().replace("\"", "")
+                                                } " +
+                                                        "${
+                                                            tax["family"].asText()
+                                                                .replace("\"", "")
+                                                        } " +
+                                                        tax["name"].asText().replace("\"", "")
+                                            )
+                                        }
+                                        if (ref.taxon != null) {
+                                            pushStyle(
+                                                SpanStyle(
+                                                    color = Color.Blue,
+                                                    textDecoration = TextDecoration.Underline,
+                                                    fontWeight = FontWeight.Light
+                                                )
+                                            )
+                                            append(ref.taxon.toString())
+                                            pop()
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.padding(top = 8.dp),
+                                onClick = { offset ->
+                                    if (ref.taxon != null) {
+                                        val url = ref.taxon
+                                        val intent =
+                                            Intent(Intent.ACTION_VIEW, url.toString().toUri())
+                                        context.startActivity(intent)
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Content(
+                                "Penyiraman", ref.plantCare?.watering ?: "Belum Tersedia",
+                                Icons.Default.WaterDrop
+                            )
+                            Content(
+                                "Kontrol Hama",
+                                ref.plantCare?.pestDiseaseManagement ?: "Belum Tersedia",
+                                Icons.Default.Coronavirus
+                            )
+                            Content(
+                                "Pemupukan", ref.plantCare?.fertilization ?: "Belum Tersedia",
+                                Icons.Default.LocalHospital
+                            )
+                            Content(
+                                "Sinar Matahari", ref.plantCare?.sunlight ?: "Belum Tersedia",
+                                Icons.Default.WbSunny
+                            )
+                            Content(
+                                "Pruning", ref.plantCare?.pruning ?: "Belum Tersedia",
+                                Icons.Default.ContentCut
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Content2(
+                                "Rumah Tangga",
+                                ref.productSystem?.rumah_tangga ?: "Belum Tersedia"
+                            )
+                            Content2(
+                                "Komersial",
+                                ref.productSystem?.komersial ?: "Belum Tersedia"
+                            )
+                            Content2(
+                                "Industri",
+                                ref.productSystem?.industri ?: "Belum Tersedia"
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        val temp_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_minimum_temperature)
-                        val temp_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.A_maximum_temperature)
-                        Label("Temperatur", "$temp_min - $temp_max", Icons.Default.Whatshot)
                     }
-                    FlowRow(
-                        modifier = Modifier.padding(top = 16.dp),
-                        mainAxisSpacing = 4.dp,
-                        crossAxisSpacing = 4.dp
-                    ) {
-                        Data.ecocrop[ref.nama_ilmiah]?.get(E.Category)?.toString()?.split(", ")?.forEach {
-                            Kat(Util.translateCategory(it))
-                        }
-                    }
-                    FlowRow(
-                        modifier = Modifier.padding(top = 16.dp),
-                        mainAxisSpacing = 4.dp,
-                        crossAxisSpacing = 4.dp
-                    ) {
-                        Data.ecocrop[ref.nama_ilmiah]?.get(E.Common_names)?.split(", ")?.forEach {
-                            Kat(it, tcolor = Color.Black, bcolor = Color.Green)
-                        }
-                    }
-                    ClickableText(
-                        text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontSize = 16.sp)) {
-                                val tax = ref.full_taxon
-                                withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                                    append("Taxonomy dari ${tax["kingdom"].asText().replace("\"", "")} " +
-                                            "${tax["family"].asText().replace("\"", "")} " +
-                                            tax["name"].asText().replace("\"", ""))
-                                }
-                                if(ref.taxon != null) {
-                                    pushStyle(
-                                        SpanStyle(
-                                            color = Color.Blue,
-                                            textDecoration = TextDecoration.Underline,
-                                            fontWeight = FontWeight.Light
-                                        )
-                                    )
-                                    append(ref.taxon.toString())
-                                    pop()
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(top = 8.dp),
-                        onClick = { offset ->
-                            if (ref.taxon != null) {
-                                val url = ref.taxon
-                                val intent = Intent(Intent.ACTION_VIEW, url.toString().toUri())
-                                context.startActivity(intent)
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Content(
-                        "Penyiraman", ref.plantCare?.watering?: "Belum Tersedia",
-                        Icons.Default.WaterDrop
-                    )
-                    Content(
-                        "Kontrol Hama", ref.plantCare?.pestDiseaseManagement?: "Belum Tersedia",
-                        Icons.Default.Coronavirus
-                    )
-                    Content(
-                        "Pemupukan", ref.plantCare?.fertilization?:"Belum Tersedia",
-                        Icons.Default.LocalHospital
-                    )
-                    Content(
-                        "Sinar Matahari", ref.plantCare?.sunlight?:"Belum Tersedia",
-                        Icons.Default.WbSunny
-                    )
-                    Content(
-                        "Pruning", ref.plantCare?.pruning?:"Belum Tersedia",
-                        Icons.Default.ContentCut
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Content2("Rumah Tangga", ref.productSystem?.rumah_tangga?:"Belum Tersedia")
-                    Content2("Komersial", ref.productSystem?.komersial?:"Belum Tersedia")
-                    Content2("Industri", ref.productSystem?.industri?:"Belum Tersedia")
                 }
             }
         }
