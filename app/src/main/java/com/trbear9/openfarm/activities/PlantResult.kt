@@ -48,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
@@ -116,10 +117,9 @@ fun ResultScreen(
     var target by remember { mutableIntStateOf(soilResult?.response?.target?.toInt() ?: 0) }
     var predicted by remember { mutableStateOf<Boolean>(soilResult?.response?.predicted == true) }
     var parameterLoaded by remember { mutableStateOf<Boolean>(soilResult?.response?.parameterLoaded == true) }
-    val keyboard = LocalSoftwareKeyboardController.current
-
 
     var search = remember{ mutableStateSetOf<String>()}
+    var empty = remember{mutableStateMapOf<Int, MutableSet<String>>()}
 
     LaunchedEffect(Unit) {
         collected = soilResult?.collected ?: true
@@ -139,9 +139,27 @@ fun ResultScreen(
                 parameterLoaded = it.parameterLoaded
                 soilResult.response = it
             }
-
         }
+    }
 
+    var completer = remember { mutableStateSetOf<String>() }
+    LaunchedEffect(querry) {
+        completer.clear()
+        var i = 0
+        if (querry.isNotEmpty()) {
+            outer@ for (it in soilResult?.plants ?: empty) {
+                for (plant in it.value) {
+                    val commonName = Data.namaIlmiahToNamaUmum[plant]
+                    val prefix = querry.lowercase()
+                    if (commonName != null && (commonName.startsWith(prefix)
+                                || plant.contains(prefix))) {
+                        completer.add(plant)
+                    }
+                    i++
+                    if (i > 10) break@outer
+                }
+            }
+        }
     }
 
     Scaffold(
@@ -159,32 +177,23 @@ fun ResultScreen(
                                 expanded = expandedSearch,
                                 onDismissRequest = { expandedSearch = false },
                             ) {
-                                soilResult.plants?.forEach {
-                                    it.value.forEach { plant ->
-                                        val commonName = Data.namaIlmiahToNamaUmum[plant]
-                                        val prefix = querry.lowercase()
-                                        if (commonName != null && commonName.startsWith(prefix)
-                                            || plant.contains(prefix)
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        text = commonName.toString(),
-                                                        fontSize = 16.sp,
-                                                        fontWeight = FontWeight.Light
-                                                    )
-                                                },
-                                                onClick = { querry = commonName.toString() }
+                                completer.forEach {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = it,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Light
                                             )
-                                        }
-                                    }
+                                        },
+                                        onClick = { querry = it }
+                                    )
                                 }
                             }
                             BasicTextField(
                                 value = querry,
                                 onValueChange = {input ->
-                                    if(input.all { it.isLetter() })
-                                        querry = input
+                                    querry = input
                                     if(input.isEmpty()) search.clear()
                                 },
                                 singleLine = true,
@@ -193,9 +202,8 @@ fun ResultScreen(
                                 ),
                                 keyboardActions = KeyboardActions(
                                     onSearch = {
-                                        keyboard?.hide()
                                         search.clear()
-                                        if(querry.isNotEmpty()) Data.search(querry){
+                                        if(querry.isNotEmpty()) Data.search(query = querry){
                                             search.add(it)
                                         }
                                     }
@@ -305,6 +313,7 @@ fun ResultScreen(
                                         onClick = {
                                             expanded = false
                                             selected = "All"
+                                            querry = ""
                                         }
                                     )
                                     Util.getCategory().forEach {
@@ -313,6 +322,7 @@ fun ResultScreen(
                                             onClick = {
                                                 expanded = false
                                                 selected = it
+                                                querry = ""
                                             },
                                         )
                                     }
@@ -387,7 +397,9 @@ fun ResultScreen(
                     val lplants = soilResult.plants
                     if(search.isNotEmpty()){
                         items(search.toList()){ q ->
-                            PlantCardDisplayer(0, Data.plant[q])
+                            Data.plantByTag[q]?.forEach {
+                                PlantCardDisplayer(0, Data.plant[it])
+                            }
                         }
                     }else if (selected == "All" && lplants != null) {
                         items(

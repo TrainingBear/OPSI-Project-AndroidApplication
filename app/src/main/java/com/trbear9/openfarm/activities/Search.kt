@@ -74,14 +74,12 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
     var completer = remember { mutableStateSetOf<String>() }
 
     LaunchedEffect(query) {
+        completer.clear()
         if(query.isNotEmpty()) {
-            completer.clear()
-            Data.search(query) {
+            Data.search(10, query = query) {
                 completer.add(it)
             }
         }
-        else completer.clear()
-        delay(1000)
     }
 
     Scaffold(
@@ -260,18 +258,17 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
                 fontSize = 30.sp,
                 modifier = Modifier.padding(start = 10.dp)
             )
-//            DropdownMenu(expanded = true, onDismissRequest = {}) {
-//                completer.forEach {
-//                    DropdownMenuItem(
-//                        text = { Text(it) },
-//                        onClick = {
-//                            completer.clear()
-//                            query = it
-//                        }
-//                    )
-//                }
-//            }
-
+            DropdownMenu(expanded = true, onDismissRequest = {}) {
+                completer.forEach {
+                    DropdownMenuItem(
+                        text = { Text(it) },
+                        onClick = {
+                            completer.clear()
+                            query = it
+                        }
+                    )
+                }
+            }
         }
     }
 }

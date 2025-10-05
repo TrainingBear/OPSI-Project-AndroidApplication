@@ -7,7 +7,6 @@ import android.util.Log
 import com.google.ai.edge.litert.CompiledModel
 import com.trbear9.plants.api.SoilParameters
 import org.tensorflow.lite.DataType
-import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp

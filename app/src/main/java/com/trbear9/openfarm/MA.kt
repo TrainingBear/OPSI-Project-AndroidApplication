@@ -7,7 +7,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.ScaleGestureDetector
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -217,7 +220,7 @@ class MA : AppCompatActivity() {
                                         contentDescription = "Help",
                                         modifier = Modifier
                                             .size(40.dp)
-                                            .clickable{nav?.navigate("help")}
+                                            .clickable{nav?.navigate("about")}
                                     )
                                     Column(
                                         horizontalAlignment = Alignment.Start,
@@ -228,7 +231,8 @@ class MA : AppCompatActivity() {
                                             text = "OpenFarm",
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFF1C8604),
-                                            fontSize = 24.sp
+                                            fontSize = 24.sp,
+                                            modifier = Modifier.clickable{nav?.navigate("about")}
                                         )
                                     }
                                 }
@@ -252,7 +256,7 @@ class MA : AppCompatActivity() {
                                         modifier = Modifier.padding(20.dp)
                                             .size(30.dp)
                                             .clickable {
-                                                nav?.navigate("tutor")
+                                                nav?.navigate("help")
                                             }
                                     )
                                 }
@@ -521,7 +525,17 @@ class MA : AppCompatActivity() {
                 Guide(nav)
             }
             composable("about") {
-
+                AndroidView(
+                    factory = {
+                        LayoutInflater.from(it).inflate(R.layout.activity_about_me, null)
+                    },
+                    update = {
+                        val aboutMe = it.findViewById<ImageButton>(R.id.buttonBackmenuabout)
+                        aboutMe.setOnClickListener {
+                            nav.navigateUp()
+                        }
+                    }
+                )
             }
         }
     }

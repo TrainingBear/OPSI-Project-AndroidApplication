@@ -54,14 +54,17 @@ object Data {
                 """.trimIndent()
     }
 
-    fun search(query: String, consumer: (String) -> Unit = {}): Set<String>{
+    fun search(max: Int = Int.MAX_VALUE, query: String, consumer: (String) -> Unit = {}): Set<String>{
         val result = mutableSetOf<String>()
+        var i = 0
         for (tag in tags) {
             val prefix = query.lowercase()
             if(tag!=null && (tag.startsWith(prefix) || tag.contains(prefix))) {
                 result.add(tag)
                 consumer(tag)
             }
+            i++
+            if(i >= max) break
         }
         return result
     }
