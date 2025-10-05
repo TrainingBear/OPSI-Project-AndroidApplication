@@ -171,7 +171,6 @@ fun ResultScreen(
             }
         } else value = emptyList()
     }
-
      Scaffold(
         topBar = {
             TopAppBar(

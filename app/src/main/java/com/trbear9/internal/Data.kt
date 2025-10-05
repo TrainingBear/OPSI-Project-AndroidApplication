@@ -197,12 +197,10 @@ object Data {
         response.loaded = true
         soilResult.plants = mutableStateMapOf()
         soilResult.plantByCategory = mutableStateMapOf()
-
         for (score in response.tanaman.keys) {
             Log.d("Data Processor", "Loaded $score with size ${response.tanaman[score]!!.size}")
             soilResult.plants!![score] = response.tanaman[score]?: mutableSetOf()
         }
-        soilResult.plantByCategory!!.clear()
         soilResult.plantByCategory!!["All"] = soilResult.plants!!
         soilResult.plants!!.forEach { (score, list) ->
             list.forEach { name ->
