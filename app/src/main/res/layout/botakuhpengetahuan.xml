@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/botakuhpengetahuan"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Gambar panjang -->
+        <ImageView
+            android:id="@+id/imagePenjelasan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitStart"
+            android:src="@drawable/tentangaplikasinewupdate2"
+            android:contentDescription="@string/PenjelasanTentangAplikasi" />
+
+        <!-- Tombol panah kiri atas -->
+        <ImageButton
+            android:id="@+id/tombolKembali"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="16dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/arrow_left"
+            android:adjustViewBounds="true"
+            android:padding="0dp"
+            android:contentDescription="Back"
+            android:scaleType="fitXY"
+            />
+    </FrameLayout>
+</ScrollView>

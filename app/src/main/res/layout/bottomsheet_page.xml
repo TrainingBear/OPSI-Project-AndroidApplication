@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/botakuhpengetahuan"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/corner_radius_bottomsheet"
+    android:paddingTop="12dp"
+    android:paddingBottom="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- Handle kecil di tengah atas -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="5dp"
+        android:background="@drawable/shape_atas"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Isi konten bottomsheet -->
+    <ImageView
+        android:id="@+id/logoleaves"
+        android:layout_width="325dp"
+        android:layout_height="403dp"
+        android:src="@drawable/leaveslogoclean"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btnPanduan"
+        android:layout_width="360dp"
+        android:layout_height="62dp"
+        android:layout_marginBottom="16dp"
+        android:translationY="-80dp"
+        android:background="@drawable/rounded_button_with_outline"
+        android:text="@string/howtouse"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/tombolPengetahuan"
+        android:layout_width="360dp"
+        android:layout_height="62dp"
+        android:translationY="-70dp"
+        android:background="@drawable/rounded_button_with_outline"
+        android:text="@string/whyplantsareimportant"
+        android:textColor="@color/black"
+        android:textAllCaps="false"
+        android:textSize="18sp" />
+
+</LinearLayout>
