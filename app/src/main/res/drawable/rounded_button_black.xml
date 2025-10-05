@@ -1,0 +1,14 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Warna latar belakang hitam -->
+    <solid android:color="#000000" />
+
+    <!-- Sudut melengkung -->
+    <corners android:radius="25dp" />
+
+    <!-- (Opsional) bayangan atau border -->
+    <stroke
+        android:width="1dp"
+        android:color="#222222" />
+</shape>
