@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +53,11 @@ import com.trbear9.plants.api.blob.Plant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+object CONS {
+    val noImage = Icons.Default.Image
+    val noImage2 = Icons.Default.WbSunny
+}
+
 @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -82,30 +88,13 @@ import kotlinx.coroutines.withContext
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.LightGray)
                 ) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            imageVector = Icons.Default.Image,
-                            contentDescription = "${ref.nama_ilmiah ?: "no"} image",
-                            modifier = Modifier
-                                .fillMaxSize(fraction = 0.5f)
-                                .clip(RoundedCornerShape(16.dp))
-                        )
-                        Text(
-                            text = "Gambar tidak tersedia untuk ${ref?.commonName}",
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
                     if (ref.fullsize != null)
                         Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
                                     .crossfade(true)
+                                    .size(300, 200)
                                     .build(),
                                 contentDescription = "${ref.nama_ilmiah} image",
                                 contentScale = ContentScale.Crop,
@@ -138,6 +127,24 @@ import kotlinx.coroutines.withContext
                                 }
                             }
                         }
+                    else
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                imageVector = CONS.noImage,
+                                contentDescription = "${ref.nama_ilmiah ?: "no"} image",
+                                modifier = Modifier
+                                    .fillMaxSize(fraction = 0.5f)
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                            Text(
+                                text = "Gambar tidak tersedia untuk ${ref?.commonName}",
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                 }
 
                 // Plant Title
@@ -150,7 +157,7 @@ import kotlinx.coroutines.withContext
 
                 // Plant Description
                 Text(
-                    text = ref.description?.take(100) + if (ref.description?.length ?: 0 > 100) "..." else "",
+                    text = ref.description?.take(100) + if ((ref.description?.length ?: 0) > 100) "..." else "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 6.dp)
                 )
@@ -170,12 +177,11 @@ import kotlinx.coroutines.withContext
                     val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
                     Kat(
                         if (panen_min != panen_max) "$panen_min-$panen_max hari"
-                        else if (panen_max == "0") ""
+                        else if (panen_min == "0") ""
                         else "$panen_min hari",
                         bcolor = Color.LightGray
                     )
-                    Data.ecocrop[ref.nama_ilmiah]?.get(E.Category)?.toString()?.split(", ")
-                        ?.forEach {
+                    ref.category?.forEach {
                             Kat(
                                 translateCategory(it), tcolor = Color.White,
                                 bcolor = categoryToColor(it)
@@ -195,7 +201,7 @@ import kotlinx.coroutines.withContext
         bcolor: Color = Color(0xFFFF9800),
         icon: ImageVector? = null
     ) {
-        Box(
+        if(text.isNotEmpty()) Box(
             modifier = Modifier.wrapContentSize()
                 .clip(RoundedCornerShape(4.dp))
                 .background(bcolor)

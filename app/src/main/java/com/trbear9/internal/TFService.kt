@@ -40,7 +40,6 @@ object TFService {
         tensorImage.load(bitmap)
         val image = ImageProcessor.Builder()
             .add(ResizeOp(320, 320, ResizeOp.ResizeMethod.BILINEAR))
-            .add(NormalizeOp(0.0f, 1.0f))
             .build()
             .process(tensorImage)
 

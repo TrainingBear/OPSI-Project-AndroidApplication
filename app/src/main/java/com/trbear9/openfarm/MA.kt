@@ -3,6 +3,7 @@ package com.trbear9.openfarm
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -21,12 +22,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -50,6 +51,8 @@ import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,24 +60,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,31 +92,28 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.google.android.gms.location.LocationServices
 import com.trbear9.internal.Data
 import com.trbear9.internal.TFService
+import com.trbear9.openfarm.activities.Guide
 import com.trbear9.openfarm.activities.ResultScreen
-import com.trbear9.openfarm.activities.Search
 import com.trbear9.openfarm.activities.SearchLayout
 import com.trbear9.openfarm.activities.SearchResult
 import com.trbear9.openfarm.activities.SoilResult
 import com.trbear9.openfarm.activities.SoilStats
-import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.api.GeoParameters
 import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.SoilParameters
 import com.trbear9.plants.api.UserVariable
-import com.trbear9.plants.api.blob.Plant
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 
 class MA : AppCompatActivity() {
@@ -131,6 +125,8 @@ class MA : AppCompatActivity() {
         var soil = SoilParameters()
         var pH: Float? = null
         var image: Bitmap? = null
+        val searchResult = SearchResult()
+        val soilResult = SoilResult()
     }
 
     var cam: Boolean = false
@@ -169,6 +165,8 @@ class MA : AppCompatActivity() {
     fun Home(nav: NavController? = null) {
         val context = LocalContext.current
         var scroll = rememberScrollState()
+        var coffe by remember {mutableStateOf(false)}
+
         Scaffold(
             bottomBar = {
                 var selected by remember { mutableIntStateOf(0) }
@@ -186,7 +184,7 @@ class MA : AppCompatActivity() {
                         selected = selected == 1,
                         onClick = {
                             selected = 1
-                            nav?.navigate("result")
+                            nav?.navigate("result_soil")
                         },
                         icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                         label = { Text("Tanaman") }
@@ -219,6 +217,7 @@ class MA : AppCompatActivity() {
                                         contentDescription = "Help",
                                         modifier = Modifier
                                             .size(40.dp)
+                                            .clickable{nav?.navigate("help")}
                                     )
                                     Column(
                                         horizontalAlignment = Alignment.Start,
@@ -243,7 +242,7 @@ class MA : AppCompatActivity() {
                                         contentDescription = "Buy us a coffe!",
                                         modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
                                             .size(30.dp)
-                                            .clickable {}
+                                            .clickable {coffe = !coffe}
                                     )
 
                                     Icon(
@@ -263,17 +262,89 @@ class MA : AppCompatActivity() {
                 )
             }
         ) {
+            if(coffe){
+                BasicAlertDialog(
+                    onDismissRequest = {coffe = false},
+                    modifier = Modifier
+                        .padding(it)
+                        .wrapContentSize()
+                    ,
+                ) {
+                    Column(modifier = Modifier
+                        .wrapContentSize()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFFFB7B7))
+                        .border(BorderStroke(1.dp, Color.Black))
+
+                            ,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            imageVector = Icons.Default.Coffee,
+                            contentDescription = "Coffee",
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Text(
+                            text = "Aplikasi ini di buat oleh salah satu tim OPSI SMA Negeri 1 Ambarawa." +
+                                    "Aplikasi ini tentang bagaimana anda merawat tanaman, dan bagaimana" +
+                                    "cara merawat tanah di lahan anda.\n" +
+                                    "Sebagai tanda dukungan, berikan kami secangkir kopi:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Row(horizontalArrangement = Arrangement.Center) {
+                            Button(
+                                onClick = {coffe = false},
+                                modifier = Modifier.padding(10.dp)
+                                    .wrapContentSize(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.DarkGray
+                                )
+                            ){
+                                Text(
+                                    text = "Tidak, terimakasih!",
+                                    fontSize = 10.sp,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.padding(10.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFFFF9100
+                                    )
+                                )
+                            ) {
+                                Text(
+                                    text = "DONASI",
+                                    fontSize = 18.sp,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
                     .background(Color(0xFF6FAD4F))
-                    .verticalScroll(scroll),
+                    .verticalScroll(scroll)
+                ,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(Modifier.fillMaxWidth().weight(1f)) {
                     BoxWithConstraints(Modifier.fillMaxSize()) {
-                        val dynamicFontSize = (maxHeight.value / 5).sp
+                        val dynamicFontSize = (maxHeight.value / 4.4).sp
                         val icon = (maxHeight/ 3)
                         Button(
                             onClick = {nav?.navigate("search")},
@@ -294,7 +365,7 @@ class MA : AppCompatActivity() {
                             Text(
                                 text = "Cari tanaman apa aja di sini",
                                 textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.Light,
+                                fontWeight = FontWeight.Medium,
                                 color = Color(0xFF1C8604),
                                 fontSize = dynamicFontSize,
                             )
@@ -392,13 +463,9 @@ class MA : AppCompatActivity() {
     @Composable
     fun App() {
         var nav = rememberNavController()
-        val scope = rememberCoroutineScope()
-        val searchResult = SearchResult()
-        val soilResult = SoilResult()
-        var job: Job? = null
         NavHost(navController = nav, startDestination = "home") {
             composable("camera") {
-                CameraActivity(onClick = {
+                CameraActivity(nav, onClick = {
                     nav.navigate("soil")
                 })
             }
@@ -412,26 +479,20 @@ class MA : AppCompatActivity() {
                     variable.geo.rainfall = 2000.0
                     variable.geo.min = 18.0
                     variable.image = image
-                    response = Data.process(this@MA, variable, soilResult)
+                    soilResult.collected = false
+                    MA.response = Data.process(variable, soilResult)
                     Toast.makeText(this@MA, "finished", Toast.LENGTH_SHORT)
                         .show()
                     Util.debug("Job has been finished!")
-                    nav.navigate("result")
+                    soilResult.res = MA.response
+                    nav.navigate("result_soil")
                 })
             }
             composable("result") {
-                if (soilResult.plants.isNullOrEmpty()) {
-                    ResultScreen(
-                        searchResult = if(searchResult.plants.isNullOrEmpty())
-                            SearchResult().apply {
-                                plants = Data.plant.keys
-                                plantByCategory = Data.plantByTag
-                            }
-                        else searchResult,
-                        onBack = { nav.navigateUp() },
-                        nav = nav
-                    )
-                } else ResultScreen(
+                
+            }
+            composable("result_soil") {
+                ResultScreen(
                     soilResult = soilResult,
                     onBack = { nav.navigate("soil") },
                     nav = nav
@@ -456,7 +517,8 @@ class MA : AppCompatActivity() {
             composable("home") {
                 Home(nav)
             }
-            composable("tutor") {
+            composable("help") {
+                Guide(nav)
             }
             composable("about") {
 
@@ -621,17 +683,22 @@ class MA : AppCompatActivity() {
             topBar =
                 {
                     TopAppBar(
-                        title = { Text("Camera") },
+                        title = { Text(
+                            text="Camera",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        ) },
                         navigationIcon = {
                             IconButton(onClick = { nav?.navigate("home") }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
+                                    contentDescription = "Back",
+                                    tint = Color.White
                                 )
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.LightGray,
+                            containerColor = Color.Black,
                         )
                     )
                 }

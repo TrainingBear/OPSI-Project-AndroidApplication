@@ -16,15 +16,21 @@ import com.openmeteo.api.common.units.TemperatureUnit
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.activities.SoilResult
 import com.trbear9.plants.CsvHandler
-import com.trbear9.plants.E.*
+import com.trbear9.plants.E.Category
+import com.trbear9.plants.E.Common_names
+import com.trbear9.plants.E.Science_name
 import com.trbear9.plants.api.GeoParameters
 import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.UserVariable
 import com.trbear9.plants.api.blob.Plant
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import lombok.Getter
@@ -48,16 +54,23 @@ object Data {
                 """.trimIndent()
     }
 
-    fun search(query: String): Set<String>{
-        return tags.filter {
-            it.startsWith(query) ||  it.contains(query)
-        }.toSet()
+    fun search(query: String, consumer: (String) -> Unit = {}): Set<String>{
+        val result = mutableSetOf<String>()
+        for (tag in tags) {
+            val prefix = query.lowercase()
+            if(tag!=null && (tag.startsWith(prefix) || tag.contains(prefix))) {
+                result.add(tag)
+                consumer(tag)
+            }
+        }
+        return result
     }
 
     val tags = mutableSetOf<String>()
-    var kew : Map<String, JsonNode>? = null
+    var kew = mutableMapOf<String, JsonNode?>()
     fun load(context: Context){
         CsvHandler.load(context)
+        TFService.load(context)
         runBlocking {
             withContext(Dispatchers.IO) {
                 val plants = context.assets.open("plants.json").use {
@@ -67,15 +80,27 @@ object Data {
                     plant[item.nama_ilmiah] = item
                 }
                 Log.d("Data Processor", "Loaded ${plant.size} plants")
-                kew = context.assets.open("KEW.json").use {
+
+                context.assets.open("KEW.json").use {
                     val type = object : TypeReference<Map<String, JsonNode>>() {}
-                    objectMapper.readValue(it, type)
+                    val k = objectMapper.readValue(it, type)
+                    for (entry in k) {
+                        val name = entry.key
+                        val ke = k[name]
+                        kew[name] = ke
+                    }
                 }
             }
         }
         CsvHandler.ecocropcsv?.forEach {
-            loadPlant(context, it)
+            loadPlant(it, true)
         }
+        Log.d("Data Processor", "Loaded ${ecocrop.size} ecocrop")
+        Log.d("Data Processor", "Loaded ${kew.size} kew")
+        Log.d("Data Processor", "Loaded ${plant.size} plants")
+        Log.d("Data Processor", "Loaded ${namaUmumToNamaIlmiah.size} namaUmumToNamaIlmiah")
+        Log.d("Data Processor", "Loaded ${namaIlmiahToNamaUmum.size} namaIlmiahToNamaUmum")
+        Log.d("Data Processor", "Loaded ${tags.size} Tags size")
     }
 
     val namaUmumToNamaIlmiah = mutableMapOf<String, String>()
@@ -84,40 +109,38 @@ object Data {
     val plant = mutableMapOf<String, Plant>()
     var plantByTag = SnapshotStateMap<String, MutableSet<String>>()
     val ecocrop = mutableMapOf<String, CSVRecord>()
-    fun loadPlant(context:Context, record: CSVRecord, load: Boolean = false): Plant {
+    fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
         val name = record[Science_name]
         if(plant.containsKey(name) && !load) return plant[name]!!
-        val plant = try {
-            context.assets.open("plants/$name.json").use {
-                ObjectMapper().readValue(it, Plant::class.java)
-            }
-        } catch (_: IOException){
+
+        val plant = if(plant[name] == null){
             Log.e("Data Processor", "Full plant version of $name not found")
             val plant = Plant()
             plant.commonName = name ?: "Tidak diketahui"
             plant
-        }
+        } else plant[name]!!
+
         plant.nama_ilmiah = name
         record[Common_names]?.split(", ")?.forEach {
             plant.nama_umum.add(it)
-            tags += it
             plantByTag.computeIfAbsent(it){
                 key -> mutableSetOf<String>()
             }.add(name)
         }
         record[Category]?.split(", ")?.forEach {
             plant.category.add(it)
-            tags += it
+            tags += it.lowercase()
             plantByTag.computeIfAbsent(it){
                     key -> mutableSetOf<String>()
             }.add(name)
         }
         writeTaxonomy(plant)
-        tags += name
-        tags += plant.commonName
+        tags += name.lowercase()
+        val commonname = plant.commonName?.lowercase() ?: "null"
+        tags += commonname
 
-        namaUmumToNamaIlmiah[plant.commonName] = name
-        namaIlmiahToNamaUmum[name] = plant.commonName
+        namaUmumToNamaIlmiah[commonname] = name.lowercase()
+        namaIlmiahToNamaUmum[name.lowercase()] = commonname
 
         this.plant[name] = plant
         Log.d("Data Processor", "Loaded ${plant.commonName} plants")
@@ -125,7 +148,7 @@ object Data {
     }
 
     @Throws(IOException::class)
-    fun process(context: Context, data: UserVariable, soilResult: SoilResult): Flow<Response> = flow {
+    fun process(data: UserVariable, soilResult: SoilResult): Flow<Response> = flow {
         val response = Response()
         val prediction = TFService.predict(data.image!!)
 
@@ -163,7 +186,7 @@ object Data {
                 emit(response)
                 if (!ecocrop.containsKey(namaIlmiah))
                     ecocrop[namaIlmiah] = ecorecord
-                response.put(i, loadPlant(context, ecorecord))
+                response.put(i, loadPlant(ecorecord))
                 response.progress++
                 emit(response)
             }
@@ -200,6 +223,7 @@ object Data {
         emit(response)
     }.flowOn(Dispatchers.IO)
 
+
     private fun writeTaxonomy(plant: Plant) {
         plant.genus = plant.nama_ilmiah?.split(" ")[0]
         if(kew?.containsKey(plant.nama_ilmiah) == true){
@@ -221,7 +245,7 @@ object Data {
             longitude = geo.longtitude.toFloat()
             temperatureUnit = TemperatureUnit.Celsius
             elevation
-            startDate = Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 60)
+            startDate = Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 5)
             endDate = Date(System.currentTimeMillis())
             daily = Forecast.Daily{
                 listOf(temperature2mMin, temperature2mMax)
@@ -251,6 +275,7 @@ object Data {
         geo.altitude = elevation.toDouble()
         geo.min =  min
         geo.max = max
+        Log.d("Data Processor", "Meteo temperatur: $min, $max with elevation: $elevation")
     }
 
         val log: org.slf4j.Logger = LoggerFactory.getLogger(Data::class.java)!!

@@ -63,7 +63,7 @@ object Util {
             vegetables.head -> return "Sayur"
             cereals_pseudocereals.head -> return "Pseudocereal"
             roots_tubers.head -> return "Akar/Umbi"
-            "forage/pasture" -> return "Padang rumput"
+            "forage/pasture" -> return "Pakan ternak"
             fruit_nut.head -> return "Buah & kacang"
             materials.head -> return "Bahan"
             ornamentals_turf.head -> return "Rumput hias"
@@ -76,7 +76,7 @@ object Util {
         return "Lainnya"
     }
     fun getCategory(): List<String>{
-        return listOf("Lainya", "Sayur", "Pseudocereal", "Akar/Umbi", "Padang rumput",
+        return listOf("Lainya", "Sayur", "Pseudocereal", "Akar/Umbi", "Pakan ternak",
             "Buah & kacang", "Bahan", "Rumput hias", "Obat & aromatik", "Hutan/Kayu",
             "Tanaman penutup", "Lingkungan", "Gulma"
             )

@@ -103,7 +103,7 @@ object CsvHandler {
                             if (altitude >= floatVar) {
                                 score += 1
                                 flag = true
-                            } else score -= (abs(altitude - floatVar)/5).toInt()
+                            } else score -= (abs(altitude - floatVar)/2).toInt()
                         }
 
                         "RAIN" -> {
@@ -119,7 +119,7 @@ object CsvHandler {
                                 score += 1
                                 flag = true
                             } else {
-                                val floatVar = floatVar / 25 // bias
+                                val floatVar = floatVar // bias
                                 score -= (floatVar.coerceIn(
                                     Math.min(min, max),
                                     Math.max(min, max)
@@ -188,7 +188,7 @@ object CsvHandler {
                                 score += 2
                                 flag = true
                             }
-                            else score -= (floatVar.coerceIn(Math.min(min, max), Math.max(min, max)).absoluteValue).toInt()
+                            else score -= (floatVar.coerceIn(Math.min(min, max), Math.max(min, max)).absoluteValue*1.4).toInt()
                         }
 
                         else -> {

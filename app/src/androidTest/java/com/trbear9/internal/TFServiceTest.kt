@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
+import com.trbear9.openfarm.activities.SoilResult
 import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.api.GeoParameters
 import com.trbear9.plants.api.SoilParameters
@@ -44,7 +45,7 @@ class TFServiceTest {
         variable.image = bit
         variable.soil = SoilParameters.ALLUVIAL
         variable.geo = GeoParameters()
-        val res = Data.process(context, variable)
+        val res = Data.process(variable, soilResult = SoilResult())
 
         runBlocking {
             res.collect {
