@@ -116,7 +116,6 @@ fun SoilStats(nav: NavController? = null) {
     var ferr by remember { mutableStateOf(response?.soil?.fertility ?: "Belum diketahui") }
     var texr by remember { mutableStateOf(response?.soil?.texture ?: "Belum diketahui") }
     var drain by remember { mutableStateOf(response?.soil?.drainage ?: "Belum diketahui") }
-    var pH by remember { mutableStateOf(MA.soil.pH?: response?.soil?.pH ?: "Belum diketahui") }
     var depth by remember { mutableStateOf(MA.soil.numericDepth) }
     val modelProducer = remember { CartesianChartModelProducer() }
     var list = remember {mutableStateListOf<Float>()}
@@ -224,7 +223,8 @@ fun SoilStats(nav: NavController? = null) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .wrapContentSize()
+                            .fillMaxWidth()
+                            .height(300.dp)
                     ) {
                         JetpackComposeBasicColumnChart(
                             modelProducer,
@@ -256,19 +256,24 @@ fun SoilStats(nav: NavController? = null) {
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 30.sp,
                     )
+                    val pH = MA.pH ?: value?.soil?.pH
                     Map(
-                        "PH: ",
-                        MA.pH?.toString()
-                            ?: (value?.soil?.pH.toString() + " (default)")
+                        "PH: ", MA.pH.toString() ?: (value?.soil?.pH.toString() + " (default)")
                     )
                     Map("Tipe: ", "$soilType ${soilPred * 100.0}%")
                     Map("Tekstur: ", texr.toString())
                     Map("Drainase: ", drain.toString())
                     Map("Kesuburan: ", ferr.toString())
 
+                    Spacer(modifier = Modifier.height(20.dp))
+                    if (pH != null) {
+                        if(pH <= 7) Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "dengan kedalaman tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
+                                " di butuhkan ${getDosis(soilType, pH ?: 5f, 7f, depth)} ton kapur dolmit/hektar",)
+                    } else {
+                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "Tanah Anda bersifat terlalu basa (pH > 8). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
+                                "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin.")
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
-                    Cat(Icons.Default.LocalHospital, "Dosis kapur dolmit: ", "dengan kedalaman tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
-                                " di butuhkan ${getDosis(soilType, MA.pH?: value?.soil?.pH ?: 5f, 7f, depth)} ton kapur dolmit/hektar",)
                     Cat(Icons.Default.WaterDrop, "Retensi Air: ", retention(soilType))
                 }
             }

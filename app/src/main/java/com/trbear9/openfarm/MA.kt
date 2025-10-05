@@ -54,6 +54,7 @@ import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -70,6 +71,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -256,7 +258,7 @@ class MA : AppCompatActivity() {
                                         modifier = Modifier.padding(20.dp)
                                             .size(30.dp)
                                             .clickable {
-                                                nav?.navigate("help")
+                                                nav?.navigate("tentang")
                                             }
                                     )
                                 }
@@ -291,7 +293,7 @@ class MA : AppCompatActivity() {
                         Text(
                             text = "Aplikasi ini di buat oleh salah satu tim OPSI SMA Negeri 1 Ambarawa." +
                                     "Aplikasi ini tentang bagaimana anda merawat tanaman, dan bagaimana" +
-                                    "cara merawat tanah di lahan anda.\n" +
+                                    "cara merawat tanah di lahan anda.\n\n" +
                                     "Sebagai tanda dukungan, berikan kami secangkir kopi:",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
@@ -351,7 +353,7 @@ class MA : AppCompatActivity() {
                         val dynamicFontSize = (maxHeight.value / 4.4).sp
                         val icon = (maxHeight/ 3)
                         Button(
-                            onClick = {nav?.navigate("search")},
+                            onClick = {nav?.navigate("help")},
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(10.dp)
@@ -361,13 +363,13 @@ class MA : AppCompatActivity() {
                             ),
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Search,
+                                imageVector = Icons.Default.Start,
                                 contentDescription = "Search",
                                 modifier = Modifier.size(icon),
                                 tint = Color.Black
                             )
                             Text(
-                                text = "Cari tanaman apa aja di sini",
+                                text = "Baru menggunakan OpenFarm?",
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF1C8604),
@@ -440,7 +442,8 @@ class MA : AppCompatActivity() {
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF2E7D32)
-                            )
+                            ),
+                            border = BorderStroke(2.dp, Color.White),
                         ) {
                             Column(
                                 verticalArrangement = Arrangement.Center
@@ -477,7 +480,7 @@ class MA : AppCompatActivity() {
                 SoilActivity(nav, onClick = { pH: Float?, depth: Int? ->
                     val variable = UserVariable()
                     val soil = SoilParameters()
-                    if (pH != null) soil.pH = pH
+                    if (pH != null) soil.pH = Math.min(pH,14f)
                     if (depth != null) soil.numericDepth = depth
                     MA.soil = soil
                     variable.geo.rainfall = 2000.0
@@ -522,7 +525,23 @@ class MA : AppCompatActivity() {
                 Home(nav)
             }
             composable("help") {
-                Guide(nav)
+                LaunchedEffect(Unit) {
+                    val intent = Intent(this@MA, TutorialActivity::class.java)
+                    this@MA.startActivity(intent)
+                }
+            }
+            composable("tentang") {
+                AndroidView(
+                    factory = {
+                        LayoutInflater.from(it).inflate(R.layout.botakuhpengetahuan, null)
+                    },
+                    update = {
+                        val about = it.findViewById<ImageButton>(R.id.tombolKembali)
+                        about.setOnClickListener {
+                            nav.navigateUp()
+                        }
+                    }
+                )
             }
             composable("about") {
                 AndroidView(
@@ -646,7 +665,7 @@ class MA : AppCompatActivity() {
                                 pH = input
                             }
                         },
-                        label = { Text("pH tanah") },
+                        label = { Text("pH tanah (1-14)") },
                         placeholder = { Text("") },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number

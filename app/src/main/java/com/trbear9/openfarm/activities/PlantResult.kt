@@ -1,7 +1,5 @@
 package com.trbear9.openfarm.activities
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,9 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,7 +35,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -56,9 +51,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -70,7 +66,6 @@ import com.trbear9.internal.Data
 import com.trbear9.openfarm.MA
 import com.trbear9.openfarm.Util
 import com.trbear9.plants.api.Response
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 
@@ -96,7 +91,7 @@ fun ResultScreen(
     onBack: () -> Unit = {},
     nav: NavController? = null
 ) {
-    var querry by remember { mutableStateOf("") }
+    var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf("All") }
     var expanded by remember { mutableStateOf(false) }
     var expandedSearch by remember { mutableStateOf(false) }
@@ -111,7 +106,6 @@ fun ResultScreen(
             else soilResult.response?.loaded ?: false)
     }
     var collected by remember { mutableStateOf<Boolean>(MA.soilResult.collected ?: true) }
-    var respon by remember { mutableStateOf<Response>(Response()) }
     var current by remember { mutableStateOf<String>(soilResult?.response?.current ?: "Tanduran") }
     var progress by remember { mutableIntStateOf(soilResult?.response?.progress?.toInt() ?: 0) }
     var target by remember { mutableIntStateOf(soilResult?.response?.target?.toInt() ?: 0) }
@@ -119,6 +113,7 @@ fun ResultScreen(
     var parameterLoaded by remember { mutableStateOf<Boolean>(soilResult?.response?.parameterLoaded == true) }
 
     var search = remember{ mutableStateSetOf<String>()}
+    var focusRequester = remember{ FocusRequester() }
     var empty = remember{mutableStateMapOf<Int, MutableSet<String>>()}
 
     LaunchedEffect(Unit) {
@@ -143,20 +138,23 @@ fun ResultScreen(
     }
 
     var completer = remember { mutableStateSetOf<String>() }
-    LaunchedEffect(querry) {
+    LaunchedEffect(query) {
         completer.clear()
         var i = 0
-        if (querry.isNotEmpty()) {
+        if (query.isNotEmpty()) {
             outer@ for (it in soilResult?.plants ?: empty) {
-                for (plant in it.value) {
+                iter@ for (plant in it.value) {
                     val commonName = Data.namaIlmiahToNamaUmum[plant]
-                    val prefix = querry.lowercase()
+                    val prefix = query.lowercase()
                     if (commonName != null && (commonName.startsWith(prefix)
                                 || plant.contains(prefix))) {
                         completer.add(plant)
                     }
                     i++
-                    if (i > 10) break@outer
+                    if (i >= 5) {
+                        break@outer
+                        break@iter
+                    }
                 }
             }
         }
@@ -186,14 +184,14 @@ fun ResultScreen(
                                                 fontWeight = FontWeight.Light
                                             )
                                         },
-                                        onClick = { querry = it }
+                                        onClick = { query = it }
                                     )
                                 }
                             }
                             BasicTextField(
-                                value = querry,
+                                value = query,
                                 onValueChange = {input ->
-                                    querry = input
+                                    query = input
                                     if(input.isEmpty()) search.clear()
                                 },
                                 singleLine = true,
@@ -203,7 +201,7 @@ fun ResultScreen(
                                 keyboardActions = KeyboardActions(
                                     onSearch = {
                                         search.clear()
-                                        if(querry.isNotEmpty()) Data.search(query = querry){
+                                        if(query.isNotEmpty()) Data.search(query = query){
                                             search.add(it)
                                         }
                                     }
@@ -213,10 +211,9 @@ fun ResultScreen(
                                     .height(35.dp)
                                     .padding(end = 12.dp)
                                     .align(Alignment.CenterVertically)
+                                    .focusRequester(focusRequester)
                                     .onFocusChanged { focusState ->
-                                        val hasFocus = focusState.isFocused
-                                        if (hasFocus && querry.isNotEmpty()) expandedSearch = true
-                                        if (!hasFocus) expandedSearch = false
+                                        expandedSearch = focusState.isFocused
                                     },
                                 decorationBox = { innerTextField ->
                                     BoxWithConstraints(
@@ -227,7 +224,7 @@ fun ResultScreen(
                                     ) {
                                         val size = (maxHeight.value / 2).sp
                                         Column(verticalArrangement = Arrangement.Center) {
-                                            if (querry.isEmpty() && !hasFocus) {
+                                            if (query.isEmpty() && !hasFocus) {
                                                 Text(
                                                     "Masukan nama tanaman",
                                                     color = Color.Gray,
@@ -313,7 +310,7 @@ fun ResultScreen(
                                         onClick = {
                                             expanded = false
                                             selected = "All"
-                                            querry = ""
+                                            query = ""
                                         }
                                     )
                                     Util.getCategory().forEach {
@@ -322,7 +319,7 @@ fun ResultScreen(
                                             onClick = {
                                                 expanded = false
                                                 selected = it
-                                                querry = ""
+                                                query = ""
                                             },
                                         )
                                     }
@@ -372,7 +369,7 @@ fun ResultScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (!loaded) {
+            if (!loaded && soilResult?.res !=null) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally

@@ -24,7 +24,7 @@ class TutorialActivity : AppCompatActivity() {
             SlideItem(R.drawable.result_imgplant, "Step 5", "Tunggu proses pengolahan data, lalu hasil akan keluar")
         )
 
-        val adapter = SlideAdapter(slides)
+        val adapter = SlideAdapter(this, slides)
         binding.viewPager.adapter = adapter
 
         // hubungkan dotsIndicator dengan viewPager
@@ -40,7 +40,7 @@ class TutorialActivity : AppCompatActivity() {
         })
 
         binding.tombolKembali.setOnClickListener {
-            finish()
+            this.finish()
         }
     }
 }
