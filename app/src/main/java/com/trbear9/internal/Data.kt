@@ -202,8 +202,8 @@ object Data {
             Log.d("Data Processor", "Loaded $score with size ${response.tanaman[score]!!.size}")
             soilResult.plants!![score] = response.tanaman[score]?: mutableSetOf()
         }
-        soilResult.plantByCategory!!["All"] = soilResult.plants!!
         soilResult.plantByCategory!!.clear()
+        soilResult.plantByCategory!!["All"] = soilResult.plants!!
         soilResult.plants!!.forEach { (score, list) ->
             list.forEach { name ->
                 plant[name]?.category
@@ -223,6 +223,7 @@ object Data {
                 Log.d("Data Processor", "Adding $kat with size ${it.size}")
             } ?: Log.d("Data Processor","$kat is null")
         }
+        Log.d("Data Processor", "DONE with result of ${response.target} tanaman")
         emit(response)
     }.flowOn(Dispatchers.IO)
 

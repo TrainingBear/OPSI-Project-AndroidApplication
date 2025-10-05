@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.ai.edge.litert.CompiledModel
 import com.trbear9.plants.api.SoilParameters
 import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
@@ -24,11 +25,6 @@ object TFService {
     fun load(context: Context){
         model = CompiledModel.create(context.assets, "model.tflite")
     }
-
-    fun close(){
-        model?.close()
-    }
-
     fun predict(bitmap: Bitmap): FloatArray {
         // Preallocate input/output buffers
         Log.d("TFService", "predicting... ")
@@ -47,6 +43,11 @@ object TFService {
         val floatArray = FloatArray(buffer.remaining() / 4)
         buffer.asFloatBuffer().get(floatArray)
 
+        Log.d("TensorDebug", "Shape = ${tensorImage.tensorBuffer.shape.contentToString()}")
+        Log.d("TensorDebug", "Mean = ${tensorImage.tensorBuffer.floatArray.average()}")
+        Log.d("TensorDebug", "Min = ${tensorImage.tensorBuffer.floatArray.minOrNull()}")
+        Log.d("TensorDebug", "Max = ${tensorImage.tensorBuffer.floatArray.maxOrNull()}")
+
         // Fill the first input
         inputBuffers[0].writeFloat(floatArray)
         // Invoke
@@ -59,6 +60,10 @@ object TFService {
         outputBuffers.forEach { it.close() }
         Log.d("TFService", "Predict Done! ")
         return outputFloatArray
+    }
+
+    fun close(){
+        model?.close()
     }
 
     fun argmax(prediction: FloatArray): Pair<String, Float> {

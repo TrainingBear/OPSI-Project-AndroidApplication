@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.trbear9.internal.Data
 import com.trbear9.plants.E
@@ -95,6 +96,8 @@ object CONS {
                                     .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
                                     .crossfade(true)
                                     .size(300, 200)
+                                    .diskCachePolicy(CachePolicy.ENABLED)
+                                    .memoryCachePolicy(CachePolicy.ENABLED)
                                     .build(),
                                 contentDescription = "${ref.nama_ilmiah} image",
                                 contentScale = ContentScale.Crop,

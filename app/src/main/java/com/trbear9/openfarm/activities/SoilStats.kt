@@ -256,21 +256,19 @@ fun SoilStats(nav: NavController? = null) {
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 30.sp,
                     )
-                    val pH = MA.pH ?: value?.soil?.pH
-                    Map(
-                        "PH: ", MA.pH.toString() ?: (value?.soil?.pH.toString() + " (default)")
-                    )
+                    val pH = MA.soil.pH ?: value?.soil?.pH
+                    Map("PH: ", (MA.soil.pH ?: (value?.soil?.pH.toString() + " (default)")).toString())
                     Map("Tipe: ", "$soilType ${soilPred * 100.0}%")
                     Map("Tekstur: ", texr.toString())
                     Map("Drainase: ", drain.toString())
                     Map("Kesuburan: ", ferr.toString())
 
                     Spacer(modifier = Modifier.height(20.dp))
-                    if (pH != null) {
-                        if(pH <= 7) Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "dengan kedalaman tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
+                    if (pH != null && pH <= 7) {
+                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "dengan kedalaman tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
                                 " di butuhkan ${getDosis(soilType, pH ?: 5f, 7f, depth)} ton kapur dolmit/hektar",)
                     } else {
-                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "Tanah Anda bersifat terlalu basa (pH > 8). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
+                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
                                 "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin.")
                     }
                     Spacer(modifier = Modifier.height(10.dp))

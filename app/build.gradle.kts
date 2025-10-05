@@ -15,12 +15,14 @@ android {
     }
 
     defaultConfig {
+        ndk{
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
         applicationId = "com.trbear9.openfarm"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,6 +39,8 @@ android {
     splits {
         abi {
             isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
         }
     }
@@ -90,6 +94,8 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.10.0")
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("androidx.paging:paging-runtime:3.2.0") // core
+    implementation("androidx.paging:paging-compose:1.0.0-alpha18") // Compose integration
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m2)
     implementation(libs.vico.compose.m3)

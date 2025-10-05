@@ -1,6 +1,7 @@
 package com.trbear9.plants
 
 import android.content.Context
+import android.util.Log
 import com.trbear9.plants.api.Parameters
 import com.trbear9.plants.api.UserVariable
 import org.apache.commons.csv.CSVFormat
@@ -182,13 +183,21 @@ object CsvHandler {
                                 min = record.get(E.A_minimum_ph).toFloat()
                                 max = record.get(E.A_maximum_ph).toFloat()
                             } catch (_: NumberFormatException){
+                                Log.d("CSV ${getScienceName(record)} ", "pH not defined for this plant")
                                  continue
                             }
                             if (floatVar in min..max) {
                                 score += 2
                                 flag = true
                             }
-                            else score -= (floatVar.coerceIn(Math.min(min, max), Math.max(min, max)).absoluteValue*1.4).toInt()
+                            else {
+                                val absoluteValue = floatVar.coerceIn(
+                                    Math.min(min, max),
+                                    Math.max(min, max)
+                                ).absoluteValue
+                                score -= (absoluteValue * 2).toInt()
+                                Log.d("CSV ${getScienceName(record)} ", "missPH: $absoluteValue, decreased to $score")
+                            }
                         }
 
                         else -> {
@@ -202,8 +211,7 @@ object CsvHandler {
                             }
 
                             if (value.contains(paramVal)) {
-                                score += if (col == E.Climate_zone) 3
-                                else 1
+                                score += 1
                                 flag = true
                             } else if (col == E.Climate_zone) {
                                 score -= 354354

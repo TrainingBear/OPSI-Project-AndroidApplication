@@ -1,5 +1,6 @@
 package com.trbear9.openfarm.activities
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -66,8 +68,10 @@ import com.trbear9.internal.Data
 import com.trbear9.openfarm.MA
 import com.trbear9.openfarm.Util
 import com.trbear9.plants.api.Response
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.withContext
 
 class SoilResult {
     var plants: SnapshotStateMap<Int, MutableSet<String>>? = null
@@ -136,7 +140,6 @@ fun ResultScreen(
             }
         }
     }
-
     var completer = remember { mutableStateSetOf<String>() }
     LaunchedEffect(query) {
         completer.clear()
@@ -159,8 +162,17 @@ fun ResultScreen(
             }
         }
     }
+    var cat = remember(selected, soilResult) { soilResult?.plantByCategory?.get(selected) }
+    val plantCat by produceState<List<Pair<Int, MutableSet<String>>>?>(initialValue = null, cat, order) {
+        if (cat != null) {
+            value = withContext(Dispatchers.Default) {
+                if (order == "Tertinggi") cat.toList().asReversed()
+                else cat.toList()
+            }
+        } else value = emptyList()
+    }
 
-    Scaffold(
+     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFF5F5F5)),
@@ -192,7 +204,7 @@ fun ResultScreen(
                                 value = query,
                                 onValueChange = {input ->
                                     query = input
-                                    if(input.isEmpty()) search.clear()
+                                    search.clear()
                                 },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
@@ -213,6 +225,7 @@ fun ResultScreen(
                                     .align(Alignment.CenterVertically)
                                     .focusRequester(focusRequester)
                                     .onFocusChanged { focusState ->
+                                        Log.d("Focus", "Focused: ${focusState.isFocused}")
                                         expandedSearch = focusState.isFocused
                                     },
                                 decorationBox = { innerTextField ->
@@ -369,7 +382,7 @@ fun ResultScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (!loaded && soilResult?.res !=null) {
+            if (!loaded || plantCat == null) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -379,6 +392,7 @@ fun ResultScreen(
                     Text(
                         text = if (!predicted) "Menganalisa tanahmu.."
                         else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
+                        else if (plantCat == null) "Loading.. "
                         else "Mencari data $current",
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -391,25 +405,14 @@ fun ResultScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val map = soilResult.plantByCategory
-                    val lplants = soilResult.plants
                     if(search.isNotEmpty()){
                         items(search.toList()){ q ->
                             Data.plantByTag[q]?.forEach {
                                 PlantCardDisplayer(0, Data.plant[it])
                             }
                         }
-                    }else if (selected == "All" && lplants != null) {
-                        items(
-                            if (order == "Tertinggi") lplants.toList().asReversed()
-                            else lplants.toList()
-                        )
-                        { (score, plant) ->
-                            plant.forEach {
-                                PlantCardDisplayer(score, Data.plant[it])
-                            }
-                        }
-
-                    } else if (map == null || map[selected].isNullOrEmpty())
+                    }
+                    else if (map == null || map[selected].isNullOrEmpty())
                         item {
                             Column {
                                 Text(
@@ -421,20 +424,15 @@ fun ResultScreen(
                             }
                         }
                     else {
-                        val map = soilResult.plantByCategory
-                        if(map != null) {
-                            val map1 = map[selected]
-                            if(map1 != null) {
-                                items(
-                                    if (order == "Tertinggi") map1.toList().asReversed()
-                                    else map1.toList()
-                                ) { (score, plant) ->
-                                    plant.forEach {
-                                        PlantCardDisplayer(score, Data.plant[it])
-                                    }
-                                }
+                        items(
+                            items = plantCat!!,
+                            key = { (_, plants) -> plants.hashCode() },
+                        ) { (score, plants) ->
+                            plants.forEach { plant ->
+                                PlantCardDisplayer(score, Data.plant[plant])
                             }
                         }
+
                     }
                 }
             }

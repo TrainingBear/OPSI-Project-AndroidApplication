@@ -306,13 +306,12 @@ class MA : AppCompatActivity() {
                                 modifier = Modifier.padding(10.dp)
                                     .wrapContentSize(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.DarkGray
+                                    containerColor = Color.Transparent
                                 )
                             ){
                                 Text(
                                     text = "Tidak, terimakasih!",
-                                    fontSize = 10.sp,
-                                    color = Color.White,
+                                    color = Color.Black,
                                     fontWeight = FontWeight.Normal
                                 )
                             }
@@ -469,6 +468,7 @@ class MA : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun App() {
+        val context = LocalContext.current
         var nav = rememberNavController()
         NavHost(navController = nav, startDestination = "home") {
             composable("camera") {
@@ -526,8 +526,8 @@ class MA : AppCompatActivity() {
             }
             composable("help") {
                 LaunchedEffect(Unit) {
-                    val intent = Intent(this@MA, TutorialActivity::class.java)
-                    this@MA.startActivity(intent)
+                    val intent = Intent(context, TutorialActivity::class.java)
+                    context.startActivity(intent)
                 }
             }
             composable("tentang") {

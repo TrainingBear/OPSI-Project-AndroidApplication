@@ -17,6 +17,7 @@ class TFServiceTest {
 
     @Test
     fun predict(){
+        TFService.load(context)
         val bit = listOf(
             BitmapFactory.decodeStream(context.assets.open("dataset/Aluvial/aluvial-004.jpg")),
             BitmapFactory.decodeStream(context.assets.open("dataset/Andosol/aafgfwqe.jpeg")),
@@ -35,6 +36,7 @@ class TFServiceTest {
                 Log.i("TEST", "Label: $label, Score: $score")
             }
         }
+        TFService.close()
     }
 
     @Test
