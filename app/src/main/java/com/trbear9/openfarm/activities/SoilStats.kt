@@ -20,19 +20,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BlurOn
-import androidx.compose.material.icons.filled.Compost
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalHospital
@@ -46,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,7 +65,6 @@ import androidx.navigation.NavController
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.auto
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberEnd
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
@@ -93,13 +86,8 @@ import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
-import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.trbear9.internal.TFService
 import com.trbear9.openfarm.MA
-import com.trbear9.plants.api.Response
-import com.trbear9.plants.E.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -199,7 +187,7 @@ fun SoilStats(nav: NavController? = null) {
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                append("Anda sepertinya belum mempotret tanah anda")
+                                append("Anda sepertinya belum memotret tanah anda")
                             }
                         },
                         textAlign = TextAlign.Center,
@@ -248,7 +236,6 @@ fun SoilStats(nav: NavController? = null) {
                     }
                 }
 
-
                 Column(modifier = Modifier.padding(10.dp)) {
                     val value = response
                     Text(
@@ -265,8 +252,10 @@ fun SoilStats(nav: NavController? = null) {
 
                     Spacer(modifier = Modifier.height(20.dp))
                     if (pH != null && pH <= 7) {
-                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "dengan kedalaman tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
-                                " di butuhkan ${getDosis(soilType, pH ?: 5f, 7f, depth)} ton kapur dolmit/hektar",)
+                        val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
+                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "dengan kedalaman" +
+                                " tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
+                                " di butuhkan $dosisKg kg kapur dolmit/hektar. atau ${dosisKg/100} kg kapur dolmit/m2",)
                     } else {
                         Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
                                 "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin.")
@@ -368,28 +357,34 @@ private fun JetpackComposeBasicColumnChart(
 
 //3. Dosis Dolomit (t/ha) = CaCO3 / 0,75
 fun getDosis(name: String,current:Float, target:Float, depth: Int) : Float{
-    val gap = target - current
-    val CaCO3: Float = when(name){
+
+
+    // target = 7
+    // current = pH saat ini
+    val selisih = target - current
+
+    val CaCO3:                                                                                                                                   Float = when(name){
         "Aluvial" -> {
-            gap.absoluteValue * 3.0f * (depth /20)
+            selisih.absoluteValue * 3.0f * (depth /20)
         }
         "Andosol" -> {
-            gap.absoluteValue * 5.0f * (depth /20)
+            selisih.absoluteValue * 5.0f * (depth /20)
         }
         "Humus" -> {
-            gap.absoluteValue * 4.0f * (depth /20)
+            selisih.absoluteValue * 4.0f * (depth /20)
         }
         "Kapur" -> {
-            gap.absoluteValue * 3.0f * (depth /20)
+            selisih.absoluteValue * 3.0f * (depth /20)
         }
         "Laterit" -> {
-            gap.absoluteValue * 3.5f * (depth /20)
+            selisih.absoluteValue * 3.5f * (depth /20)
         }
         "Pasir" -> {
-            gap.absoluteValue * 2.0f * (depth /20)
+            selisih.absoluteValue * 2.0f * (depth /20)
         }
         else -> -1.0f
     }
+    // Dosis Dolomit (t/ha) = CaCO3 / 0,75
     return CaCO3/75
 }
 

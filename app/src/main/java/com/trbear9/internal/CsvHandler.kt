@@ -179,16 +179,18 @@ object CsvHandler {
                         "PH" -> {
                             val min: Float
                             val max:Float
+                            val scienceName = getScienceName(record)
                             try {
                                 min = record.get(E.A_minimum_ph).toFloat()
                                 max = record.get(E.A_maximum_ph).toFloat()
                             } catch (_: NumberFormatException){
-                                Log.d("CSV ${getScienceName(record)} ", "pH not defined for this plant")
-                                 continue
+                                Log.d("CSV $scienceName ", "pH not defined for $scienceName plant")
+                                continue
                             }
                             if (floatVar in min..max) {
                                 score += 2
                                 flag = true
+                                Log.d("CSV $scienceName", "$scienceName actual pH: $floatVar, increased to $score")
                             }
                             else {
                                 val absoluteValue = floatVar.coerceIn(
@@ -196,7 +198,7 @@ object CsvHandler {
                                     Math.max(min, max)
                                 ).absoluteValue
                                 score -= (absoluteValue * 2).toInt()
-                                Log.d("CSV ${getScienceName(record)} ", "missPH: $absoluteValue, decreased to $score")
+                                Log.d("CSV $scienceName ", "$scienceName missPH: $absoluteValue, decreased to $score actual ph is $floatVar")
                             }
                         }
 
