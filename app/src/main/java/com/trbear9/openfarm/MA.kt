@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LightbulbCircle
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QuestionMark
@@ -302,7 +303,27 @@ class MA : AppCompatActivity() {
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(10.dp)
                         )
-                        Row(horizontalArrangement = Arrangement.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                            Button(
+                                onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.padding(10.dp).wrapContentSize(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFFFF9100
+                                    )
+                                )
+                            ) {
+                                Text(
+                                    text = "Beri dukungan!",
+                                    fontSize = 18.sp,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
                             Button(
                                 onClick = {coffe = false},
                                 modifier = Modifier.padding(10.dp)
@@ -315,25 +336,6 @@ class MA : AppCompatActivity() {
                                     text = "Tidak, terimakasih!",
                                     color = Color.Black,
                                     fontWeight = FontWeight.Normal
-                                )
-                            }
-                            Button(
-                                onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
-                                    context.startActivity(intent)
-                                },
-                                modifier = Modifier.padding(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFFFF9100
-                                    )
-                                )
-                            ) {
-                                Text(
-                                    text = "Beri dukungan!",
-                                    fontSize = 18.sp,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.ExtraBold
                                 )
                             }
                         }
@@ -364,13 +366,13 @@ class MA : AppCompatActivity() {
                             ),
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Lightbulb,
+                                imageVector = Icons.Default.LightbulbCircle,
                                 contentDescription = "Search",
                                 modifier = Modifier.size(icon),
                                 tint = Color.Black
                             )
                             Text(
-                                text = "Baru menggunakan OpenFarm?",
+                                text = " Baru menggunakan OpenFarm?",
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.Black,
@@ -407,24 +409,35 @@ class MA : AppCompatActivity() {
                         )
                     }
                 }
-                Box(modifier = Modifier.fillMaxWidth().weight(3f)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
+                Box(modifier = Modifier.fillMaxWidth().weight(5f)) {
+
+                Image(
+                        painter = painterResource(id = R.drawable.smanega),
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillHeight,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16/6.5f)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.background2),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillHeight,
                         modifier = Modifier
                             .fillMaxSize()
+                            .align(Alignment.Center)
                     )
-                }
-                Box(Modifier.fillMaxWidth().weight(1f)) {
-                    BoxWithConstraints(Modifier.fillMaxSize()) {
-                        val dynamicFontSize = (maxHeight.value / 3).sp
-                        Button( modifier = Modifier
-                                .fillMaxSize()
-                                .padding(
-                                    start = 30.dp, end = 30.dp, bottom = 20.dp
-                                )
-                                .wrapContentSize(),
+
+                    BoxWithConstraints(Modifier.fillMaxWidth()
+                        .fillMaxWidth()
+                        .aspectRatio(16/3f)
+                        .align(Alignment.BottomCenter)
+                        .padding(start = 50.dp, end = 50.dp, bottom = 20.dp)
+                    ) {
+                        val dynamicFontSize = (maxHeight.value / 2).sp
+                        Button(
+                            modifier = Modifier
+                                .fillMaxSize(),
                             onClick = {
                                 perm.launch(arrayOf(Manifest.permission.CAMERA))
                                 if (ContextCompat.checkSelfPermission(
@@ -443,16 +456,17 @@ class MA : AppCompatActivity() {
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF2E7D32)
+                                containerColor = Color(0xFFF5A623)
                             ),
-                            border = BorderStroke(2.dp, Color.White),
+//                            border = BorderStroke(2.dp, Color.White),
                         ) {
                             Text(
                                 text = "Scan tanahmu!",
                                 fontSize = dynamicFontSize,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = Color.White,
-                                modifier = Modifier.fillMaxSize().align(Alignment.CenterVertically),
+                                modifier = Modifier.fillMaxSize()
+                                    .align(Alignment.CenterVertically),
                                 textAlign = TextAlign.Center,
                             )
                         }
