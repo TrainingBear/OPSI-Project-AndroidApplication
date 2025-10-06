@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ScaleGestureDetector
 import android.widget.Button
@@ -50,6 +51,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QuestionMark
@@ -232,7 +234,7 @@ class MA : AppCompatActivity() {
                                         Text(
                                             text = "OpenFarm",
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF1C8604),
+                                            color = Color.White,
                                             fontSize = 24.sp,
                                             modifier = Modifier.clickable{nav?.navigate("about")}
                                         )
@@ -328,7 +330,7 @@ class MA : AppCompatActivity() {
                                 )
                             ) {
                                 Text(
-                                    text = "DONASI",
+                                    text = "Beri dukungan!",
                                     fontSize = 18.sp,
                                     color = Color.White,
                                     fontWeight = FontWeight.ExtraBold
@@ -362,7 +364,7 @@ class MA : AppCompatActivity() {
                             ),
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Start,
+                                imageVector = Icons.Default.Lightbulb,
                                 contentDescription = "Search",
                                 modifier = Modifier.size(icon),
                                 tint = Color.Black
@@ -371,7 +373,7 @@ class MA : AppCompatActivity() {
                                 text = "Baru menggunakan OpenFarm?",
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Medium,
-                                color = Color(0xFF1C8604),
+                                color = Color.Black,
                                 fontSize = dynamicFontSize,
                             )
 
@@ -417,10 +419,11 @@ class MA : AppCompatActivity() {
                 Box(Modifier.fillMaxWidth().weight(1f)) {
                     BoxWithConstraints(Modifier.fillMaxSize()) {
                         val dynamicFontSize = (maxHeight.value / 3).sp
-                        Button(
-                            modifier = Modifier
+                        Button( modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 30.dp, end = 30.dp, bottom = 20.dp)
+                                .padding(
+                                    start = 30.dp, end = 30.dp, bottom = 20.dp
+                                )
                                 .wrapContentSize(),
                             onClick = {
                                 perm.launch(arrayOf(Manifest.permission.CAMERA))
@@ -444,19 +447,14 @@ class MA : AppCompatActivity() {
                             ),
                             border = BorderStroke(2.dp, Color.White),
                         ) {
-                            Column(
-                                verticalArrangement = Arrangement.Center
-                                ,modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = "Scan tanahmu!",
-                                    fontSize = dynamicFontSize,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White,
-                                    modifier = Modifier.fillMaxSize(),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            Text(
+                                text = "Scan tanahmu!",
+                                fontSize = dynamicFontSize,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                modifier = Modifier.fillMaxSize().align(Alignment.CenterVertically),
+                                textAlign = TextAlign.Center,
+                            )
                         }
                     }
                 }
@@ -480,12 +478,13 @@ class MA : AppCompatActivity() {
                 SoilActivity(nav, onClick = { pH: Float?, depth: Int? ->
                     val variable = UserVariable()
                     val soil = SoilParameters()
-                    if (pH != null) soil.pH = Math.min(pH,14f)
+                    if (pH != null) soil.pH = pH.coerceAtMost(14f)
                     if (depth != null) soil.numericDepth = depth
                     MA.soil = soil
                     variable.geo.rainfall = 2000.0
                     variable.geo.min = 18.0
                     variable.image = image
+                    variable.soil = soil
                     soilResult.collected = false
                     MA.response = Data.process(variable, soilResult)
                     Toast.makeText(this@MA, "finished", Toast.LENGTH_SHORT)
@@ -614,7 +613,7 @@ class MA : AppCompatActivity() {
         nav: NavController? = null,
         onClick: (pH: Float?, depth: Int?) -> Unit? = { a, b -> }) {
         var pH by remember { mutableStateOf("") }
-        var depth by remember { mutableStateOf("40") }
+        var depth by remember { mutableStateOf("20") }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -682,7 +681,7 @@ class MA : AppCompatActivity() {
                             }
                         },
                         label = { Text("Kedalaman tanah (cm)") },
-                        placeholder = { Text("40") },
+                        placeholder = { Text("20") },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number
                         ),
@@ -695,7 +694,11 @@ class MA : AppCompatActivity() {
                     val pH = pH.replace(",", ".").toFloatOrNull()
                     val depth = depth.replace(",", ".").toFloatOrNull()?.toInt()
                     Button(
-                        onClick = { onClick(pH, depth) },
+                        onClick = {
+                            onClick(pH, depth)
+                            Log.d("SOIL", "pH = $pH and depth = $depth")
+                            Toast.makeText(this@MA, "pH: $pH, depth: $depth", Toast.LENGTH_SHORT).show()
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 80.dp, vertical = 8.dp)

@@ -162,15 +162,7 @@ fun ResultScreen(
             }
         }
     }
-    var cat = remember(selected, soilResult) { soilResult?.plantByCategory?.get(selected) }
-    val plantCat by produceState<List<Pair<Int, MutableSet<String>>>?>(initialValue = null, cat, order) {
-        if (cat != null) {
-            value = withContext(Dispatchers.Default) {
-                if (order == "Tertinggi") cat.toList().asReversed()
-                else cat.toList()
-            }
-        } else value = emptyList()
-    }
+
      Scaffold(
         topBar = {
             TopAppBar(
@@ -181,119 +173,103 @@ fun ResultScreen(
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if(soilResult != null) {
-                            DropdownMenu(
-                                expanded = expandedSearch,
-                                onDismissRequest = { expandedSearch = false },
-                            ) {
-                                completer.forEach {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = it,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.Light
-                                            )
-                                        },
-                                        onClick = { query = it }
-                                    )
-                                }
-                            }
-                            BasicTextField(
-                                value = query,
-                                onValueChange = {input ->
-                                    query = input
+                        BasicTextField(
+                            value = query,
+                            onValueChange = { input ->
+                                query = input
+                                search.clear()
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
                                     search.clear()
+                                    if (query.isNotEmpty()) Data.search(query = query) {
+                                        search.add(it)
+                                    }
+                                }
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(35.dp)
+                                .padding(end = 12.dp)
+                                .align(Alignment.CenterVertically)
+                                .focusRequester(focusRequester)
+                                .onFocusChanged { focusState ->
+                                    Log.d("Focus", "Focused: ${focusState.isFocused}")
+                                    expandedSearch = focusState.isFocused
                                 },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Search
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onSearch = {
-                                        search.clear()
-                                        if(query.isNotEmpty()) Data.search(query = query){
-                                            search.add(it)
-                                        }
-                                    }
-                                ),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(35.dp)
-                                    .padding(end = 12.dp)
-                                    .align(Alignment.CenterVertically)
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged { focusState ->
-                                        Log.d("Focus", "Focused: ${focusState.isFocused}")
-                                        expandedSearch = focusState.isFocused
-                                    },
-                                decorationBox = { innerTextField ->
-                                    BoxWithConstraints(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        val size = (maxHeight.value / 2).sp
-                                        Column(verticalArrangement = Arrangement.Center) {
-                                            if (query.isEmpty() && !hasFocus) {
-                                                Text(
-                                                    "Masukan nama tanaman",
-                                                    color = Color.Gray,
-                                                    fontSize = size,
-                                                    modifier = Modifier
-                                                        .padding(start = 10.dp)
-                                                )
-                                            } else
-                                                Box(
-                                                    Modifier
-                                                        .wrapContentSize()
-                                                        .padding(start = 10.dp)
-                                                ) {
-                                                    innerTextField()
-                                                }
-                                        }
-                                    }
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Row(Modifier.clickable { expandCat = !expandCat },
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = order,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Normal,
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = "Order",
-                                    tint = Color.Yellow,
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                )
-                                DropdownMenu(
-                                    expanded = expandCat,
-                                    onDismissRequest = { expandCat = false },
+                            decorationBox = { innerTextField ->
+                                BoxWithConstraints(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+                                    contentAlignment = Alignment.CenterStart
                                 ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Tertinggi") },
-                                        onClick = {
-                                            order = "Tertinggi"
-                                            expandCat = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("Terendah") },
-                                        onClick = {
-                                            order = "Terendah"
-                                            expandCat = false
-                                        },
-                                    )
+                                    val size = (maxHeight.value / 2).sp
+                                    Column(verticalArrangement = Arrangement.Center) {
+                                        if (query.isEmpty() && !hasFocus) {
+                                            Text(
+                                                "Masukan nama tanaman",
+                                                color = Color.Gray,
+                                                fontSize = size,
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                            )
+                                        } else
+                                            Box(
+                                                Modifier
+                                                    .wrapContentSize()
+                                                    .padding(start = 10.dp)
+                                            ) {
+                                                innerTextField()
+                                            }
+                                    }
                                 }
-
                             }
+                        )
+
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Row(
+                            Modifier.clickable { expandCat = !expandCat },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = order,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Order",
+                                tint = Color.Yellow,
+                                modifier = Modifier
+                                    .size(30.dp)
+                            )
+                            DropdownMenu(
+                                expanded = expandCat,
+                                onDismissRequest = { expandCat = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Tertinggi") },
+                                    onClick = {
+                                        order = "Tertinggi"
+                                        expandCat = false
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Terendah") },
+                                    onClick = {
+                                        order = "Terendah"
+                                        expandCat = false
+                                    },
+                                )
+                            }
+
                         }
+
                         Row(
                             modifier = Modifier
                                 .clickable { expanded = !expanded },
@@ -381,7 +357,24 @@ fun ResultScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (!loaded || plantCat == null) {
+            DropdownMenu(
+                expanded = expandedSearch,
+                onDismissRequest = { expandedSearch = false },
+            ) {
+                completer.forEach {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = it,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Light
+                            )
+                        },
+                        onClick = { query = it }
+                    )
+                }
+            }
+            if (!loaded) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -391,7 +384,6 @@ fun ResultScreen(
                     Text(
                         text = if (!predicted) "Menganalisa tanahmu.."
                         else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
-                        else if (plantCat == null) "Loading.. "
                         else "Mencari data $current",
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -399,11 +391,19 @@ fun ResultScreen(
                     )
                 }
             } else if (soilResult != null && soilResult.plants?.isEmpty() == false) {
+                var cat = remember(selected, soilResult) { soilResult?.plantByCategory?.get(selected) }
+                val plantCat by produceState<List<Pair<Int, MutableSet<String>>>?>(initialValue = null, cat, order) {
+                    if (cat != null) {
+                        value = withContext(Dispatchers.Default) {
+                            if (order == "Tertinggi") cat.toList().asReversed()
+                            else cat.toList()
+                        }
+                    } else value = emptyList()
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val map = soilResult.plantByCategory
                     if(search.isNotEmpty()){
                         items(search.toList()){ q ->
                             Data.plantByTag[q]?.forEach {
@@ -411,7 +411,7 @@ fun ResultScreen(
                             }
                         }
                     }
-                    else if (map == null || map[selected].isNullOrEmpty())
+                    else if (plantCat.isNullOrEmpty())
                         item {
                             Column {
                                 Text(
@@ -434,43 +434,7 @@ fun ResultScreen(
 
                     }
                 }
-            }
-            else if(false && (searchResult != null && searchResult.plants?.isEmpty() == false)) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    val plants = searchResult?.plants
-                    val plantByCategory = searchResult?.plantByCategory
-                    if (selected == "All" && plants != null) {
-                        items(plants.toList()) { plant ->
-                            plant.forEach {
-                                PlantCardDisplayer(ref = Data.plant[plant])
-                            }
-                        }
-                    } else {
-                        if (plantByCategory == null || plantByCategory.isEmpty()) {
-                            item {
-                                Column(verticalArrangement = Arrangement.Center) {
-                                    Text(
-                                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 28.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(20.dp)
-                                    )
-                                }
-                            }
-                        } else {
-                            val map = plantByCategory[selected]
-                            if (map != null) items(map.toList()) {
-                                PlantCardDisplayer(ref = Data.plant[it])
-                            }
-                        }
-                    }
-                }
-            }
-            else {
+            } else {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
