@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
-            android:src="@drawable/aboutusthemesept"
+            android:src="@drawable/tentangkami"
             android:contentDescription="@string/PenjelasanTentangAplikasi" />
 
         <!-- Tombol panah kiri atas -->
