@@ -39,18 +39,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.OpenFarm"
         tools:targetApi="31">
-        <activity android:name="com.trbear9.openfarm.activities.PlantResult"
-            android:launchMode="singleTask"
-            android:exported="true" />
         <activity android:name="com.trbear9.openfarm.activities.PlantDetail"
             android:launchMode="singleTop"
-            android:exported="true" />
-        <activity android:name="com.trbear9.openfarm.activities.Camera"
-            android:launchMode="singleTop"
-            android:exported="true" />
-        <activity android:name=".AboutMeActivity"
-            android:exported="true" />
-        <activity android:name=".BotakuhPengetahuanActivity"
             android:exported="true" />
         <activity android:name="com.trbear9.openfarm.TutorialActivity"
             android:exported="true" />
@@ -67,7 +57,7 @@
         </provider>
 
         <activity
-            android:name="com.trbear9.openfarm.MA"
+            android:name="com.trbear9.openfarm.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

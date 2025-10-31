@@ -26,10 +26,10 @@ class SoilParameters : Parameters {
 
     override fun getParameters(): MutableMap<String?, String?> {
         val map: MutableMap<String?, String?> = HashMap()
-        map.put(O_soil_depth, depth?.head)
-        map.put(O_soil_texture, texture?.head)
-        map.put(O_soil_fertility, fertility?.head)
-        map.put(O_soil_drainage, drainage?.head)
+        map.put(A_soil_depth, depth?.head)
+        map.put(A_soil_texture, texture?.head)
+        map.put(A_soil_fertility, fertility?.head)
+        map.put(A_soil_drainage, drainage?.head)
         map.put("PH", pH.toString())
 
         return map
@@ -37,8 +37,8 @@ class SoilParameters : Parameters {
 
     companion object {
         /** sources:
-         * - https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/alluvial-soil
-         * - https://amoghavarshaiaskas.in/alluvial-soil/ */
+         * - https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/alluvial-soilStats
+         * - https://amoghavarshaiaskas.in/alluvial-soilStats/ */
         @JvmField
         val ALLUVIAL = SoilParameters().apply {
             texture = (TEXTURE.medium)

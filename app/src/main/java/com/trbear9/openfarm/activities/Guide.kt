@@ -124,7 +124,7 @@ fun Guide(nav: NavController? = null) {
                         }, content = {
                             Row {
                                 Image(
-                                    painter = painterResource(id = R.drawable.tentangaplikasinewupdate2),
+                                    painter = painterResource(id = R.drawable.mengapapenting),
                                     contentDescription = "Plant",
                                     modifier = Modifier.fillMaxWidth(0.3f)
                                         .padding(16.dp)

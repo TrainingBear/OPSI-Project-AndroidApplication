@@ -54,24 +54,28 @@ object Data {
                 """.trimIndent()
     }
 
-    fun search(max: Int = Int.MAX_VALUE, query: String, consumer: (String) -> Unit = {}): Set<String>{
+    fun search(
+        max: Int = Int.MAX_VALUE,
+        query: String,
+        consumer: (String) -> Unit = {}
+    ): Set<String> {
         val result = mutableSetOf<String>()
         var i = 0
         for (tag in tags) {
             val prefix = query.lowercase()
-            if(tag!=null && (tag.startsWith(prefix) || tag.contains(prefix))) {
+            if (tag != null && (tag.startsWith(prefix) || tag.contains(prefix))) {
                 result.add(tag)
                 consumer(tag)
             }
             i++
-            if(i >= max) break
+            if (i >= max) break
         }
         return result
     }
 
     val tags = mutableSetOf<String>()
     var kew = mutableMapOf<String, JsonNode?>()
-    fun load(context: Context){
+    fun load(context: Context) {
         CsvHandler.load(context)
         TFService.load(context)
         runBlocking {
@@ -114,9 +118,9 @@ object Data {
     val ecocrop = mutableMapOf<String, CSVRecord>()
     fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
         val name = record[Science_name]
-        if(plant.containsKey(name) && !load) return plant[name]!!
+        if (plant.containsKey(name) && !load) return plant[name]!!
 
-        val plant = if(plant[name] == null){
+        val plant = if (plant[name] == null) {
             Log.e("Data Processor", "Full plant version of $name not found")
             val plant = Plant()
             plant.commonName = name ?: "Tidak diketahui"
@@ -126,15 +130,15 @@ object Data {
         plant.nama_ilmiah = name
         record[Common_names]?.split(", ")?.forEach {
             plant.nama_umum.add(it)
-            plantByTag.computeIfAbsent(it){
-                key -> mutableSetOf<String>()
+            plantByTag.computeIfAbsent(it) { key ->
+                mutableSetOf<String>()
             }.add(name)
         }
         record[Category]?.split(", ")?.forEach {
             plant.category.add(it)
             tags += it.lowercase()
-            plantByTag.computeIfAbsent(it){
-                    key -> mutableSetOf<String>()
+            plantByTag.computeIfAbsent(it) { key ->
+                mutableSetOf<String>()
             }.add(name)
         }
         writeTaxonomy(plant)
@@ -199,7 +203,7 @@ object Data {
         soilResult.plantByCategory = mutableStateMapOf()
         for (score in response.tanaman.keys) {
             Log.d("Data Processor", "Loaded $score with size ${response.tanaman[score]!!.size}")
-            soilResult.plants!![score] = response.tanaman[score]?: mutableSetOf()
+            soilResult.plants!![score] = response.tanaman[score] ?: mutableSetOf()
         }
         soilResult.plantByCategory!!["All"] = soilResult.plants!!
         soilResult.plants!!.forEach { (score, list) ->
@@ -219,7 +223,7 @@ object Data {
         Util.getCategory().forEach { kat ->
             soilResult.plantByCategory!![kat]?.let {
                 Log.d("Data Processor", "Adding $kat with size ${it.size}")
-            } ?: Log.d("Data Processor","$kat is null")
+            } ?: Log.d("Data Processor", "$kat is null")
         }
         Log.d("Data Processor", "DONE with result of ${response.target} tanaman")
         emit(response)
@@ -228,12 +232,14 @@ object Data {
 
     private fun writeTaxonomy(plant: Plant) {
         plant.genus = plant.nama_ilmiah?.split(" ")[0]
-        if(kew?.containsKey(plant.nama_ilmiah) == true){
+        if (kew?.containsKey(plant.nama_ilmiah) == true) {
             plant.full_taxon = kew!![plant.nama_ilmiah]
-        }
-        else{
+        } else {
             log.warn("No taxonomy found for ${plant.nama_ilmiah}")
         }
+    }
+
+    fun pupuk(category: String) {
     }
 
     @OptIn(com.openmeteo.api.common.Response.ExperimentalGluedUnitTimeStepValues::class)
@@ -242,27 +248,27 @@ object Data {
         var min = 0.0
         var elevation = 0f
         val meteo = OpenMeteo(geo.latitude.toFloat(), geo.longtitude.toFloat())
-        val temperatur = meteo.forecast(){
+        val temperatur = meteo.forecast() {
             latitude = geo.latitude.toFloat()
             longitude = geo.longtitude.toFloat()
             temperatureUnit = TemperatureUnit.Celsius
             elevation
             startDate = Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 5)
             endDate = Date(System.currentTimeMillis())
-            daily = Forecast.Daily{
+            daily = Forecast.Daily {
                 listOf(temperature2mMin, temperature2mMax)
             }
         }.getOrThrow()
         Forecast.Daily.run {
             temperatur.daily.getValue(temperature2mMax).run {
                 for (m in values.values)
-                    max+= m?:28.0
-                max/= values.size
+                    max += m ?: 28.0
+                max /= values.size
             }
             temperatur.daily.getValue(temperature2mMin).run {
                 for (m in values.values)
-                    min+= m?:20.0
-                min/= values.size
+                    min += m ?: 20.0
+                min /= values.size
             }
         }
 
@@ -273,25 +279,25 @@ object Data {
         for (f in MPDL.elevation) {
             elevation = f
         }
-        elevation/=MPDL.elevation.size
+        elevation /= MPDL.elevation.size
         geo.altitude = elevation.toDouble()
-        geo.min =  min
+        geo.min = min
         geo.max = max
         Log.d("Data Processor", "Meteo temperatur: $min, $max with elevation: $elevation")
     }
 
-        val log: org.slf4j.Logger = LoggerFactory.getLogger(Data::class.java)!!
-        private val objectMapper = ObjectMapper()
+    val log: org.slf4j.Logger = LoggerFactory.getLogger(Data::class.java)!!
+    private val objectMapper = ObjectMapper()
 
-        init {
-            objectMapper.factory.setStreamReadConstraints(
-                StreamReadConstraints.builder()
-                    .maxStringLength(1_000_000_000)
-                    .build()
-            ).setStreamWriteConstraints(
-                StreamWriteConstraints.builder()
-                    .maxNestingDepth(1_000_000_000)
-                    .build()
-            )
-        }
+    init {
+        objectMapper.factory.setStreamReadConstraints(
+            StreamReadConstraints.builder()
+                .maxStringLength(1_000_000_000)
+                .build()
+        ).setStreamWriteConstraints(
+            StreamWriteConstraints.builder()
+                .maxNestingDepth(1_000_000_000)
+                .build()
+        )
+    }
 }

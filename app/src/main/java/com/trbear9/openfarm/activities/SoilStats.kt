@@ -87,7 +87,8 @@ import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.trbear9.internal.TFService
-import com.trbear9.openfarm.MA
+import com.trbear9.openfarm.MainActivity
+import com.trbear9.openfarm.inputs
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -97,19 +98,19 @@ val labelListKey = ExtraStore.Key<List<String>>()
 @Composable
 fun SoilStats(nav: NavController? = null) {
     val scroll = rememberScrollState()
-    var response by remember {mutableStateOf(MA.soilResult.response)}
-    var collected by remember {mutableStateOf<Boolean>(MA.soilResult.collected)}
+    var response by remember {mutableStateOf(inputs.soilResult.response)}
+    var collected by remember {mutableStateOf<Boolean>(inputs.soilResult.collected)}
     var soilType by remember { mutableStateOf(response?.soilMax?.first ?: "Belum diketahui") }
     var soilPred by remember { mutableFloatStateOf(response?.soilMax?.second ?: 0.0f) }
     var ferr by remember { mutableStateOf(response?.soil?.fertility ?: "Belum diketahui") }
     var texr by remember { mutableStateOf(response?.soil?.texture ?: "Belum diketahui") }
     var drain by remember { mutableStateOf(response?.soil?.drainage ?: "Belum diketahui") }
-    var depth by remember { mutableStateOf(MA.soil.numericDepth) }
+    var depth by remember { mutableStateOf(inputs.soil.numericDepth) }
     val modelProducer = remember { CartesianChartModelProducer() }
     var list = remember {mutableStateListOf<Float>()}
 
     LaunchedEffect(Unit) {
-        collected = MA.soilResult.collected
+        collected = inputs.soilResult.collected
         modelProducer.runTransaction {
             columnSeries {
                 response?.soilPrediction?.run {
@@ -243,8 +244,8 @@ fun SoilStats(nav: NavController? = null) {
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 30.sp,
                     )
-                    val pH = MA.soil.pH ?: value?.soil?.pH
-                    Map("PH: ", (MA.soil.pH ?: (value?.soil?.pH.toString() + " (default)")).toString())
+                    val pH = inputs.soil.pH ?: value?.soil?.pH
+                    Map("PH: ", (inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")).toString())
                     Map("Tipe: ", "$soilType ${soilPred * 100.0}%")
                     Map("Tekstur: ", texr.toString())
                     Map("Drainase: ", drain.toString())

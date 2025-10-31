@@ -35,7 +35,7 @@ class SlideAdapter(private val context: AppCompatActivity, private val data: Lis
             holder.binding.btnDone.visibility = View.VISIBLE
             holder.binding.btnDone.setOnClickListener {
 //                val context = holder.itemView.context
-//                val intent = Intent(context, MA::class.java)
+//                val intent = Intent(context, MainActivity::class.java)
 //                context.startActivity(intent)
 //                (context as? AppCompatActivity)?.finish()
                 context.finish()

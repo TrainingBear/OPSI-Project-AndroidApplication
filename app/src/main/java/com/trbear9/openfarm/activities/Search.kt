@@ -1,7 +1,6 @@
 package com.trbear9.openfarm.activities
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -43,23 +42,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.accompanist.flowlayout.FlowRow
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview

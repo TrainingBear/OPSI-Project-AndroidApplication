@@ -16,14 +16,23 @@ android {
 
     defaultConfig {
         ndk{
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            abiFilters += listOf("arm64-v8a")
         }
         applicationId = "com.trbear9.openfarm"
-        minSdk = 29
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a")
+            isUniversalApk = true
+        }
     }
 
     signingConfigs {
@@ -52,14 +61,6 @@ android {
         }
     }
 
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = true
-        }
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -93,6 +94,10 @@ android {
                 pickFirsts += "META-INF/**/**"
                 pickFirsts += "META-INF/**"
                 pickFirsts += "mozilla/public-suffix-list.txt"
+                pickFirsts += listOf(
+                    "lib/armeabi-v7a/liblitert_jni.so",
+                    "lib/arm64-v8a/liblitert_jni.so"
+                )
             }
     }
     fun AndroidResources.() {

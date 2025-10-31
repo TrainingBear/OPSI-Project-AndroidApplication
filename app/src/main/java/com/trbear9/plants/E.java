@@ -172,9 +172,9 @@ public final class E {
     }
 
     public enum DRAINAGE{
-        poorly("poorly"),
-        well("well"),
-        excessive("excessive")
+        poorly("poorly (saturated >50% of year)"),
+        well("well (dry spells)"),
+        excessive("excessive (dry/moderately dry)")
         ;
         public static final String absolute = A_soil_drainage;
         public static final String optimal = O_soil_drainage;

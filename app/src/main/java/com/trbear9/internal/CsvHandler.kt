@@ -197,7 +197,7 @@ object CsvHandler {
                                     Math.min(min, max),
                                     Math.max(min, max)
                                 ).absoluteValue
-                                score -= (absoluteValue * 2).toInt()
+                                score -= (absoluteValue * 2.7).toInt()
                                 Log.d("CSV $scienceName ", "$scienceName missPH: $absoluteValue, decreased to $score actual ph is $floatVar")
                             }
                         }
@@ -215,9 +215,17 @@ object CsvHandler {
                             if (value.contains(paramVal)) {
                                 score += 1
                                 flag = true
-                            } else if (col == E.Climate_zone) {
+                                continue
+                            }
+
+                            flag = false
+                            if (col == E.Climate_zone) {
                                 score -= 354354
-                                flag = false
+                                continue
+                            }
+                            if (col == E.A_soil_drainage || col == E.O_soil_drainage){
+                                score -= 10
+                                continue
                             }
                         }
                     }

@@ -65,8 +65,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.trbear9.internal.Data
-import com.trbear9.openfarm.MA
+import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.Util
+import com.trbear9.openfarm.inputs
 import com.trbear9.plants.api.Response
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -89,9 +90,8 @@ class SearchResult {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun ResultScreen(
-    soilResult: SoilResult? = null,
-    searchResult: SearchResult? = null,
+fun SoilResultScreen(
+    soilResult: SoilResult? = inputs.soilResult,
     onBack: () -> Unit = {},
     nav: NavController? = null
 ) {
@@ -109,7 +109,7 @@ fun ResultScreen(
             if(soilResult == null) true
             else soilResult.response?.loaded ?: false)
     }
-    var collected by remember { mutableStateOf<Boolean>(MA.soilResult.collected ?: true) }
+    var collected by remember { mutableStateOf<Boolean>(inputs.soilResult.collected ?: true) }
     var current by remember { mutableStateOf<String>(soilResult?.response?.current ?: "Tanduran") }
     var progress by remember { mutableIntStateOf(soilResult?.response?.progress?.toInt() ?: 0) }
     var target by remember { mutableIntStateOf(soilResult?.response?.target?.toInt() ?: 0) }
@@ -319,7 +319,7 @@ fun ResultScreen(
             )
         },
         bottomBar = {
-            if(searchResult == null) {
+            if(true) { //before: if searchresult == null
                 var selected by remember { mutableIntStateOf(1) }
                 NavigationBar {
                     NavigationBarItem(
