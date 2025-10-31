@@ -10,6 +10,7 @@ object Screen {
     const val about = "about"
     const val tentang = "tentang"
     const val camera = "camera"
+    const val inputSoil = "inputSoil"
 }
 
 fun String.withArgs(vararg arg: Pair<String, String>): String{

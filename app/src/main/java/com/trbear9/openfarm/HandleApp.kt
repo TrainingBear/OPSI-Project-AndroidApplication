@@ -28,10 +28,10 @@ fun App() {
     NavHost(navController = nav, startDestination = "home") {
         composable(Screen.camera) {
             CameraActivity(nav, onClick = {
-                nav.navigate(Screen.soilStats)
+                nav.navigate(Screen.inputSoil)
             })
         }
-        composable(Screen.soilStats) {
+        composable(Screen.inputSoil) {
             InputSoil(nav, onClick = { pH: Float?, depth: Int? ->
                 val variable = UserVariable()
                 val soil = SoilParameters()
@@ -48,7 +48,7 @@ fun App() {
                     .show()
                 Util.debug("Job has been finished!")
                 inputs.soilResult.res = inputs.response
-                nav.navigate("result_soil")
+                nav.navigate(Screen.soilResult)
             })
         }
         composable(Screen.soilResult) {
@@ -57,7 +57,7 @@ fun App() {
                 nav = nav
             )
         }
-        composable("search_result") {
+        composable(Screen.searchResult) {
             SoilResultScreen(
                 onBack = { nav.navigateUp() },
                 nav = nav

@@ -404,21 +404,22 @@ fun Home(nav: NavController? = null) {
             }
             Box(modifier = Modifier.fillMaxWidth().weight(5f)) {
 
+//                Image(
+//                    painter = painterResource(id = R.drawable.smanega),
+//                    contentDescription = null,
+//                    contentScale = ContentScale.FillHeight,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .aspectRatio(16/6.5f)
+//                )
                 Image(
-                    painter = painterResource(id = R.drawable.smanega),
+                    painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
                     contentDescription = null,
-                    contentScale = ContentScale.FillHeight,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16/6.5f)
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.background2),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillHeight,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.Center)
+                        .aspectRatio(16/13.5f)
+                        .align(Alignment.Center),
                 )
 
                 BoxWithConstraints(Modifier.fillMaxWidth()
