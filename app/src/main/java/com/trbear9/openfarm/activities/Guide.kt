@@ -85,17 +85,6 @@ fun Guide(nav: NavController? = null) {
                 Modifier.fillMaxSize().padding(it)
             ) {
                 Box(Modifier.fillMaxWidth().weight(0.1f)) {
-//                    AndroidView(
-//                        factory = {
-//                            LayoutInflater.from(it).inflate(R.layout.activity_about_me, null)
-//                        },
-//                        update = {
-//                            val aboutMe = it.findViewById<ImageButton>(R.id.buttonBackmenuabout)
-//                            aboutMe.setOnClickListener {
-//                                nav?.navigateUp()
-//                            }
-//                        }
-//                    )
                 }
                 Box(Modifier.fillMaxWidth().weight(2f)) {
                     Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
