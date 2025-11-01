@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
+import com.trbear9.openfarm.util.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -117,7 +118,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
                                             }
                                             searchResult.plantByCategory!![cat.toString()] = result
                                         }
-                                        nav?.navigate("search_result")
+                                        nav?.navigate(Screen.searchResult)
                                     }
                                 ),
                                 decorationBox = { innerTextField ->

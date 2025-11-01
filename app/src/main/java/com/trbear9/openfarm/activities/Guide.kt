@@ -43,6 +43,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.trbear9.openfarm.R
 import com.trbear9.openfarm.TutorialActivity
+import com.trbear9.openfarm.util.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -61,7 +62,7 @@ fun Guide(nav: NavController? = null) {
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        nav?.navigate("home")
+                        nav?.navigate(Screen.home)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -109,7 +110,7 @@ fun Guide(nav: NavController? = null) {
                             }
                         })
                         Item(click = {
-                            nav?.navigate("tentang")
+                            nav?.navigate(Screen.tentang)
                         }, content = {
                             Row {
                                 Image(

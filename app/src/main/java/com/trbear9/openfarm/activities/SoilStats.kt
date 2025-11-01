@@ -89,6 +89,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.trbear9.internal.TFService
 import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.inputs
+import com.trbear9.openfarm.util.Screen
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -141,7 +142,7 @@ fun SoilStats(nav: NavController? = null) {
                 selected = selected == 0,
                 onClick = {
                     selected = 0
-                    nav?.navigate("home")
+                    nav?.navigate(Screen.home)
                 },
                 icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                 label = { Text("Home") }
@@ -150,7 +151,7 @@ fun SoilStats(nav: NavController? = null) {
                 selected = selected == 1,
                 onClick = {
                     selected = 1
-                    nav?.navigate("result_soil")
+                    nav?.navigate(Screen.soilResult)
                 },
                 icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                 label = { Text("Tanaman") }
@@ -196,7 +197,7 @@ fun SoilStats(nav: NavController? = null) {
                     )
                     Button(
                         onClick = {
-                            nav?.navigate("camera")
+                            nav?.navigate(Screen.camera)
                         },
                         modifier = Modifier.padding(top = 20.dp)
                     ) {

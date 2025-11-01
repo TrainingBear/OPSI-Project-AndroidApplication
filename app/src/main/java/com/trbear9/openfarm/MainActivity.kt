@@ -176,7 +176,7 @@ fun Home(nav: NavController? = null) {
                     selected = selected == 0,
                     onClick = {
                         selected = 0
-                        nav?.navigate("home")
+                        nav?.navigate(Screen.home)
                     },
                     icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                     label = { Text("Home") }
@@ -185,7 +185,7 @@ fun Home(nav: NavController? = null) {
                     selected = selected == 1,
                     onClick = {
                         selected = 1
-                        nav?.navigate("result_soil")
+                        nav?.navigate(Screen.soilResult)
                     },
                     icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                     label = { Text("Tanaman") }
@@ -194,7 +194,7 @@ fun Home(nav: NavController? = null) {
                     selected = selected == 2,
                     onClick = {
                         selected = 2
-                        nav?.navigate("tanah")
+                        nav?.navigate(Screen.soilStats)
                     },
                     icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                     label = { Text("Tanah") }
@@ -218,7 +218,7 @@ fun Home(nav: NavController? = null) {
                                     contentDescription = "Help",
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .clickable{nav?.navigate("about")}
+                                        .clickable{nav?.navigate(Screen.about)}
                                 )
                                 Column(
                                     horizontalAlignment = Alignment.Start,
@@ -230,7 +230,7 @@ fun Home(nav: NavController? = null) {
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
                                         fontSize = 24.sp,
-                                        modifier = Modifier.clickable{nav?.navigate("about")}
+                                        modifier = Modifier.clickable{nav?.navigate(Screen.about)}
                                     )
                                 }
                             }
@@ -254,7 +254,7 @@ fun Home(nav: NavController? = null) {
                                     modifier = Modifier.padding(20.dp)
                                         .size(30.dp)
                                         .clickable {
-                                            nav?.navigate("tentang")
+                                            nav?.navigate(Screen.tentang)
                                         }
                                 )
                             }
@@ -349,7 +349,7 @@ fun Home(nav: NavController? = null) {
                     val dynamicFontSize = (maxHeight.value / 4.4).sp
                     val icon = (maxHeight/ 3)
                     Button(
-                        onClick = {nav?.navigate("help")},
+                        onClick = {nav?.navigate(Screen.help)},
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(10.dp)
@@ -404,14 +404,6 @@ fun Home(nav: NavController? = null) {
             }
             Box(modifier = Modifier.fillMaxWidth().weight(5f)) {
 
-//                Image(
-//                    painter = painterResource(id = R.drawable.smanega),
-//                    contentDescription = null,
-//                    contentScale = ContentScale.FillHeight,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .aspectRatio(16/6.5f)
-//                )
                 Image(
                     painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
                     contentDescription = null,

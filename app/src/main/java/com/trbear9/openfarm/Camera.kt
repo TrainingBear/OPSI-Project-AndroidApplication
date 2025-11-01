@@ -50,6 +50,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.trbear9.openfarm.util.Screen
 
 
 private val imgCapture = ImageCapture.Builder().build()
@@ -86,8 +87,8 @@ fun CameraActivity(nav: NavController? = null,onClick: () -> Unit = {}) {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { nav?.navigate("home") }) {
-                        androidx.compose.material3.Icon(
+                    IconButton(onClick = { nav?.navigate(Screen.home) }) {
+                        Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = Color.White

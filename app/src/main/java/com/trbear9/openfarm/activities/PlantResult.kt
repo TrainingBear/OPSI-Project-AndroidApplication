@@ -68,6 +68,7 @@ import com.trbear9.internal.Data
 import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.inputs
+import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.api.Response
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -327,7 +328,7 @@ fun SoilResultScreen(
                         onClick = {
                             selected = 0
                             onBack()
-                            nav?.navigate("home")
+                            nav?.navigate(Screen.home)
                         },
                         icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                         label = { Text("Home") }
@@ -344,7 +345,7 @@ fun SoilResultScreen(
                         selected = selected == 2,
                         onClick = {
                             selected = 2
-                            nav?.navigate("tanah")
+                            nav?.navigate(Screen.soilStats)
                         },
                         icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
                         label = { Text("Tanah") }
@@ -454,7 +455,7 @@ fun SoilResultScreen(
                     )
                     Button(
                         onClick = {
-                            nav?.navigate("camera")
+                            nav?.navigate(Screen.camera)
                         },
                         modifier = Modifier
                             .padding(top = 20.dp)

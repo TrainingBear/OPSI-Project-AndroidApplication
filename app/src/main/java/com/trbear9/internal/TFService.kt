@@ -13,14 +13,25 @@ import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 
 object TFService {
-    val labels = listOf("Aluvial", "Andosol", "Humus", "Kapur", "Laterit", "Pasir")
+//    val labels = listOf("Aluvial", "Andosol", "Humus", "Kapur", "Laterit", "Pasir")
+    val labels = listOf("Aluvial", "Andosol", "Entisol", "Humus", "Inceptisol", "Laterit", "Kapur", "Pasir")
+//    val soils = mapOf(
+//            "Aluvial" to SoilParameters.ALLUVIAL,
+//            "Andosol" to SoilParameters.ANDOSOL,
+//            "Humus" to SoilParameters.HUMUS,
+//            "Kapur" to SoilParameters.KAPUR,
+//            "Laterit" to SoilParameters.LATERITE,
+//            "Pasir" to SoilParameters.PASIR)
     val soils = mapOf(
             "Aluvial" to SoilParameters.ALLUVIAL,
             "Andosol" to SoilParameters.ANDOSOL,
             "Humus" to SoilParameters.HUMUS,
             "Kapur" to SoilParameters.KAPUR,
             "Laterit" to SoilParameters.LATERITE,
-            "Pasir" to SoilParameters.PASIR)
+            "Pasir" to SoilParameters.PASIR,
+            "Inceptisol" to SoilParameters.INCEPTISOL,
+            "Entisol" to SoilParameters.ENTISOL
+        )
     var model: CompiledModel? = null
     fun load(context: Context){
         model = CompiledModel.create(context.assets, "model.tflite")

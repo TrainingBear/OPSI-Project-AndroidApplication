@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.trbear9.openfarm.util.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +61,7 @@ fun InputSoil(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        nav?.navigate("camera")
+                        nav?.navigate(Screen.camera)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
