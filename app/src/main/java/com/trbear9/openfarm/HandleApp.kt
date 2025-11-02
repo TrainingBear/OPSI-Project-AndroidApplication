@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.activities.Guide
 import com.trbear9.openfarm.activities.SearchLayout
 import com.trbear9.openfarm.activities.SoilResultScreen
 import com.trbear9.openfarm.activities.SoilStats
@@ -76,10 +77,7 @@ fun App() {
             Home(nav)
         }
         composable(Screen.help) {
-            LaunchedEffect(Unit) {
-                val intent = Intent(context, TutorialActivity::class.java)
-                context.startActivity(intent)
-            }
+            Guide(nav)
         }
         composable(Screen.tentang) {
             AndroidView(
