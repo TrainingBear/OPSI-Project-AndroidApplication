@@ -89,7 +89,7 @@ object CONS {
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.LightGray)
                 ) {
-                    if (ref.fullsize != null)
+                    if (ref.fullsize != null )
                         Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)

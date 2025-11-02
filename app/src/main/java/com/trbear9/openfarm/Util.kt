@@ -9,6 +9,11 @@ import java.io.IOException
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
+fun String.info(tag: String) = Log.i(tag, this)
+fun String.debug(tag: String) = Log.d(tag, this)
+fun String.warn(tag: String) = Log.w(tag, this)
+fun String.error(tag: String) = Log.e(tag, this)
+
 object Util {
     fun debug(message: String) {
         Log.d("OpenFarm", message)

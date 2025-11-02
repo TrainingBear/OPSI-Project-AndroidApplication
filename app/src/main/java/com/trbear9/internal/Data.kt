@@ -23,14 +23,10 @@ import com.trbear9.plants.api.GeoParameters
 import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.UserVariable
 import com.trbear9.plants.api.blob.Plant
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import lombok.Getter
@@ -54,16 +50,20 @@ object Data {
                 """.trimIndent()
     }
 
-    fun search(
+    fun searchByCommonName(
         max: Int = Int.MAX_VALUE,
         query: String,
         consumer: (String) -> Unit = {}
     ): Set<String> {
         val result = mutableSetOf<String>()
         var i = 0
-        for (tag in tags) {
+        for (tag in namaUmumToNamaIlmiah.keys) {
             val prefix = query.lowercase()
-            if (tag != null && (tag.startsWith(prefix) || tag.contains(prefix))) {
+            val target = tag.lowercase()
+            if (target != null && (target.startsWith(prefix) ||
+                        target.endsWith(prefix) ||
+                        target.contains(prefix))
+                ) {
                 result.add(tag)
                 consumer(tag)
             }
@@ -117,39 +117,39 @@ object Data {
     var plantByTag = SnapshotStateMap<String, MutableSet<String>>()
     val ecocrop = mutableMapOf<String, CSVRecord>()
     fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
-        val name = record[Science_name]
-        if (plant.containsKey(name) && !load) return plant[name]!!
+        val ilmiah = record[Science_name]
+        if (plant.containsKey(ilmiah) && !load) return plant[ilmiah]!!
 
-        val plant = if (plant[name] == null) {
-            Log.e("Data Processor", "Full plant version of $name not found")
+        val plant = if (plant[ilmiah] == null) {
+            Log.e("Data Processor", "Full plant version of $ilmiah not found")
             val plant = Plant()
-            plant.commonName = name ?: "Tidak diketahui"
+            plant.commonName = ilmiah ?: "Tidak diketahui"
             plant
-        } else plant[name]!!
+        } else plant[ilmiah]!!
 
-        plant.nama_ilmiah = name
+        plant.nama_ilmiah = ilmiah
         record[Common_names]?.split(", ")?.forEach {
             plant.nama_umum.add(it)
             plantByTag.computeIfAbsent(it) { key ->
                 mutableSetOf<String>()
-            }.add(name)
+            }.add(ilmiah)
         }
         record[Category]?.split(", ")?.forEach {
             plant.category.add(it)
             tags += it.lowercase()
             plantByTag.computeIfAbsent(it) { key ->
                 mutableSetOf<String>()
-            }.add(name)
+            }.add(ilmiah)
         }
         writeTaxonomy(plant)
-        tags += name.lowercase()
+        tags += ilmiah.lowercase()
         val commonname = plant.commonName?.lowercase() ?: "null"
         tags += commonname
 
-        namaUmumToNamaIlmiah[commonname] = name.lowercase()
-        namaIlmiahToNamaUmum[name.lowercase()] = commonname
+        namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah.lowercase()
+        namaIlmiahToNamaUmum[ilmiah.lowercase()] = commonname
 
-        this.plant[name] = plant
+        this.plant[ilmiah] = plant
         Log.d("Data Processor", "Loaded ${plant.commonName} plants")
         return plant
     }

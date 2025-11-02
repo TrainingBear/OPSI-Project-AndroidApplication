@@ -226,10 +226,27 @@ fun Home(nav: NavController? = null) {
                                     modifier = Modifier.fillMaxSize()
                                 ) {
                                     Text(
-                                        text = "OpenFarm",
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        fontSize = 24.sp,
+                                        text = buildAnnotatedString {
+                                            withStyle(
+                                                style = SpanStyle(
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 24.sp,
+                                                )
+                                            ) {
+                                                append("OpenFarm")
+                                            }
+                                            withStyle(
+                                                style = SpanStyle(
+                                                    color = Color.DarkGray,
+                                                    fontWeight = FontWeight.Normal,
+                                                    fontSize = 16.sp,
+                                                )
+                                            ) {
+                                                append("\nby Jasper")
+                                            }
+                                        },
+                                        lineHeight = 18.sp,
                                         modifier = Modifier.clickable{nav?.navigate(Screen.about)}
                                     )
                                 }

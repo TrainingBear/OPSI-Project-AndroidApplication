@@ -5,7 +5,7 @@ object Screen {
     const val soilStats = "soilStats"
     const val soilResult = "soil_result"
     const val searchResult = "search_result"
-    const val search = "search"
+    const val search = "searchByCommonName"
     const val help = "help"
     const val about = "about"
     const val tentang = "tentang"
