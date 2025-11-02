@@ -81,7 +81,6 @@ object CONS {
                 .padding(8.dp)
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
-                // Plant Image
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -95,7 +94,7 @@ object CONS {
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
                                     .crossfade(true)
-                                    .size(300, 200)
+                                    .size(600, 400)
                                     .diskCachePolicy(CachePolicy.ENABLED)
                                     .memoryCachePolicy(CachePolicy.ENABLED)
                                     .build(),
@@ -108,7 +107,14 @@ object CONS {
                             if (score != 0) {
                                 val star = (score / 10f) * 5
                                 val half = (star - star.toInt()) > 0.1f
-                                androidx.compose.foundation.layout.Row(Modifier.align(Alignment.BottomStart)) {
+                                androidx.compose.foundation.layout.Row(
+                                    modifier = Modifier
+                                        .padding(end = 10.dp, top = 7.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .wrapContentSize(Alignment.Center)
+                                        .background(Color.Black.copy(alpha = 0.5f))
+                                        .align(Alignment.TopEnd)
+                                ) {
                                     repeat(star.toInt()) {
                                         Icon(
                                             imageVector = Icons.Default.Star,
@@ -131,22 +137,55 @@ object CONS {
                             }
                         }
                     else
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                imageVector = CONS.noImage,
-                                contentDescription = "${ref.nama_ilmiah ?: "no"} image",
-                                modifier = Modifier
-                                    .fillMaxSize(fraction = 0.5f)
-                                    .clip(RoundedCornerShape(16.dp))
-                            )
-                            Text(
-                                text = "Gambar tidak tersedia untuk ${ref?.commonName}",
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
+                        Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
+                            Column(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    imageVector = CONS.noImage,
+                                    contentDescription = "${ref.nama_ilmiah ?: "no"} image",
+                                    modifier = Modifier
+                                        .fillMaxSize(fraction = 0.5f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                )
+                                Text(
+                                    text = "Gambar tidak tersedia untuk ${ref?.commonName}",
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            if (score != 0) {
+                                val star = (score / 10f) * 5
+                                val half = (star - star.toInt()) > 0.1f
+                                androidx.compose.foundation.layout.Row(
+                                    modifier = Modifier
+                                        .padding(end = 10.dp, top = 7.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .wrapContentSize(Alignment.Center)
+                                        .background(Color.Black.copy(alpha = 0.5f))
+                                        .align(Alignment.TopEnd)
+                                ) {
+                                    repeat(star.toInt()) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Score",
+                                            tint = Color.Yellow,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                        )
+                                    }
+                                    if (half) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                            contentDescription = "Half Score",
+                                            tint = Color.Yellow,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                 }
 

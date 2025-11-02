@@ -61,14 +61,35 @@ object Data {
             val prefix = query.lowercase()
             val target = tag.lowercase()
             if (target != null && (target.startsWith(prefix) ||
-                        target.endsWith(prefix) ||
                         target.contains(prefix))
                 ) {
                 result.add(tag)
                 consumer(tag)
+                i++
+                if (i >= max) break
             }
-            i++
-            if (i >= max) break
+        }
+        return result
+    }
+
+    fun searchByScienceName(
+        max: Int = Int.MAX_VALUE,
+        query: String,
+        consumer: (String) -> Unit = {}
+    ): Set<String> {
+        val result = mutableSetOf<String>()
+        var i = 0
+        for (tag in namaIlmiahToNamaUmum.keys){
+            val prefix = query.lowercase()
+            val target = tag.lowercase()
+            if (target != null && (target.startsWith(prefix) ||
+                        target.contains(prefix))
+                ) {
+                result.add(tag)
+                consumer(tag)
+                i++
+                if (i >= max) break
+            }
         }
         return result
     }

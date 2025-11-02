@@ -156,11 +156,11 @@ class PlantDetail : ComponentActivity(){
                     }
                     Row(
                         modifier = Modifier
-                            .padding(start = 10.dp)
+                            .padding(end = 10.dp, top = 7.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .wrapContentSize(Alignment.Center)
                             .background(Color.Black.copy(alpha = 0.5f))
-                            .align(Alignment.BottomStart)
+                            .align(Alignment.TopEnd)
                     ) {
                         val star = (score / 10f) * 5
                         val half = (star - star.toInt()) > 0.1f
@@ -207,12 +207,12 @@ class PlantDetail : ComponentActivity(){
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = ref.commonName.toString(),
+                            text = ref.commonName?.toString()?:"null",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
-                            text = ref.description.toString(),
+                            text = ref.description?.toString()?:"null",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )

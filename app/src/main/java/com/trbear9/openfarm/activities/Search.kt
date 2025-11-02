@@ -1,6 +1,7 @@
 package com.trbear9.openfarm.activities
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,7 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -42,16 +45,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
+import com.trbear9.openfarm.error
 import com.trbear9.openfarm.util.Screen
+import kotlinx.coroutines.delay
+import kotlin.math.min
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -62,13 +81,83 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
     var expanded by remember { mutableStateOf(false) }
     val cat = remember { mutableStateSetOf<String>("All") }
     var query by remember { mutableStateOf("") }
-    var focusState by remember { mutableStateOf(false) }
-    var completer = remember { mutableStateSetOf<String>() }
+    var completer = remember { mutableListOf<String>() }
+    val focusRequester = remember { FocusRequester() }
+
+    val pageSource = object : PagingSource<Int, String>(){
+        override fun getRefreshKey(state: PagingState<Int, String>): Int? {
+            return state.anchorPosition?.let { pos ->
+                state.closestPageToPosition(pos)?.prevKey?.plus(1)
+                    ?: state.closestPageToPosition(pos)?.nextKey?.minus(1)
+            }
+        }
+
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
+            val page = params.key ?: 0
+            val pageSize = 7
+
+            return try {
+                delay(500)
+                val nextKey = if (page.toDouble() >= (completer.size/pageSize)) null else page + 1
+                val item = completer.subList(page * pageSize,
+                    min((page + 1) * pageSize, completer.size)
+                ).toList()
+                LoadResult.Page(
+                    data = item,
+                    prevKey = if (page == 0) null else page - 1,
+                    nextKey = nextKey
+                )
+            } catch (e: Exception) {
+                "Error when loading page $page: ${e.message}".error("Search")
+                e.printStackTrace()
+                LoadResult.Error(e)
+            }
+        }
+    }
+
+    val viewModel = object : ViewModel() {
+        val pager = Pager(
+            config = PagingConfig(
+                pageSize = 8,
+                prefetchDistance = 4,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { pageSource }
+        ).flow.cachedIn(viewModelScope)
+    }
+
+    val factory = remember {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(viewModel::class.java)) {
+                    return viewModel as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    }
+    val pagerFlow =
+            remember(completer) {
+                Pager(PagingConfig(pageSize = 7)) {
+                    pageSource
+                }.flow
+            }
+    val items = pagerFlow.collectAsLazyPagingItems()
+
+    val keyboard = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(Unit){
+        focusRequester.requestFocus()
+    }
 
     LaunchedEffect(query) {
         completer.clear()
         if(query.isNotEmpty()) {
-            Data.searchByCommonName(10, query = query) {
+            Data.searchByCommonName(9999, query = query) {
+                completer.add(it)
+            }
+            Data.searchByScienceName(9999, query = query) {
                 completer.add(it)
             }
         }
@@ -99,6 +188,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
                                     .fillMaxWidth()
                                     .height(35.dp)
                                     .align(Alignment.Center)
+                                    .focusRequester(focusRequester)
                                 ,
                                 keyboardOptions = KeyboardOptions(
                                     imeAction = ImeAction.Search
@@ -138,8 +228,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
                                                     modifier = Modifier
                                                         .padding(start = 10.dp)
                                                 )
-                                            }
-                                            Box(
+                                            } else Box(
                                                 Modifier
                                                     .wrapContentSize()
                                                     .padding(start = 10.dp)
@@ -237,29 +326,30 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
             )
         }
     ) {
-        Column(Modifier
+        LazyColumn(Modifier
             .fillMaxSize()
-            .padding(it)
-            .verticalScroll(scroll),
-            verticalArrangement = Arrangement.Center,
+            .padding(it),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Coming soon!",
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 30.sp,
-                modifier = Modifier.padding(start = 10.dp)
-            )
-            DropdownMenu(expanded = true, onDismissRequest = {}) {
-                completer.forEach {
-                    DropdownMenuItem(
-                        text = { Text(it) },
-                        onClick = {
-                            completer.clear()
-                            query = it
-                        }
+            items(completer.count()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+//                        .border(1.dp, Color.Black)
+                ) {
+                    Text(
+                        text = completer[it],
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(start = 10.dp, top = 5.dp)
+                            .clickable {
+                                query = completer[it]
+                            }
                     )
                 }
+
             }
         }
     }

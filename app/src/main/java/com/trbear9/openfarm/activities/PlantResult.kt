@@ -57,10 +57,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -74,6 +76,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.patrykandpatrick.vico.compose.common.shape.rounded
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.ResultPagingSource
 import com.trbear9.openfarm.Util
@@ -131,7 +134,7 @@ fun SoilResultScreen(
 
     var search = remember{ mutableStateSetOf<String>()}
     var focusRequester = remember{ FocusRequester() }
-    var empty = remember{mutableStateMapOf<Int, MutableSet<String>>()}
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         collected = inputs.soilResult?.collected ?: true
@@ -171,13 +174,14 @@ fun SoilResultScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
-                            modifier = if(expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(1f)
+                            modifier = (if(expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(1f))
                         ) {
                             BasicTextField (
                                 value = query,
                                 onValueChange = { input ->
                                     query = input
                                     search.clear()
+                                    expandedSearch = true
                                 },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
@@ -197,10 +201,9 @@ fun SoilResultScreen(
                                     .padding(end = 12.dp)
                                     .focusRequester(focusRequester)
                                     .onFocusChanged { focusState ->
-                                        "Focused: ${focusState.hasFocus}".debug("PlantResult")
-                                        expandedSearch = focusState.hasFocus
                                         hasFocus = focusState.hasFocus
-                                    },
+                                    }
+                                ,
                                 decorationBox = { innerTextField ->
                                     BoxWithConstraints(
                                         Modifier
@@ -239,7 +242,6 @@ fun SoilResultScreen(
                                                         }
                                                     }
                                                     innerTextField()
-                                                    expandedSearch = true
                                                 }
                                         }
                                     }
@@ -484,10 +486,13 @@ fun SoilResultScreen(
                 }
             }
         }
+        "ExpandedSearch: $expandedSearch".debug("PlantResult")
         if (expandedSearch) {
             Box(
                 modifier = Modifier
                     .fillMaxSize().padding(padding)
+                    .background(Color.DarkGray.copy(alpha = 0.8f))
+                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
             ) {
                 Box(
                     modifier = Modifier
