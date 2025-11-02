@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose")
+    id("kotlin-kapt")
 }
 
 android {
@@ -106,6 +107,10 @@ android {
 }
 
 dependencies {
+    implementation ("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+
     // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert-support
     implementation("com.google.ai.edge.litert:litert-support:1.4.0")
     // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert
@@ -115,8 +120,8 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.10.0")
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("androidx.paging:paging-runtime:3.2.0") // core
-    implementation("androidx.paging:paging-compose:1.0.0-alpha18") // Compose integration
+    implementation ("androidx.paging:paging-runtime:3.3.6")
+    implementation ("androidx.paging:paging-compose:3.3.6")
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m2)
     implementation(libs.vico.compose.m3)

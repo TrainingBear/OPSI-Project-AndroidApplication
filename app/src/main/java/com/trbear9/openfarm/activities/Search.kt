@@ -68,7 +68,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home", searchResult
     LaunchedEffect(query) {
         completer.clear()
         if(query.isNotEmpty()) {
-            Data.search(10, query = query) {
+            Data.searchByCommonName(10, query = query) {
                 completer.add(it)
             }
         }
