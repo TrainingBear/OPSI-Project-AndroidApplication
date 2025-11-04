@@ -65,7 +65,6 @@ fun App() {
         }
         composable(Screen.search) {
             SearchLayout(
-                searchResult = inputs.searchResult,
                 nav = nav
             )
         }

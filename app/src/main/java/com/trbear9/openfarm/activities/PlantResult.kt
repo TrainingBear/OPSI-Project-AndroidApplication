@@ -52,6 +52,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.snapshots.SnapshotStateSet
@@ -109,32 +110,31 @@ fun SoilResultScreen(
     nav: NavController? = null,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
-    var query by remember { mutableStateOf("") }
-    var finalQuery by remember { mutableStateOf("") }
-    var selected by remember { mutableStateOf("All") }
-    var expanded by remember { mutableStateOf(false) }
-    var expandedSearch by remember { mutableStateOf(false) }
-    var expandCat by remember { mutableStateOf(false) }
-    var hasFocus by remember { mutableStateOf(false) }
-    var order by remember { mutableStateOf("Tertinggi") }
+    var query by rememberSaveable { mutableStateOf("") }
+    var finalQuery by rememberSaveable{ mutableStateOf("") }
+    var selected by rememberSaveable{ mutableStateOf("All") }
+    var expanded by rememberSaveable{ mutableStateOf(false) }
+    var expandedSearch by rememberSaveable{ mutableStateOf(false) }
+    var expandCat by rememberSaveable{ mutableStateOf(false) }
+    var hasFocus by rememberSaveable{ mutableStateOf(false) }
+    var order by rememberSaveable{ mutableStateOf("Tertinggi") }
     var scroll = rememberScrollState()
     var completerScroll = rememberScrollState()
 
-    var loaded by remember {
+    var loaded by rememberSaveable{
         mutableStateOf<Boolean>(
             if(inputs.soilResult == null) true
             else inputs.soilResult.response?.loaded ?: false)
     }
-    var collected by remember { mutableStateOf<Boolean>(inputs.soilResult.collected ?: true) }
-    var current by remember { mutableStateOf<String>(inputs.soilResult?.response?.current ?: "Tanduran") }
-    var progress by remember { mutableIntStateOf(inputs.soilResult?.response?.progress?.toInt() ?: 0) }
-    var target by remember { mutableIntStateOf(inputs.soilResult?.response?.target?.toInt() ?: 0) }
-    var predicted by remember { mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
-    var parameterLoaded by remember { mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
+    var collected by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult.collected ?: true) }
+    var current by rememberSaveable{ mutableStateOf<String>(inputs.soilResult?.response?.current ?: "Tanduran") }
+    var progress by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.progress?.toInt() ?: 0) }
+    var target by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.target?.toInt() ?: 0) }
+    var predicted by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
+    var parameterLoaded by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
 
     var search = remember{ mutableStateSetOf<String>()}
     var focusRequester = remember{ FocusRequester() }
-    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         collected = inputs.soilResult?.collected ?: true
@@ -156,7 +156,7 @@ fun SoilResultScreen(
             }
         }
     }
-    var completer = remember { mutableStateSetOf<String>() }
+    var completer = rememberSaveable{ mutableStateSetOf<String>() }
     LaunchedEffect(query) {
         completer.clear()
         completer(query, completer, 5)
@@ -341,7 +341,7 @@ fun SoilResultScreen(
         },
         bottomBar = {
             if(true) { //before: if searchresult == null
-                var selected by remember { mutableIntStateOf(1) }
+                var selected by rememberSaveable{ mutableIntStateOf(1) }
                 NavigationBar {
                     NavigationBarItem(
                         selected = selected == 0,
@@ -537,7 +537,7 @@ fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableLis
 fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE){
     inputs.soilResult.plants?:return
     var i = 0
-    outer@ for (it in inputs.soilResult.plants ?: return) {
+    outer@ for (it in (inputs.soilResult.plants) ?: return) {
         outer2@ for (plant in it.value) {
             val commonName = Data.namaIlmiahToNamaUmum[plant.lowercase()]
             val prefix = query.lowercase()
