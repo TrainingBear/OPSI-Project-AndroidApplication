@@ -167,7 +167,7 @@ fun SoilStats(nav: NavController? = null) {
         }
     }) { padding ->
         Box(modifier = Modifier.padding(padding)) {
-            if(!collected)
+            if(false)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,

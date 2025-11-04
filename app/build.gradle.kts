@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         ndk{
-            abiFilters += listOf("arm64-v8a")
+            abiFilters += listOf("arm64-v8a","armeabi-v7a","armeabi")
         }
         applicationId = "com.trbear9.openfarm"
         minSdk = 26
@@ -108,6 +108,7 @@ android {
 
 dependencies {
     implementation ("androidx.room:room-runtime:2.6.1")
+    implementation(libs.androidx.foundation.layout)
     kapt("androidx.room:room-compiler:2.6.1")
     implementation ("androidx.room:room-ktx:2.6.1")
 
