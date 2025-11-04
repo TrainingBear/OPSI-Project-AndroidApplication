@@ -1,0 +1,193 @@
+package com.trbear9.openfarm.activities
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.trbear9.openfarm.R
+import com.trbear9.openfarm.util.Screen
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun PointDetail(
+    nav: NavController? = null,
+    title: String = "LOREM IPSUM DOLOR",
+    subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt",
+    details: List<Triple<Painter?, String, String>> = listOf(
+        Triple(
+            painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
+            "lorem ipsum sit amet test",
+            """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt
+                |
+                |A fawtawtiauawhawkja iaefrhgofpkl aofaef  eaofjiae awop awi as a as huihusurahr aw.
+            """.trimMargin()
+        )
+    )
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFBDB5A4),
+                        Color(0xFFB5A4C4),
+                        Color(0xFF99B6AC)
+                    ), end = Offset.Zero, start = Offset.Infinite
+                )
+            )
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                Box {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                        modifier = Modifier
+                            .wrapContentHeight(),
+//                        .border(width = 3.25.dp, color = Color(0x60000000)),
+                        navigationIcon = {
+                            IconButton(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+//                                .background(Color(0x80EAEAEA))
+                                    .size(40.dp),
+                                onClick = { nav?.navigate(Screen.home) },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                    contentDescription = "back arrow",
+                                    tint = Color.Black,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(1.dp))
+                                        .background(Color(0x8BFFFFFF))
+//                                    .padding(5.dp)
+                                )
+                            }
+                        },
+                        title = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(vertical = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = title,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    overflow = TextOverflow.Visible
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        ) {
+            val cardsList: MutableList<@Composable () -> Unit> = mutableListOf()
+            for (perInfo in details) {
+                cardsList.add({ Card(perInfo) })
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+                    .padding(20.dp)
+            ) {
+                item {
+                    Text(
+                        text = subtitle,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Justify,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+                    )
+                }
+                items(cardsList.size) { i -> cardsList[i]() }
+                if (cardsList.size == 1)
+                    item {
+                        Spacer(modifier = Modifier.fillParentMaxSize()
+                                .background(Color(0x23FFFFFF)))
+                    }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Card(perInfo: Triple<Painter?, String, String>): Unit {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(Color(0x23FFFFFF))
+            .padding(bottom = 10.dp)
+    ) {
+        if (perInfo.first != null)
+            Image(
+                painter = perInfo.first!!,
+                contentDescription = "Image per point",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 3.dp,
+                        color = Color(0x4D000000)
+                    )
+            )
+        Text(
+            text = perInfo.second,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = perInfo.third,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Normal,
+            textAlign = TextAlign.Justify,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.5.dp)
+        )
+    }
+}
