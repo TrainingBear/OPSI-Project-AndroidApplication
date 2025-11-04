@@ -61,14 +61,35 @@ object Data {
             val prefix = query.lowercase()
             val target = tag.lowercase()
             if (target != null && (target.startsWith(prefix) ||
-                        target.endsWith(prefix) ||
                         target.contains(prefix))
                 ) {
                 result.add(tag)
                 consumer(tag)
+                i++
+                if (i >= max) break
             }
-            i++
-            if (i >= max) break
+        }
+        return result
+    }
+
+    fun searchByScienceName(
+        max: Int = Int.MAX_VALUE,
+        query: String,
+        consumer: (String) -> Unit = {}
+    ): Set<String> {
+        val result = mutableSetOf<String>()
+        var i = 0
+        for (tag in namaIlmiahToNamaUmum.keys){
+            val prefix = query.lowercase()
+            val target = tag.lowercase()
+            if (target != null && (target.startsWith(prefix) ||
+                        target.contains(prefix))
+                ) {
+                result.add(tag)
+                consumer(tag)
+                i++
+                if (i >= max) break
+            }
         }
         return result
     }
@@ -98,9 +119,11 @@ object Data {
                     }
                 }
             }
-        }
-        CsvHandler.ecocropcsv?.forEach {
-            loadPlant(it, true)
+            CsvHandler.ecocropcsv?.forEach {
+                if (!ecocrop.containsKey(it[Science_name]))
+                    ecocrop[it[Science_name]] = it
+                loadPlant(it, true)
+            }
         }
         Log.d("Data Processor", "Loaded ${ecocrop.size} ecocrop")
         Log.d("Data Processor", "Loaded ${kew.size} kew")
@@ -114,6 +137,7 @@ object Data {
     val namaIlmiahToNamaUmum = mutableMapOf<String, String>()
 
     val plant = mutableMapOf<String, Plant>()
+    val normalize = mutableMapOf<String, String>()
     var plantByTag = SnapshotStateMap<String, MutableSet<String>>()
     val ecocrop = mutableMapOf<String, CSVRecord>()
     fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
@@ -140,16 +164,23 @@ object Data {
             plantByTag.computeIfAbsent(it) { key ->
                 mutableSetOf<String>()
             }.add(ilmiah)
+            plantByTag.computeIfAbsent(Util.translateCategory(it)) { key ->
+                mutableSetOf<String>()
+            }.add(ilmiah)
+            plantByTag.computeIfAbsent("All") { key ->
+                mutableSetOf<String>()
+            }.add(ilmiah)
         }
         writeTaxonomy(plant)
         tags += ilmiah.lowercase()
-        val commonname = plant.commonName?.lowercase() ?: "null"
+        val commonname = plant.commonName?.lowercase() ?: ilmiah
         tags += commonname
 
         namaUmumToNamaIlmiah[commonname.lowercase()] = ilmiah.lowercase()
         namaIlmiahToNamaUmum[ilmiah.lowercase()] = commonname
 
         this.plant[ilmiah] = plant
+        normalize[ilmiah.lowercase()] = ilmiah
         Log.d("Data Processor", "Loaded ${plant.commonName} plants")
         return plant
     }
@@ -191,8 +222,6 @@ object Data {
                 val namaIlmiah = ecorecord.get(Science_name)
                 response.current = namaIlmiah
                 emit(response)
-                if (!ecocrop.containsKey(namaIlmiah))
-                    ecocrop[namaIlmiah] = ecorecord
                 response.put(i, loadPlant(ecorecord))
                 response.progress++
                 emit(response)

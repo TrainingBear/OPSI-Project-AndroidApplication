@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LightbulbCircle
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -366,7 +367,7 @@ fun Home(nav: NavController? = null) {
                     val dynamicFontSize = (maxHeight.value / 4.4).sp
                     val icon = (maxHeight/ 3)
                     Button(
-                        onClick = {nav?.navigate(Screen.help)},
+                        onClick = {nav?.navigate(Screen.search)},
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(10.dp)
@@ -376,13 +377,13 @@ fun Home(nav: NavController? = null) {
                         ),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.LightbulbCircle,
+                            imageVector = Icons.Default.Search,
                             contentDescription = "Search",
                             modifier = Modifier.size(icon),
                             tint = Color.Black
                         )
                         Text(
-                            text = " Baru menggunakan OpenFarm?",
+                            text = "Cek database tanaman",
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Medium,
                             color = Color.Black,

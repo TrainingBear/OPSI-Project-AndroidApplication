@@ -70,6 +70,8 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.Util
@@ -135,32 +137,36 @@ class PlantDetail : ComponentActivity(){
                         .aspectRatio(16/11f)
                         .background(Color.LightGray)
                 ) {
-                    Image(
-                        imageVector = CONS.noImage2,
+                    val model = ImageRequest.Builder(LocalContext.current)
+                        .data("file:///android_asset/images/${ref?.nama_ilmiah}.webp")
+                        .crossfade(true)
+                        .build()
+                    val painter = rememberAsyncImagePainter(model)
+                    val state = painter.state
+                    AsyncImage(
+                        model = model,
                         contentDescription = "Plant image",
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
-                            .align(Alignment.Center)
                     )
-                    if (ref?.fullsize != null) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
-                                .crossfade(true)
-                                .build(),
+                    if(state is AsyncImagePainter.State.Error){
+                        Image(
+                            imageVector = CONS.noImage2,
                             contentDescription = "Plant image",
-                            contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
+                                .align(Alignment.Center)
                         )
                     }
+
                     Row(
                         modifier = Modifier
-                            .padding(start = 10.dp)
+                            .padding(end = 10.dp, top = 7.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .wrapContentSize(Alignment.Center)
                             .background(Color.Black.copy(alpha = 0.5f))
-                            .align(Alignment.BottomStart)
+                            .align(Alignment.TopEnd)
                     ) {
                         val star = (score / 10f) * 5
                         val half = (star - star.toInt()) > 0.1f
@@ -207,12 +213,12 @@ class PlantDetail : ComponentActivity(){
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = ref.commonName.toString(),
+                            text = ref.commonName?.toString()?:"null",
                             fontSize = 30.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
-                            text = ref.description.toString(),
+                            text = ref.description?.toString()?:"null",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )

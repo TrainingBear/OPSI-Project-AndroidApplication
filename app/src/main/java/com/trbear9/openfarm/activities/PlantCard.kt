@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.trbear9.internal.Data
@@ -81,7 +83,6 @@ object CONS {
                 .padding(8.dp)
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
-                // Plant Image
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,65 +90,75 @@ object CONS {
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.LightGray)
                 ) {
-                    if (ref.fullsize != null )
-                        Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
-                                    .crossfade(true)
-                                    .size(300, 200)
-                                    .diskCachePolicy(CachePolicy.ENABLED)
-                                    .memoryCachePolicy(CachePolicy.ENABLED)
-                                    .build(),
-                                contentDescription = "${ref.nama_ilmiah} image",
-                                contentScale = ContentScale.Crop,
+                    Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
+                        val model = ImageRequest.Builder(LocalContext.current)
+                            .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
+                            .crossfade(true)
+                            .size(600, 400)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .build()
+                        val painter = rememberAsyncImagePainter(model)
+                        val state = painter.state
+                        AsyncImage(
+                            model = model,
+                            contentDescription = "${ref.nama_ilmiah} image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(16.dp))
+                        )
+                        if(state is AsyncImagePainter.State.Error || state is AsyncImagePainter.State.Loading){
+                            Column(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    imageVector = CONS.noImage,
+                                    contentDescription = "${ref.nama_ilmiah ?: "no"} image",
+                                    modifier = Modifier
+                                        .fillMaxSize(fraction = 0.5f)
+                                        .clip(RoundedCornerShape(16.dp))
+                                )
+                                Text(
+                                    text = "Gambar tidak tersedia untuk ${ref?.commonName}",
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                        if (score != 0) {
+                            val star = (score / 10f) * 5
+                            val half = (star - star.toInt()) > 0.1f
+                            androidx.compose.foundation.layout.Row(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(16.dp))
-                            )
-                            if (score != 0) {
-                                val star = (score / 10f) * 5
-                                val half = (star - star.toInt()) > 0.1f
-                                androidx.compose.foundation.layout.Row(Modifier.align(Alignment.BottomStart)) {
-                                    repeat(star.toInt()) {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = "Score",
-                                            tint = Color.Yellow,
-                                            modifier = Modifier
-                                                .size(30.dp)
-                                        )
-                                    }
-                                    if (half) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.StarHalf,
-                                            contentDescription = "Half Score",
-                                            tint = Color.Yellow,
-                                            modifier = Modifier
-                                                .size(30.dp)
-                                        )
-                                    }
+                                    .padding(end = 10.dp, top = 7.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .wrapContentSize(Alignment.Center)
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .align(Alignment.TopEnd)
+                            ) {
+                                repeat(star.toInt()) {
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = "Score",
+                                        tint = Color.Yellow,
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                    )
+                                }
+                                if (half) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                        contentDescription = "Half Score",
+                                        tint = Color.Yellow,
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                    )
                                 }
                             }
                         }
-                    else
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                imageVector = CONS.noImage,
-                                contentDescription = "${ref.nama_ilmiah ?: "no"} image",
-                                modifier = Modifier
-                                    .fillMaxSize(fraction = 0.5f)
-                                    .clip(RoundedCornerShape(16.dp))
-                            )
-                            Text(
-                                text = "Gambar tidak tersedia untuk ${ref?.commonName}",
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                    }
                 }
 
                 // Plant Title
@@ -172,15 +183,16 @@ object CONS {
                     crossAxisSpacing = 2.dp
                 ) {
                     Kat(
-                        ref.difficulty?.toString() ?: "EASY",
+                        ref.difficulty?.toString() ?: "???",
                         Color.Black,
-                        diffToColor(ref.difficulty?.toString() ?: "EASY")
+                        diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
                     )
                     val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
                     val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
                     Kat(
                         if (panen_min != panen_max) "$panen_min-$panen_max hari"
                         else if (panen_min == "0") ""
+                        else if (panen_min == "null") ""
                         else "$panen_min hari",
                         bcolor = Color.LightGray
                     )
