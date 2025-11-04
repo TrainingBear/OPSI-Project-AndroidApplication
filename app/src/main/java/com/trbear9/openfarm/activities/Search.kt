@@ -128,10 +128,10 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
     }
 
     LaunchedEffect(Unit){
-        runBlocking {
-            delay(900)
-            focusRequester.requestFocus()
-        }
+//        runBlocking {
+//            delay(900)
+//            focusRequester.requestFocus()
+//        }
     }
 
     LaunchedEffect(query) {

@@ -255,8 +255,8 @@ class PlantDetail : ComponentActivity(){
                             mainAxisSpacing = 4.dp,
                             crossAxisSpacing = 4.dp
                         ) {
-                            ref.category?.forEach {
-                                Kat(Util.translateCategory(it))
+                            Data.ecocrop[ref.nama_ilmiah]?.get(Climate_zone)?.split(", ")?.forEach {
+                                Kat(Util.translateClimate(it), tcolor = Color.White, bcolor = Color.Blue)
                             }
                         }
                         FlowRow(
@@ -264,10 +264,19 @@ class PlantDetail : ComponentActivity(){
                             mainAxisSpacing = 4.dp,
                             crossAxisSpacing = 4.dp
                         ) {
-                            ref.nama_umum?.forEach {
-                                    Kat(it, tcolor = Color.Black, bcolor = Color.Green)
-                                }
+                            ref.category?.forEach {
+                                Kat(Util.translateCategory(it))
+                            }
                         }
+//                        FlowRow(
+//                            modifier = Modifier.padding(top = 16.dp),
+//                            mainAxisSpacing = 4.dp,
+//                            crossAxisSpacing = 4.dp
+//                        ) {
+//                            ref.nama_umum?.forEach {
+//                                    Kat(it, tcolor = Color.Black, bcolor = Color.Green)
+//                                }
+//                        }
                         ClickableText(
                             text = buildAnnotatedString {
                                 withStyle(SpanStyle(fontSize = 16.sp)) {
@@ -281,7 +290,7 @@ class PlantDetail : ComponentActivity(){
                                                         } " +
                                                         tax["name"].asText().replace("\"", "")
                                             )
-                                            append("\n")
+                                            append(":\n")
                                         }
                                     if (ref.taxon != null) {
                                         pushStyle(
