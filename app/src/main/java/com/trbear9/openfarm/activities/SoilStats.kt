@@ -15,6 +15,7 @@ package com.trbear9.openfarm.activities
 
 import android.graphics.Typeface
 import android.text.Layout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Grain
@@ -50,6 +52,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
@@ -59,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -68,9 +74,11 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelCompone
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.core.cartesian.axis.Axis
@@ -86,21 +94,25 @@ import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.trbear9.internal.TFService
 import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.inputs
 import com.trbear9.openfarm.util.Screen
+import com.trbear9.plants.api.Response
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 val labelListKey = ExtraStore.Key<List<String>>()
+private val backgroundCardColor: Color = Color(0x99FFFFFF)
+private val clipRound: Dp = 15.dp
 
 @Preview
 @Composable
 fun SoilStats(nav: NavController? = null) {
     val scroll = rememberScrollState()
-    var response by remember {mutableStateOf(inputs.soilResult.response)}
-    var collected by remember {mutableStateOf<Boolean>(inputs.soilResult.collected)}
+    var response by remember { mutableStateOf(inputs.soilResult.response) }
+    var collected by remember { mutableStateOf<Boolean>(inputs.soilResult.collected) }
     var soilType by remember { mutableStateOf(response?.soilMax?.first ?: "Belum diketahui") }
     var soilPred by remember { mutableFloatStateOf(response?.soilMax?.second ?: 0.0f) }
     var ferr by remember { mutableStateOf(response?.soil?.fertility ?: "Belum diketahui") }
@@ -108,7 +120,7 @@ fun SoilStats(nav: NavController? = null) {
     var drain by remember { mutableStateOf(response?.soil?.drainage ?: "Belum diketahui") }
     var depth by remember { mutableStateOf(inputs.soil.numericDepth) }
     val modelProducer = remember { CartesianChartModelProducer() }
-    var list = remember {mutableStateListOf<Float>()}
+    var list = remember { mutableStateListOf<Float>() }
 
     LaunchedEffect(Unit) {
         collected = inputs.soilResult.collected
@@ -134,170 +146,239 @@ fun SoilStats(nav: NavController? = null) {
             }
         }
     }
-
-    Scaffold(bottomBar = {
-        var selected by remember { mutableIntStateOf(2) }
-        NavigationBar {
-            NavigationBarItem(
-                selected = selected == 0,
-                onClick = {
-                    selected = 0
-                    nav?.navigate(Screen.home)
-                },
-                icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                label = { Text("Home") }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background( // BACKGROUND
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFCFE5D4),
+                        Color(0xFFEEEED9)
+                    ), end = Offset.Zero, start = Offset(300f, 500f)
+                )
             )
-            NavigationBarItem(
-                selected = selected == 1,
-                onClick = {
-                    selected = 1
-                    nav?.navigate(Screen.soilResult)
-                },
-                icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
-                label = { Text("Tanaman") }
-            )
-            NavigationBarItem(
-                selected = selected == 2,
-                onClick = {
-                    selected = 2
-                },
-                icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
-                label = { Text("Tanah") }
-            )
-        }
-    }) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            if(!collected && false)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                )
-                            ) {
-                                append("Oopps!\n")
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("Anda sepertinya belum memotret tanah anda")
-                            }
-                        },
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                    Button(
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            bottomBar = {
+                var selected by remember { mutableIntStateOf(2) }
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = selected == 0,
                         onClick = {
-                            nav?.navigate(Screen.camera)
+                            selected = 0
+                            nav?.navigate(Screen.home)
                         },
-                        modifier = Modifier.padding(top = 20.dp)
-                    ) {
-                        Text(text = "Potret Tanahmu Sekarang")
-                    }
-                }
-            else Column(
-                modifier = Modifier.verticalScroll(scroll),
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                    ) {
-                        JetpackComposeBasicColumnChart(
-                            modelProducer,
-                            modifier = Modifier.fillMaxSize()
-                                .align(Alignment.Center)
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (response?.soilPrediction == null) Text(
-                            text = "Tunggu sebentar...",
-                            fontSize = 20.sp,
-                            fontFamily = FontFamily.Monospace
-                        )else Text(
-                            text = "Diagram Prediksi Tanah",
-                            fontSize = 20.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                }
-
-                Column(modifier = Modifier.padding(10.dp)) {
-                    val value = response
-                    Text(
-                        text = "Hasil Prediksi:",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 30.sp,
+                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                        label = { Text("Home") }
                     )
-                    val pH = inputs.soil.pH ?: value?.soil?.pH
-                    Map("PH: ", (inputs.soil.pH ?: (value?.soil?.pH.toString() + " (default)")).toString())
-                    Map("Tipe: ", "$soilType ${soilPred * 100.0}%")
-                    Map("Tekstur: ", texr.toString())
-                    Map("Drainase: ", drain.toString())
-                    Map("Kesuburan: ", ferr.toString())
-
-                    Spacer(modifier = Modifier.height(20.dp))
-                    if (pH != null && pH <= 7) {
-                        val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
-                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "dengan kedalaman" +
-                                " tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
-                                " di butuhkan $dosisKg kg kapur dolmit/hektar. atau ${dosisKg/100} kg kapur dolmit/m2",)
-                    } else {
-                        Cat(Icons.Default.LocalHospital, "Netralisasi pH tanah: ", "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
-                                "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin.")
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Cat(Icons.Default.WaterDrop, "Retensi Air: ", retention(soilType))
+                    NavigationBarItem(
+                        selected = selected == 1,
+                        onClick = {
+                            selected = 1
+                            nav?.navigate(Screen.soilResult)
+                        },
+                        icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
+                        label = { Text("Tanaman") }
+                    )
+                    NavigationBarItem(
+                        selected = selected == 2,
+                        onClick = {
+                            selected = 2
+                        },
+                        icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
+                        label = { Text("Tanah") }
+                    )
                 }
             }
-        }
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding)) {
+                if (!collected && false)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontSize = 40.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                    )
+                                ) {
+                                    append("Oopps!\n")
+                                }
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("Anda sepertinya belum memotret tanah anda")
+                                }
+                            },
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                        Button(
+                            onClick = {
+                                nav?.navigate(Screen.camera)
+                            },
+                            modifier = Modifier.padding(top = 20.dp)
+                        ) {
+                            Text(text = "Potret Tanahmu Sekarang")
+                        }
+                    }
+                else
+                    Column(
+                        modifier = Modifier.verticalScroll(scroll),
+                    ) {
+                        if (false) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            ) {
+                                Text(
+                                    text = "Tunggu sebentar...",
+                                    fontSize = 20.sp,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+//                        if (response?.soilPrediction == null)
+                        else {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(365.dp)
+                                    .padding(10.dp)
+                                    .clip(RoundedCornerShape(clipRound))
+                                    .background(backgroundCardColor)
+                                    .padding(5.dp)
+                            ) {
+                                Text(
+                                    text = "Diagram Prediksi Tanah",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                ) {
+                                    JetpackComposeBasicColumnChart(
+                                        modelProducer,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+                        val value: Response? = response
+                        val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(10.dp)
+                                .clip(RoundedCornerShape(clipRound))
+                                .background(backgroundCardColor)
+                                .padding(10.dp)
+                        ) {
 
+                            Text(
+                                text = "Hasil Prediksi:",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 30.sp,
+                            )
+
+                            Map(
+                                "PH: ",
+                                (inputs.soil.pH
+                                    ?: (value?.soil?.pH.toString() + " (default)")).toString()
+                            )
+                            Map("Tipe: ", "$soilType ${soilPred * 100.0}%")
+                            Map("Tekstur: ", texr.toString())
+                            Map("Drainase: ", drain.toString())
+                            Map("Kesuburan: ", ferr.toString())
+                        }
+                        if (pH != null && pH <= 7) {
+                            val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
+                            Cat(
+                                Icons.Default.LocalHospital, "Netralisasi pH tanah",
+                                "dengan kedalaman" +
+                                        " tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
+                                        " di butuhkan $dosisKg kg kapur dolmit/hektar. atau ${dosisKg / 100} kg kapur dolmit/m2",
+                            )
+                        } else {
+                            Cat(
+                                Icons.Default.LocalHospital,
+                                "Netralisasi pH tanah",
+                                "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
+                                        "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin."
+                            )
+                        }
+                        Cat(Icons.Default.WaterDrop, "Retensi Air", retention(soilType))
+                    }
+            }
+        }
     }
 }
 
 @Composable
-private fun Map(key:String, value:String){
-    Text(
-        text = buildAnnotatedString {
-            withStyle(style = SpanStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium)) { append(key) }
-            withStyle(style = SpanStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal)) { append(value) }
-        },
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier.padding(start = 5.dp)
-    )
+private fun Map(key: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = key,
+            fontWeight = FontWeight.Normal,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(vertical = 2.5.dp)
+        )
+        Text(
+            text = value,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(vertical = 2.5.dp)
+        )
+    }
 }
 
 @Composable
-private fun Cat(icon: ImageVector, head:String, body: String) {
-    Row() {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp)
-        )
+private fun Cat(icon: ImageVector, head: String, body: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .clip(RoundedCornerShape(clipRound))
+            .background(backgroundCardColor)
+            .padding(10.dp)
+    ) {
         Text(
-            text = buildAnnotatedString() {
-                withStyle(style = SpanStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold)) { append(head) }
-                withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) { append(body) }
-            },
-            modifier = Modifier.padding(top = 8.dp)
+            text = head, fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
         )
+        Row{
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
+            Text(
+                text = body, fontSize = 17.sp,
+                textAlign = TextAlign.Justify,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.padding(start = 5.dp)
+            )
+        }
     }
 }
 
@@ -312,20 +393,24 @@ private fun JetpackComposeBasicColumnChart(
             rememberCartesianChart(
                 rememberColumnCartesianLayer(
                     columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                            rememberLineComponent(
-                                fill = fill(Color(0xFF2979FF)),
-                                thickness = 10.dp,
-                                shadow = Shadow(4f),
-                                margins = Insets(2f),
-                            )
-                        ,
+                        rememberLineComponent(
+                            fill = fill(Color(0xFF2979FF)),
+                            thickness = 10.dp,
+                            shadow = Shadow(4f),
+                            margins = Insets(2f),
+                        ),
                     ),
                     columnCollectionSpacing = 2.dp,
                     dataLabel = rememberTextComponent(
                         textAlignment = Layout.Alignment.ALIGN_NORMAL,
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
-                    rangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 1.0) },
+                    rangeProvider = remember {
+                        CartesianLayerRangeProvider.fixed(
+                            minY = 0.0,
+                            maxY = 1.0
+                        )
+                    },
                 ),
                 startAxis = VerticalAxis.rememberStart(
                     labelRotationDegrees = 0f,
@@ -348,7 +433,7 @@ private fun JetpackComposeBasicColumnChart(
                         context.model.extraStore[labelListKey][x.toInt()]
                     },
                     labelRotationDegrees = -80f,
-                ),
+                )
             ),
         animateIn = true,
         modelProducer = modelProducer,
@@ -358,58 +443,70 @@ private fun JetpackComposeBasicColumnChart(
 }
 
 //3. Dosis Dolomit (t/ha) = CaCO3 / 0,75
-fun getDosis(name: String,current:Float, target:Float, depth: Int) : Float{
+fun getDosis(name: String, current: Float, target: Float, depth: Int): Float {
 
 
     // target = 7
     // current = pH saat ini
     val selisih = target - current
 
-    val CaCO3:                                                                                                                                   Float = when(name){
+    val CaCO3: Float = when (name) {
         "Aluvial" -> {
-            selisih.absoluteValue * 3.0f * (depth /20)
+            selisih.absoluteValue * 3.0f * (depth / 20)
         }
+
         "Andosol" -> {
-            selisih.absoluteValue * 5.0f * (depth /20)
+            selisih.absoluteValue * 5.0f * (depth / 20)
         }
+
         "Humus" -> {
-            selisih.absoluteValue * 4.0f * (depth /20)
+            selisih.absoluteValue * 4.0f * (depth / 20)
         }
+
         "Kapur" -> {
-            selisih.absoluteValue * 3.0f * (depth /20)
+            selisih.absoluteValue * 3.0f * (depth / 20)
         }
+
         "Laterit" -> {
-            selisih.absoluteValue * 3.5f * (depth /20)
+            selisih.absoluteValue * 3.5f * (depth / 20)
         }
+
         "Pasir" -> {
-            selisih.absoluteValue * 2.0f * (depth /20)
+            selisih.absoluteValue * 2.0f * (depth / 20)
         }
+
         else -> -1.0f
     }
     // Dosis Dolomit (t/ha) = CaCO3 / 0,75
-    return CaCO3/75
+    return CaCO3 / 75
 }
 
-fun retention(name: String?): String{
-    return when(name){
+fun retention(name: String?): String {
+    return when (name) {
         "Aluvial" -> """
         Tanah aluvial memiliki kemampuan menahan air sedang sehingga perlu dikelola agar tetap lembap. Gunakan mulsa organik (jerami atau daun kering) setebal 5–10 cm untuk mengurangi penguapan, serta tambahkan biochar 2–5 ton/ha agar kapasitas simpan air meningkat. Penyiraman dilakukan saat kelembapan turun di bawah 60% kapasitas lapang dengan metode irigasi sederhana atau tetes. Tambahkan pupuk organik 10–15 ton/ha dan tanam cover crop untuk menjaga struktur serta kelembapan tanah. 
         """
+
         "Andosol" -> """
         Tanah andosol umumnya memiliki porositas tinggi dan mampu menahan air cukup baik, tetapi mudah kehilangan kelembapan saat kering. Untuk menjaga kestabilan air, gunakan mulsa organik (jerami, daun kering) setebal 5–10 cm dan tambahkan biochar 3–6 ton/ha agar daya simpan air lebih optimal. Lakukan penyiraman ketika kelembapan tanah turun di bawah 70% kapasitas lapang, serta gunakan irigasi tetes atau sprinkle agar distribusi air lebih merata. Pemberian pupuk organik 15–20 ton/ha serta penanaman cover crop dianjurkan untuk memperbaiki struktur tanah dan mempertahankan kelembapan lebih lama.
 """
+
         "Humus" -> """
         Tanah humus memiliki kandungan bahan organik tinggi sehingga daya menahan airnya sangat baik. Namun, kelembapan tetap perlu dijaga agar stabil bagi tanaman. Gunakan mulsa organik (jerami, daun kering) setebal 5–10 cm untuk mengurangi penguapan, serta tambahkan biochar 2–4 ton/ha bila diperlukan agar struktur tanah lebih kokoh. Penyiraman cukup dilakukan ketika kelembapan tanah turun hingga sekitar 70% kapasitas lapang, karena humus cenderung mampu menyimpan air lebih lama. Pemberian pupuk organik tambahan 10–15 ton/ha dan penanaman cover crop akan membantu mempertahankan kelembapan sekaligus meningkatkan kesuburan tanah.
 """
+
         "Retensi" -> """
         Tanah kapur umumnya bertekstur kasar, cepat meresapkan air, tetapi sulit menyimpannya sehingga kelembapan cepat hilang. Untuk meningkatkan retensi air, gunakan mulsa organik (jerami, serasah, daun kering) setebal 7–10 cm agar mengurangi penguapan. Tambahkan biochar 4–6 ton/ha serta pupuk organik 15–20 ton/ha untuk memperbaiki porositas dan daya simpan air. Penyiraman perlu lebih sering, terutama saat kelembapan turun di bawah 60% kapasitas lapang, dengan sistem irigasi tetes atau alur agar penyerapan lebih efisien. Penanaman cover crop juga disarankan untuk menjaga kelembapan tanah dan menambah bahan organik.
 """
+
         "Laterit" -> """
         Tanah laterit memiliki kandungan liat tinggi, drainase kurang baik, dan mudah mengeras saat kering sehingga retensi airnya rendah. Untuk menjaga ketersediaan air, gunakan mulsa organik (jerami, serasah, daun kering) setebal 5–8 cm agar kelembapan lebih stabil. Tambahkan biochar 3–5 ton/ha serta pupuk organik 15–20 ton/ha untuk memperbaiki struktur tanah dan meningkatkan kapasitas menahan air. Penyiraman dilakukan ketika kelembapan turun hingga <65% kapasitas lapang, dengan metode irigasi tetes atau sprinkle agar air terserap merata. Penanaman cover crop dianjurkan untuk mencegah pemadatan, menjaga kelembapan, dan menambah bahan organik.
 """
+
         "Pasir" -> """
         Tanah pasir memiliki pori besar, sehingga cepat meloloskan air dan sangat rendah daya menahan airnya. Untuk meningkatkan retensi, gunakan mulsa organik (jerami, sekam, daun kering) setebal 7–10 cm agar mengurangi penguapan. Tambahkan biochar 5–7 ton/ha serta pupuk organik 20–25 ton/ha untuk meningkatkan kandungan bahan organik dan memperbaiki struktur tanah. Penyiraman perlu lebih sering, dilakukan saat kelembapan turun di bawah 50–55% kapasitas lapang, dengan metode irigasi tetes agar air langsung terserap ke zona perakaran. Penanaman cover crop juga penting untuk menahan kelembapan dan menambah unsur organik pada tanah berpasir.
 """
+
         else -> "Tidak tersedia"
     }
 }

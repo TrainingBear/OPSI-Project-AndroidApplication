@@ -74,7 +74,15 @@ object Guide {
 @Preview(device = "spec:width=411dp,height=891dp,dpi=160")
 @Composable
 fun Guide(nav: NavController? = null) {
-    val GUIDECARDS: List<Unit> = listOf(GuideCard(num = 1), GuideCard(num = 1))
+    val guideCards: List<@Composable () -> Unit> = listOf(
+        { GuideCard(num = 1) },
+        { GuideCard(num = 2) },
+        { GuideCard(num = 3) },
+        { GuideCard(num = 4) },
+        { GuideCard(num = 5) },
+        { GuideCard(num = 6) },
+        { GuideCard(num = 7) }
+    )
 
     Scaffold(
         topBar = {
@@ -251,19 +259,7 @@ fun Guide(nav: NavController? = null) {
                     .height(180.dp)
                     .background(Color(0x56D3D3D3))
             ) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0x99AFAFAF))
-                    ) {
-
-                    }
-                }
-                item { GuideCard(num = 1) }
-                item { GuideCard(num = 2) }
-                item { GuideCard(num = 3) }
-                item { GuideCard(num = 4) }
+                items(guideCards.size) { i -> guideCards[i]() }
             }
         }
     }
@@ -307,6 +303,9 @@ fun GuideCard(
                     end = Offset(w, size.height),
                     strokeWidth = 3f
                 )
+            }.clickable { // TODO paling lu bisa urus biar efisien yg guide pointer
+                Guide.guidePointer = Triple(title, desc, details)
+                nav?.navigate(Screen.guidePointDetail)
             }
     ) {
         Row(
@@ -360,10 +359,6 @@ fun GuideCard(
                 modifier = Modifier
                     .weight(.15f)
                     .fillMaxSize()
-                    .clickable { // TODO paling lu bisa urus biar efisien yg guide pointer
-                        Guide.guidePointer = Triple(title, desc, details)
-                        nav?.navigate(Screen.guidePointDetail)
-                    }
             )
         }
     }

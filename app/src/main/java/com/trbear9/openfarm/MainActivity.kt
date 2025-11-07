@@ -272,7 +272,7 @@ fun Home(nav: NavController? = null) {
                                     modifier = Modifier.padding(20.dp)
                                         .size(30.dp)
                                         .clickable {
-                                            nav?.navigate(Screen.tentang)
+                                            nav?.navigate(Screen.help)
                                         }
                                 )
                             }

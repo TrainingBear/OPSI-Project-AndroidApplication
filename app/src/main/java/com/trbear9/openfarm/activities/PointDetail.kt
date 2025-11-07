@@ -154,7 +154,7 @@ fun PointDetail(
 }
 
 @Composable
-private fun Card(perInfo: Triple<Painter?, String, String>): Unit {
+private fun Card(perInfo: Triple<Painter?, String, String>) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
