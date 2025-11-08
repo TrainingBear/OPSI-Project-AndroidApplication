@@ -105,6 +105,7 @@ import kotlin.random.Random
 
 val labelListKey = ExtraStore.Key<List<String>>()
 private val backgroundCardColor: Color = Color(0x99FFFFFF)
+private val backgroundTitleColor: Color = Color(0x27050091)
 private val clipRound: Dp = 15.dp
 
 @Preview
@@ -260,17 +261,20 @@ fun SoilStats(nav: NavController? = null) {
                                     .padding(10.dp)
                                     .clip(RoundedCornerShape(clipRound))
                                     .background(backgroundCardColor)
-                                    .padding(5.dp)
                             ) {
                                 Text(
                                     text = "Diagram Prediksi Tanah",
                                     fontSize = 20.sp,
+                                    textAlign = TextAlign.Center,
                                     fontWeight = FontWeight.Medium,
-                                    fontFamily = FontFamily.Monospace
+                                    fontFamily = FontFamily.Monospace,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(backgroundTitleColor)
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
+                                        .fillMaxSize().padding(5.dp)
                                 ) {
                                     JetpackComposeBasicColumnChart(
                                         modelProducer,
@@ -289,15 +293,16 @@ fun SoilStats(nav: NavController? = null) {
                                 .padding(10.dp)
                                 .clip(RoundedCornerShape(clipRound))
                                 .background(backgroundCardColor)
-                                .padding(10.dp)
                         ) {
-
                             Text(
                                 text = "Hasil Prediksi:",
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 30.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(backgroundTitleColor)
                             )
-
                             Map(
                                 "PH: ",
                                 (inputs.soil.pH
@@ -334,7 +339,7 @@ fun SoilStats(nav: NavController? = null) {
 @Composable
 private fun Map(key: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
@@ -360,13 +365,17 @@ private fun Cat(icon: ImageVector, head: String, body: String) {
             .padding(10.dp)
             .clip(RoundedCornerShape(clipRound))
             .background(backgroundCardColor)
-            .padding(10.dp)
     ) {
         Text(
-            text = head, fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
+            text = head,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(backgroundTitleColor)
         )
-        Row{
+        Row (modifier = Modifier.padding(start = 5.dp, end = 10.dp, top = 10.dp, bottom = 10.dp)){
             Icon(
                 imageVector = icon,
                 contentDescription = null,
