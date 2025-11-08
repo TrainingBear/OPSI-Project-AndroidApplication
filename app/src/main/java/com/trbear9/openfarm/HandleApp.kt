@@ -112,7 +112,7 @@ fun App() {
                 subtitle = Guide.guidePointer!!.second,
                 details = Guide.guidePointer!!.third
             )
-            Guide.guidePointer = null
+//            Guide.guidePointer = null
         }
     }
 }

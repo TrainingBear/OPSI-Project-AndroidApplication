@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -59,6 +60,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -361,19 +363,43 @@ fun SoilResultScreen(
                         icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                         label = { Text("Tanaman") }
                     )
-                    NavigationBarItem(
-                        selected = selected == 2,
-                        onClick = {
-                            selected = 2
-                            nav?.navigate(Screen.soilStats)
-                        },
-                        icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
-                        label = { Text("Tanah") }
-                    )
                 }
             }
         }) { padding ->
-        Box(
+        "ExpandedSearch: $expandedSearch".debug("PlantResult")
+        if (expandedSearch) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize().padding(padding)
+                    .background(Color.DarkGray.copy(alpha = 0.8f))
+                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(top = 10.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.verticalScroll(completerScroll),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        completer.forEach {
+                            Text(
+                                text = it,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable {
+                                    query = it
+                                }.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -394,7 +420,8 @@ fun SoilResultScreen(
                         modifier = Modifier.padding(20.dp)
                     )
                 }
-            } else if (inputs.soilResult.plants?.isNotEmpty() == true) {
+            }
+            else if (inputs.soilResult.plants?.isNotEmpty() == true) {
                 val pagerFlow =
                     if (finalQuery.isEmpty())
                         remember(selected, order) {
@@ -451,8 +478,9 @@ fun SoilResultScreen(
                         }
                     }
 
-                }
-            } else {
+        }
+    }
+            else {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -485,39 +513,38 @@ fun SoilResultScreen(
                     }
                 }
             }
-        }
-        "ExpandedSearch: $expandedSearch".debug("PlantResult")
-        if (expandedSearch) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize().padding(padding)
-                    .background(Color.DarkGray.copy(alpha = 0.8f))
-                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(150.dp)
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(top = 10.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.verticalScroll(completerScroll),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        completer.forEach {
-                            Text(
-                                text = it,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable {
-                                    query = it
-                                }.padding(start = 16.dp)
-                            )
+            Column(Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                val fontSize = (this@BoxWithConstraints.maxWidth.value / 27).sp
+                Icon(
+                    Icons.Default.Grain, contentDescription = "Tanah",
+                    modifier = Modifier.size(this@BoxWithConstraints.maxWidth / 10)
+                        .clip(RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp))
+                        .background(Color(0xFF069B16).copy(alpha = 1f))
+                        .clickable {
+                            nav?.navigate(Screen.soilStats)
                         }
-                    }
+                        .shadow(100.dp, CircleShape)
+                )
+                Box(Modifier
+                    .padding(top = 10.dp)
+                    .wrapContentSize()
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(Color.White)
+                ) {
+                    Text(
+                        text = "Analisa tanahmu",
+                        fontSize = fontSize,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(5.dp)
+                    )
                 }
             }
+
         }
     }
 }
@@ -555,7 +582,7 @@ fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.
 
 fun search(query: String, order: String, category: String): MutableList<Pair<Int, String>> {
     val plants = (inputs.soilResult.plantByCategory?.get(category) ?: return mutableListOf())
-            .flatten(order)
+        .flatten(order)
     val result = mutableListOf<Pair<Int, String>>()
     for (plant in plants) {
         val name = Data.namaIlmiahToNamaUmum[plant.second.lowercase()]
