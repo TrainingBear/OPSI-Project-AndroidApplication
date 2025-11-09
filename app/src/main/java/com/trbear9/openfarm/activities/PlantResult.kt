@@ -407,7 +407,41 @@ fun SoilResultScreen() {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (LocalNav.current == null || !loaded) {
+            if(inputs.soilResult.response == null) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text(
+                        text = "Ooops!",
+                        textAlign = TextAlign.Center,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                        textAlign = TextAlign.Center,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Button(
+                        onClick = {
+                            LocalNav.current?.navigate(Screen.camera)
+                        },
+                        modifier = Modifier
+                            .padding(top = 20.dp)
+                    ) {
+                        Text(
+                            text = "Scan tanahmu!",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 30.sp
+                        )
+                    }
+                }
+                return@Box
+            }
+            else if (!loaded) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -479,39 +513,6 @@ fun SoilResultScreen() {
                     fontSize = 28.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
-            else {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        text = "Ooops!",
-                        textAlign = TextAlign.Center,
-                        fontSize = 40.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-                        textAlign = TextAlign.Center,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Button(
-                        onClick = {
-                            LocalNav.current?.navigate(Screen.camera)
-                        },
-                        modifier = Modifier
-                            .padding(top = 20.dp)
-                    ) {
-                        Text(
-                            text = "Scan tanahmu!",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp
-                        )
-                    }
-                }
-            }
             FloatingButtons.NavigateSoilStats(Modifier.fillMaxSize())
         }
     }
