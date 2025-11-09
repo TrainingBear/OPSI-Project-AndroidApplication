@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.activities.AboutUs
 import com.trbear9.openfarm.activities.Guide
 import com.trbear9.openfarm.activities.PointDetail
 import com.trbear9.openfarm.activities.SearchLayout
@@ -103,17 +104,18 @@ fun App(app: AppCompatActivity) {
             )
         }
         composable(Screen.about) {
-            AndroidView(
-                factory = {
-                    LayoutInflater.from(it).inflate(R.layout.activity_about_me, null)
-                },
-                update = {
-                    val aboutMe = it.findViewById<ImageButton>(R.id.buttonBackmenuabout)
-                    aboutMe.setOnClickListener {
-                        nav.navigateUp()
-                    }
-                }
-            )
+            AboutUs(nav)
+//            AndroidView(
+//                factory = {
+//                    LayoutInflater.from(it).inflate(R.layout.activity_about_me, null)
+//                },
+//                update = {
+//                    val aboutMe = it.findViewById<ImageButton>(R.id.buttonBackmenuabout)
+//                    aboutMe.setOnClickListener {
+//                        nav.navigateUp()
+//                    }
+//                }
+//            )
         }
         composable(Screen.guidePointDetail){
             PointDetail(
