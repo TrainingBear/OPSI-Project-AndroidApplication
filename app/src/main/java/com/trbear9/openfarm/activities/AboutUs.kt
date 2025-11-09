@@ -275,7 +275,7 @@ fun AboutUs(nav: NavController?) {
 private fun ExpandCard(
     text: String,
     backgroundColor: Color,
-    contentColor: Color = lerp(backgroundColor, Color.White, .75f),
+    contentColor: Color = lerp(backgroundColor, Color.White, .5f),
     imageVector: ImageVector,
     isExpanded: MutableState<Boolean>,
     content: @Composable (BoxScope.() -> Unit)
@@ -333,8 +333,7 @@ private fun ExpandCard(
                 durationMillis = animateTime,
                 easing = FastOutLinearInEasing
             )
-        ),
-        modifier = Modifier.zIndex(0f)
+        )
     ) {
         Box(
             modifier = Modifier
