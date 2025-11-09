@@ -1,5 +1,10 @@
 package com.trbear9.openfarm.activities
 
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -65,6 +70,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +87,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.patrykandpatrick.vico.compose.common.shape.rounded
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.FloatingButtons
+import com.trbear9.openfarm.LocalNav
+import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.ResultPagingSource
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.debug
@@ -107,10 +116,7 @@ class SearchResult {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview()
-fun SoilResultScreen(
-    onBack: () -> Unit = {},
-    nav: NavController? = null,
-) {
+fun SoilResultScreen() {
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable{ mutableStateOf("") }
@@ -342,28 +348,25 @@ fun SoilResultScreen(
             )
         },
         bottomBar = {
-            if(true) { //before: if searchresult == null
-                var selected by rememberSaveable{ mutableIntStateOf(1) }
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = selected == 0,
-                        onClick = {
-                            selected = 0
-                            onBack()
-                            nav?.navigate(Screen.home)
-                        },
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                        label = { Text("Home") }
-                    )
-                    NavigationBarItem(
-                        selected = selected == 1,
-                        onClick = {
-                            selected = 1
-                        },
-                        icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
-                        label = { Text("Tanaman") }
-                    )
-                }
+            var selected by rememberSaveable{ mutableIntStateOf(1) }
+            NavigationBar {
+                NavigationBarItem(
+                    selected = selected == 0,
+                    onClick = {
+                        selected = 0
+                        LocalNav.current?.navigate(Screen.home)
+                    },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = selected == 1,
+                    onClick = {
+                        selected = 1
+                    },
+                    icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
+                    label = { Text("Rekomendasi Tanaman") }
+                )
             }
         }) { padding ->
         "ExpandedSearch: $expandedSearch".debug("PlantResult")
@@ -399,12 +402,12 @@ fun SoilResultScreen(
                 }
             }
         }
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (!loaded) {
+            if (LocalNav.current == null || !loaded) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -420,43 +423,32 @@ fun SoilResultScreen(
                         modifier = Modifier.padding(20.dp)
                     )
                 }
+                return@Box
             }
-            else if (inputs.soilResult.plants?.isNotEmpty() == true) {
-                val pagerFlow =
-                    if (finalQuery.isEmpty())
-                        remember(selected, order) {
-                            Pager(PagingConfig(pageSize = 7)) {
-                                ResultPagingSource(
-                                    items = inputs.soilResult.plantByCategory?.get(selected)
-                                        ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
-                                )
-                            }.flow
-                        }
-                    else
-                        remember(finalQuery, order, selected) {
-                            Pager(PagingConfig(pageSize = 7)) {
-                                ResultPagingSource(items = search(query, order, selected))
-                            }.flow
-                        }
-                val plants: LazyPagingItems<Pair<Int, String>> =
-                    pagerFlow.collectAsLazyPagingItems()
+            val pagerFlow =
+                if (finalQuery.isEmpty())
+                    remember(selected, order) {
+                        Pager(PagingConfig(pageSize = 7)) {
+                            ResultPagingSource(
+                                items = inputs.soilResult.plantByCategory?.get(selected)
+                                    ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
+                            )
+                        }.flow
+                    }
+                else
+                    remember(finalQuery, order, selected) {
+                        Pager(PagingConfig(pageSize = 7)) {
+                            ResultPagingSource(items = search(query, order, selected))
+                        }.flow
+                    }
+            val plants: LazyPagingItems<Pair<Int, String>> =
+                pagerFlow.collectAsLazyPagingItems()
 
+            if (inputs.soilResult.plants?.isNotEmpty() == true) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-//                    if (plants.itemCount == 0)
-//                        item {
-//                            Column {
-//                                Text(
-//                                    text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-//                                    textAlign = TextAlign.Center,
-//                                    fontSize = 28.sp,
-//                                    modifier = Modifier.padding(top = 100.dp)
-//                                )
-//                            }
-//                        }
-//                    else
                     items(plants.itemCount) { i ->
                         PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
                         "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
@@ -478,8 +470,15 @@ fun SoilResultScreen(
                         }
                     }
 
-        }
-    }
+                }
+            }
+            else if (plants.itemCount == 0)
+                Text(
+                    text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                    textAlign = TextAlign.Center,
+                    fontSize = 28.sp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             else {
                 Column(
                     verticalArrangement = Arrangement.Center,
@@ -500,7 +499,7 @@ fun SoilResultScreen(
                     )
                     Button(
                         onClick = {
-                            nav?.navigate(Screen.camera)
+                            LocalNav.current?.navigate(Screen.camera)
                         },
                         modifier = Modifier
                             .padding(top = 20.dp)
@@ -513,38 +512,7 @@ fun SoilResultScreen(
                     }
                 }
             }
-            Column(Modifier
-                .align(Alignment.BottomEnd)
-                .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                val fontSize = (this@BoxWithConstraints.maxWidth.value / 27).sp
-                Icon(
-                    Icons.Default.Grain, contentDescription = "Tanah",
-                    modifier = Modifier.size(this@BoxWithConstraints.maxWidth / 10)
-                        .clip(RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp))
-                        .background(Color(0xFF069B16).copy(alpha = 1f))
-                        .clickable {
-                            nav?.navigate(Screen.soilStats)
-                        }
-                        .shadow(100.dp, CircleShape)
-                )
-                Box(Modifier
-                    .padding(top = 10.dp)
-                    .wrapContentSize()
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(Color.White)
-                ) {
-                    Text(
-                        text = "Analisa tanahmu",
-                        fontSize = fontSize,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(5.dp)
-                    )
-                }
-            }
-
+            FloatingButtons.NavigateSoilStats(Modifier.fillMaxSize())
         }
     }
 }

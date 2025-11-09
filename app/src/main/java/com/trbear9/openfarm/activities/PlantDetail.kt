@@ -74,6 +74,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.FloatingButtons
 import com.trbear9.openfarm.Util
 import com.trbear9.plants.E
 import com.trbear9.plants.E.*
@@ -353,6 +354,7 @@ class PlantDetail : ComponentActivity(){
                     }
                 }
             }
+            FloatingButtons.NavigateSoilStats(Modifier.fillMaxSize())
         }
     }
 

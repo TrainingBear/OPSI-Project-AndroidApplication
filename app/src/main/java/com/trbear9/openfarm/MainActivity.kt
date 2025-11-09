@@ -1,6 +1,7 @@
 package com.trbear9.openfarm
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -59,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -99,7 +101,6 @@ var perm: ActivityResultLauncher<Array<String>> = object: ActivityResultLauncher
 
     override fun unregister() {
     }
-
 }
 
 class MainActivity : AppCompatActivity() {
@@ -112,53 +113,40 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Data.load(this)
         setContent {
-            App()
+            App(this)
         }
-        getLocation()
+        getLocation(this)
         perm.launch(arrayOf(Manifest.permission.CAMERA))
-        if (ContextCompat.checkSelfPermission
-                (this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-        ) else {
-            cam = true
-            Toast.makeText(this, "Camera permission granted!", Toast.LENGTH_SHORT).show()
-        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         TFService.close()
     }
-
-    private fun getLocation() {
-        perm.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        );
-        if (ActivityCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(this, "Tolong aktifkan dan izikan GPS", Toast.LENGTH_SHORT).show();
-        } else gps = true
-
-        val geo = GeoParameters();
-        LocationServices.getFusedLocationProviderClient(this)
-            .lastLocation
-            .addOnSuccessListener {
-                if (it != null) {
-                    geo.latitude = it.latitude;
-                    geo.longtitude = it.longitude;
-                }
-            };
-        inputs.geo = geo;
+}
+fun getLocation(context: Context) {
+    perm.launch(
+        arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    );
+    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, "Tolong izinkan untuk menggunakan fitur ini?", Toast.LENGTH_SHORT).show();
+        return
     }
+    else gps = true
+
+    val geo = GeoParameters();
+    LocationServices.getFusedLocationProviderClient(context)
+        .lastLocation
+        .addOnSuccessListener {
+            if (it != null) {
+                geo.latitude = it.latitude;
+                geo.longtitude = it.longitude;
+            }
+        }
+    inputs.geo = geo;
+    "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("GETLOCATION")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -294,9 +282,7 @@ fun Home(nav: NavController? = null) {
                         modifier = Modifier.size(50.dp)
                     )
                     Text(
-                        text = "Aplikasi ini di buat oleh salah satu tim OPSI SMA Negeri 1 Ambarawa." +
-                                "Aplikasi ini tentang bagaimana anda merawat tanaman, dan bagaimana" +
-                                "cara merawat tanah di lahan anda.\n\n" +
+                        text = "Selamat menggunakan aplikasi ini, semoga dapat bermanfaat untuk petani masa depan" +
                                 "Sebagai tanda dukungan, berikan kami secangkir kopi:",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
@@ -432,21 +418,26 @@ fun Home(nav: NavController? = null) {
                 val dynamicFontSize = (maxHeight.value / 2).sp
                 Button(
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .shadow(10.dp, RoundedCornerShape(15.dp))
+                    ,
                     onClick = {
                         perm.launch(arrayOf(Manifest.permission.CAMERA))
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.CAMERA
                             ) != PackageManager.PERMISSION_GRANTED
-                        ) else {
-                            cam = true
+                        ){
+                            perm.launch(arrayOf(Manifest.permission.CAMERA))
                             Toast.makeText(
                                 context,
-                                "Camera permission granted!",
+                                "Tolong izinkan kamera untuk menggunakan fitur ini!",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            if (gps) nav?.navigate(Screen.camera)
+                        }
+                        else {
+                            cam = true
+                            nav?.navigate(Screen.camera)
                         }
                     },
                     colors = ButtonDefaults.buttonColors(

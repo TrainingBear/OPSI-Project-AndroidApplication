@@ -2,15 +2,23 @@ package com.trbear9.plants
 
 import android.content.Context
 import android.util.Log
+import com.trbear9.openfarm.info
 import com.trbear9.plants.api.Parameters
 import com.trbear9.plants.api.UserVariable
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
+import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
+import java.io.ObjectInputStream
+import java.io.ObjectOutput
+import java.io.ObjectOutputStream
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.absoluteValue
+
+private val dir = File("serialized").also{it.mkdirs()}
+fun save(name: String): File = File(dir, name)
 
 object CsvHandler {
     @JvmField
@@ -18,7 +26,42 @@ object CsvHandler {
     var ecocropcsv: MutableList<CSVRecord>? = null
     var perawatan: MutableList<CSVRecord>? = null
 
+    fun preload(){
+        try {
+            File("EcoCrop_DB.csv").inputStream().use { `is` ->
+                InputStreamReader(`is`).use {
+                        reader -> ecocropcsv = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
+                }
+            }
+
+            File("Perawatan.csv").inputStream().use { `is` ->
+                InputStreamReader(`is`).use {
+                        reader -> perawatan = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader).records
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            throw RuntimeException(e)
+        }
+        ObjectOutputStream(save("ecocropcsv.ser").outputStream()).use {
+            it.writeObject(ecocropcsv)
+        }
+        ObjectOutputStream(save("perawatan.ser").outputStream()).use{
+            it.writeObject(perawatan)
+        }
+    }
+
     fun load(context: Context) {
+//        context.assets.list("serialized/CSV")?.forEach {
+//            val field = this::class.java.getDeclaredField(it.replace(".ser", ""))
+//            field.isAccessible = true
+//
+//            field.set(this, ObjectInputStream(
+//                context.assets.open("serialized/CSV/$it")
+//            ).readObject())
+//
+//            "Deserialized $it".info("CsvHandler")
+//        }
         try {
             context.assets.open("EcoCrop_DB.csv").use { `is` ->
                 InputStreamReader(`is`).use {
