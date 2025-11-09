@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -49,7 +50,13 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.pseudoankit.coachmark.UnifyCoachmark
+import com.pseudoankit.coachmark.model.ToolTipPlacement
+import com.pseudoankit.coachmark.scope.enableCoachMark
+import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.MarkKey
+import com.trbear9.openfarm.highlightConfig
 import com.trbear9.plants.E
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.api.blob.Plant
@@ -61,6 +68,7 @@ object CONS {
     val noImage2 = Icons.Default.WbSunny
 }
 
+var coached by mutableStateOf(false)
 @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -68,142 +76,168 @@ object CONS {
     val context = LocalContext.current
 
     if (ref != null) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            onClick = {
-                val intent = Intent(context, PlantDetail::class.java)
-                intent.putExtra("plant", ref)
-                intent.putExtra("score", score)
-                context.startActivity(intent)
-            },
-            modifier = Modifier
+        UnifyCoachmark {
+            val cmodifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()
+                .heightIn(max = 600.dp)
                 .padding(8.dp)
-        ) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16 / 9f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.LightGray)
-                ) {
-                    Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
-                        val model = ImageRequest.Builder(LocalContext.current)
-                            .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
-                            .crossfade(true)
-                            .size(600, 400)
-                            .diskCachePolicy(CachePolicy.ENABLED)
-                            .memoryCachePolicy(CachePolicy.ENABLED)
-                            .build()
-                        val painter = rememberAsyncImagePainter(model)
-                        val state = painter.state
-                        AsyncImage(
-                            model = model,
-                            contentDescription = "${ref.nama_ilmiah} image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp))
-                        )
-                        if(state is AsyncImagePainter.State.Error || state is AsyncImagePainter.State.Loading){
-                            Column(
-                                modifier = Modifier.align(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Image(
-                                    imageVector = CONS.noImage,
-                                    contentDescription = "${ref.nama_ilmiah ?: "no"} image",
-                                    modifier = Modifier
-                                        .fillMaxSize(fraction = 0.5f)
-                                        .clip(RoundedCornerShape(16.dp))
-                                )
-                                Text(
-                                    text = "Gambar tidak tersedia untuk ${ref?.commonName}",
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(8.dp),
+                onClick = {
+                    val intent = Intent(context, PlantDetail::class.java)
+                    intent.putExtra("plant", ref)
+                    intent.putExtra("score", score)
+                    context.startActivity(intent)
+                },
+                modifier = if(!coached) {
+//                    coached = true
+                    cmodifier
+                        .enableCoachMark(
+                            key = MarkKey.cocok,
+                            toolTipPlacement = ToolTipPlacement.Bottom,
+                            highlightedViewConfig = highlightConfig
+                        ) {
+                            MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
                         }
-                        if (score != 0) {
-                            val star = (score / 10f) * 5
-                            val half = (star - star.toInt()) > 0.1f
-                            androidx.compose.foundation.layout.Row(
+                }
+                else cmodifier
+            ) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.LightGray)
+                    ) {
+                        Box(Modifier.fillMaxWidth().aspectRatio(16 / 9f)) {
+                            val model = ImageRequest.Builder(LocalContext.current)
+                                .data("file:///android_asset/images/${ref.nama_ilmiah}.webp")
+                                .crossfade(true)
+                                .size(600, 400)
+                                .diskCachePolicy(CachePolicy.ENABLED)
+                                .memoryCachePolicy(CachePolicy.ENABLED)
+                                .build()
+                            val painter = rememberAsyncImagePainter(model)
+                            val state = painter.state
+                            AsyncImage(
+                                model = model,
+                                contentDescription = "${ref.nama_ilmiah} image",
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                            if (state is AsyncImagePainter.State.Error || state is AsyncImagePainter.State.Loading) {
+                                Column(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        imageVector = CONS.noImage,
+                                        contentDescription = "${ref.nama_ilmiah ?: "no"} image",
+                                        modifier = Modifier
+                                            .fillMaxSize(fraction = 0.5f)
+                                            .clip(RoundedCornerShape(16.dp))
+                                    )
+                                    Text(
+                                        text = "Gambar tidak tersedia untuk ${ref?.commonName}",
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                            if (score != 0) {
+                                val star = (score / 10f) * 5
+                                val half = (star - star.toInt()) > 0.1f
+                                val modifier = Modifier
                                     .padding(end = 10.dp, top = 7.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .wrapContentSize(Alignment.Center)
                                     .background(Color.Black.copy(alpha = 0.5f))
                                     .align(Alignment.TopEnd)
-                            ) {
-                                repeat(star.toInt()) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = "Score",
-                                        tint = Color.Yellow,
-                                        modifier = Modifier
-                                            .size(30.dp)
-                                    )
-                                }
-                                if (half) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.StarHalf,
-                                        contentDescription = "Half Score",
-                                        tint = Color.Yellow,
-                                        modifier = Modifier
-                                            .size(30.dp)
-                                    )
+                                androidx.compose.foundation.layout.Row(
+                                    modifier = if(!coached) modifier
+                                        .enableCoachMark(
+                                            key = MarkKey.skor,
+                                            toolTipPlacement = ToolTipPlacement.Top,
+                                            highlightedViewConfig = highlightConfig
+                                        ){
+                                            MarkKey.skor.tooltip(ToolTipPlacement.Top)
+                                        }
+                                    else modifier
+                                ) {
+                                    repeat(star.toInt()) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Score",
+                                            tint = Color.Yellow,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                        )
+                                    }
+                                    if (half) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                                            contentDescription = "Half Score",
+                                            tint = Color.Yellow,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Plant Title
-                Text(
-                    text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-
-                // Plant Description
-                Text(
-                    text = ref.description?.take(100) + if ((ref.description?.length ?: 0) > 100) "..." else "",
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-
-                // Plant Tags
-                com.google.accompanist.flowlayout.FlowRow(
-                    modifier = Modifier.padding(top = 6.dp),
-                    mainAxisSpacing = 2.dp,
-                    crossAxisSpacing = 2.dp
-                ) {
-                    Kat(
-                        ref.difficulty?.toString() ?: "???",
-                        Color.Black,
-                        diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
+                    // Plant Title
+                    Text(
+                        text = ref.commonName?.split(",")[0] ?: "Tidak tersedia",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 10.dp)
                     )
-                    val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
-                    val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
-                    Kat(
-                        if (panen_min != panen_max) "$panen_min-$panen_max hari"
-                        else if (panen_min == "0") ""
-                        else if (panen_min == "null") ""
-                        else "$panen_min hari",
-                        bcolor = Color.LightGray
+
+                    // Plant Description
+                    Text(
+                        text = ref.description?.take(100) + if ((ref.description?.length
+                                ?: 0) > 100
+                        ) "..." else "",
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 6.dp)
                     )
-                    ref.category?.forEach {
+
+                    // Plant Tags
+                    com.google.accompanist.flowlayout.FlowRow(
+                        modifier = Modifier.padding(top = 6.dp),
+                        mainAxisSpacing = 2.dp,
+                        crossAxisSpacing = 2.dp
+                    ) {
+                        Kat(
+                            ref.difficulty?.toString() ?: "???",
+                            Color.Black,
+                            diffToColor(ref.difficulty?.toString() ?: "UNKNOWN")
+                        )
+                        val panen_min = Data.ecocrop[ref.nama_ilmiah]?.get(E.MIN_crop_cycle)
+                        val panen_max = Data.ecocrop[ref.nama_ilmiah]?.get(E.MAX_crop_cycle)
+                        Kat(
+                            if (panen_min != panen_max) "$panen_min-$panen_max hari"
+                            else if (panen_min == "0") ""
+                            else if (panen_min == "null") ""
+                            else "$panen_min hari",
+                            bcolor = Color.LightGray
+                        )
+                        ref.category?.forEach {
                             Kat(
                                 translateCategory(it), tcolor = Color.White,
                                 bcolor = categoryToColor(it)
                             )
                         }
+                    }
                 }
             }
+            coached = true
         }
     }
 }

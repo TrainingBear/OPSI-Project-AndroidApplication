@@ -52,7 +52,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-
+//            isShrinkResources = true
         }
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
@@ -85,28 +85,30 @@ android {
     }
 
     packaging {
-            resources {
-                pickFirsts += "messages/JavaOptionBundle.properties"
-                pickFirsts += "kotlin/reflect/reflect.kotlin_builtins"
-                pickFirsts += "DebugProbesKt.bin"
-                pickFirsts += "META-INF/analysis-api/analysis-api-impl-base.xml"
-                pickFirsts += "META-INF/analysis-api/analysis-api-fir.xml"
-                pickFirsts += "META-INF/analysis-api/**"
-                pickFirsts += "META-INF/**/**"
-                pickFirsts += "META-INF/**"
-                pickFirsts += "mozilla/public-suffix-list.txt"
-                pickFirsts += listOf(
-                    "lib/armeabi-v7a/liblitert_jni.so",
-                    "lib/arm64-v8a/liblitert_jni.so"
-                )
-            }
+        resources {
+            pickFirsts += "messages/JavaOptionBundle.properties"
+            pickFirsts += "kotlin/reflect/reflect.kotlin_builtins"
+            pickFirsts += "DebugProbesKt.bin"
+            pickFirsts += "META-INF/analysis-api/analysis-api-impl-base.xml"
+            pickFirsts += "META-INF/analysis-api/analysis-api-fir.xml"
+            pickFirsts += "META-INF/analysis-api/**"
+            pickFirsts += "META-INF/**/**"
+            pickFirsts += "META-INF/**"
+            pickFirsts += "mozilla/public-suffix-list.txt"
+            pickFirsts += listOf(
+                "lib/armeabi-v7a/liblitert_jni.so",
+                "lib/arm64-v8a/liblitert_jni.so"
+            )
+        }
+
     }
     fun AndroidResources.() {
-        noCompress += "tflite"
+        noCompress -= "tflite"
     }
 }
 
 dependencies {
+    implementation("io.github.pseudoankit:coachmark:3.0.1")
     implementation ("androidx.room:room-runtime:2.6.1")
     implementation(libs.androidx.foundation.layout)
     kapt("androidx.room:room-compiler:2.6.1")

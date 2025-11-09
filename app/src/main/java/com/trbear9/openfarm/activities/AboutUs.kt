@@ -298,7 +298,8 @@ fun AboutUs(nav: NavController? = null) {
                             ) {
                                 append("https://discord.gg/fbAZSd3Hf2")
                             }
-                            append("\n")
+                            pop()
+                            append("\n\n")
                             withStyle(
                                 SpanStyle(
                                     fontWeight = FontWeight.Bold
@@ -318,6 +319,7 @@ fun AboutUs(nav: NavController? = null) {
                             ) {
                                 append("https://www.youtube.com/channel/kujatic")
                             }
+                            pop()
                         }
                         ClickableText(
                             text = anotated,
