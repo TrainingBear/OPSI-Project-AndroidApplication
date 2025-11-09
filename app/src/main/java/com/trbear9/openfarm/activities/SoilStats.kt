@@ -13,30 +13,40 @@
 //   limitations under the License.
 package com.trbear9.openfarm.activities
 
+import android.graphics.BitmapFactory
 import android.graphics.Typeface
+import android.os.Bundle
 import android.text.Layout
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -56,7 +66,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -96,7 +111,6 @@ import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.trbear9.internal.TFService
-import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.inputs
 import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.api.Response
@@ -108,9 +122,21 @@ private val backgroundCardColor: Color = Color(0x99FFFFFF)
 private val backgroundTitleColor: Color = Color(0x27050091)
 private val clipRound: Dp = 15.dp
 
+class SoilStatsActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            SoilStats(){
+                this.onBackPressedDispatcher.onBackPressed()
+                this.finish()
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
-fun SoilStats(nav: NavController? = null) {
+fun SoilStats(click: () -> Unit = {}) {
     val scroll = rememberScrollState()
     var response by remember { mutableStateOf(inputs.soilResult.response) }
     var collected by remember { mutableStateOf<Boolean>(inputs.soilResult.collected) }
@@ -161,37 +187,29 @@ fun SoilStats(nav: NavController? = null) {
     ) {
         Scaffold(
             containerColor = Color.Transparent,
-            bottomBar = {
-                var selected by remember { mutableIntStateOf(2) }
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = selected == 0,
-                        onClick = {
-                            selected = 0
-                            nav?.navigate(Screen.home)
-                        },
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                        label = { Text("Home") }
-                    )
-                    NavigationBarItem(
-                        selected = selected == 1,
-                        onClick = {
-                            selected = 1
-                            nav?.navigate(Screen.soilResult)
-                        },
-                        icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
-                        label = { Text("Tanaman") }
-                    )
-                    NavigationBarItem(
-                        selected = selected == 2,
-                        onClick = {
-                            selected = 2
-                        },
-                        icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
-                        label = { Text("Tanah") }
-                    )
-                }
-            }
+//            bottomBar = {
+//                var selected by remember { mutableIntStateOf(2) }
+//                NavigationBar {
+//                    NavigationBarItem(
+//                        selected = selected == 0,
+//                        onClick = {
+//                            selected = 0
+//                            nav?.navigate(Screen.home)
+//                        },
+//                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+//                        label = { Text("Home") }
+//                    )
+//                    NavigationBarItem(
+//                        selected = selected == 1,
+//                        onClick = {
+//                            selected = 1
+//                            nav?.navigate(Screen.soilResult)
+//                        },
+//                        icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
+//                        label = { Text("Tanaman") }
+//                    )
+//                }
+//            }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
                 if (!collected && false)
@@ -224,7 +242,7 @@ fun SoilStats(nav: NavController? = null) {
                         )
                         Button(
                             onClick = {
-                                nav?.navigate(Screen.camera)
+                                click()
                             },
                             modifier = Modifier.padding(top = 20.dp)
                         ) {
@@ -252,6 +270,19 @@ fun SoilStats(nav: NavController? = null) {
                         }
 //                        if (response?.soilPrediction == null)
                         else {
+                            Image(
+                                painter = if(inputs.image!=null)
+                                    BitmapPainter(inputs.image!!.asImageBitmap())
+                                else rememberVectorPainter(Icons.Default.Image),
+                                contentDescription = "Tanah",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(2f)
+                                    .clip(RoundedCornerShape(clipRound))
+                                    .background(backgroundCardColor)
+                                    .padding(5.dp)
+                            )
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
@@ -308,7 +339,8 @@ fun SoilStats(nav: NavController? = null) {
                                 (inputs.soil.pH
                                     ?: (value?.soil?.pH.toString() + " (default)")).toString()
                             )
-                            Map("Tipe: ", "$soilType ${soilPred * 100.0}%")
+                            var pred = soilPred * 100.0
+                            Map("Tipe: ", "$soilType ${String.format("%.2f", pred)}%")
                             Map("Tekstur: ", texr.toString())
                             Map("Drainase: ", drain.toString())
                             Map("Kesuburan: ", ferr.toString())
@@ -317,20 +349,34 @@ fun SoilStats(nav: NavController? = null) {
                             val dosisKg = getDosis(soilType, pH, 7f, depth) * 1000
                             Cat(
                                 Icons.Default.LocalHospital, "Netralisasi pH tanah",
-                                "dengan kedalaman" +
-                                        " tanah: $depth cm. untuk mencapai angka pH netral -> 7," +
-                                        " di butuhkan $dosisKg kg kapur dolmit/hektar. atau ${dosisKg / 100} kg kapur dolmit/m2",
+//                                "dengan kedalaman tanah: $depth cm. " +
+                                "untuk mencapai angka pH netral dari ${inputs.soil.pH
+                                    ?: (value?.soil?.pH.toString() + " (default)")} -> 7," +
+                                        " di butuhkan ${dosisKg.round()} kg kapur dolmit per hektar atau ${(dosisKg / 100).round()} kg kapur dolmit per meter persegi",
                             )
                         } else {
                             Cat(
                                 Icons.Default.LocalHospital,
                                 "Netralisasi pH tanah",
-                                "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami.\n" +
+                                "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami." +
                                         "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin."
                             )
                         }
                         Cat(Icons.Default.WaterDrop, "Retensi Air", retention(soilType))
                     }
+                IconButton(
+                    onClick = { click() },
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.8f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close"
+                    )
+                }
             }
         }
     }
@@ -383,7 +429,7 @@ private fun Cat(icon: ImageVector, head: String, body: String) {
             )
             Text(
                 text = body, fontSize = 17.sp,
-                textAlign = TextAlign.Justify,
+                textAlign = TextAlign.Left,
                 fontWeight = FontWeight.Normal,
                 modifier = Modifier.padding(start = 5.dp)
             )
@@ -492,30 +538,21 @@ fun getDosis(name: String, current: Float, target: Float, depth: Int): Float {
 
 fun retention(name: String?): String {
     return when (name) {
-        "Aluvial" -> """
-        Tanah aluvial memiliki kemampuan menahan air sedang sehingga perlu dikelola agar tetap lembap. Gunakan mulsa organik (jerami atau daun kering) setebal 5–10 cm untuk mengurangi penguapan, serta tambahkan biochar 2–5 ton/ha agar kapasitas simpan air meningkat. Penyiraman dilakukan saat kelembapan turun di bawah 60% kapasitas lapang dengan metode irigasi sederhana atau tetes. Tambahkan pupuk organik 10–15 ton/ha dan tanam cover crop untuk menjaga struktur serta kelembapan tanah. 
-        """
+        "Aluvial" -> """ Tanah aluvial memiliki kemampuan menahan air sedang sehingga perlu dikelola agar tetap lembap. Gunakan mulsa organik (jerami atau daun kering) setebal 5–10 cm untuk mengurangi penguapan, serta tambahkan biochar 2–5 ton/ha agar kapasitas simpan air meningkat. Penyiraman dilakukan saat kelembapan turun di bawah 60% kapasitas lapang dengan metode irigasi sederhana atau tetes. Tambahkan pupuk organik 10–15 ton/ha dan tanam cover crop untuk menjaga struktur serta kelembapan tanah. """
 
-        "Andosol" -> """
-        Tanah andosol umumnya memiliki porositas tinggi dan mampu menahan air cukup baik, tetapi mudah kehilangan kelembapan saat kering. Untuk menjaga kestabilan air, gunakan mulsa organik (jerami, daun kering) setebal 5–10 cm dan tambahkan biochar 3–6 ton/ha agar daya simpan air lebih optimal. Lakukan penyiraman ketika kelembapan tanah turun di bawah 70% kapasitas lapang, serta gunakan irigasi tetes atau sprinkle agar distribusi air lebih merata. Pemberian pupuk organik 15–20 ton/ha serta penanaman cover crop dianjurkan untuk memperbaiki struktur tanah dan mempertahankan kelembapan lebih lama.
-"""
+        "Andosol" -> """ Tanah andosol umumnya memiliki porositas tinggi dan mampu menahan air cukup baik, tetapi mudah kehilangan kelembapan saat kering. Untuk menjaga kestabilan air, gunakan mulsa organik (jerami, daun kering) setebal 5–10 cm dan tambahkan biochar 3–6 ton/ha agar daya simpan air lebih optimal. Lakukan penyiraman ketika kelembapan tanah turun di bawah 70% kapasitas lapang, serta gunakan irigasi tetes atau sprinkle agar distribusi air lebih merata. Pemberian pupuk organik 15–20 ton/ha serta penanaman cover crop dianjurkan untuk memperbaiki struktur tanah dan mempertahankan kelembapan lebih lama. """
 
-        "Humus" -> """
-        Tanah humus memiliki kandungan bahan organik tinggi sehingga daya menahan airnya sangat baik. Namun, kelembapan tetap perlu dijaga agar stabil bagi tanaman. Gunakan mulsa organik (jerami, daun kering) setebal 5–10 cm untuk mengurangi penguapan, serta tambahkan biochar 2–4 ton/ha bila diperlukan agar struktur tanah lebih kokoh. Penyiraman cukup dilakukan ketika kelembapan tanah turun hingga sekitar 70% kapasitas lapang, karena humus cenderung mampu menyimpan air lebih lama. Pemberian pupuk organik tambahan 10–15 ton/ha dan penanaman cover crop akan membantu mempertahankan kelembapan sekaligus meningkatkan kesuburan tanah.
-"""
+        "Humus" -> """ Tanah humus memiliki kandungan bahan organik tinggi sehingga daya menahan airnya sangat baik. Namun, kelembapan tetap perlu dijaga agar stabil bagi tanaman. Gunakan mulsa organik (jerami, daun kering) setebal 5–10 cm untuk mengurangi penguapan, serta tambahkan biochar 2–4 ton/ha bila diperlukan agar struktur tanah lebih kokoh. Penyiraman cukup dilakukan ketika kelembapan tanah turun hingga sekitar 70% kapasitas lapang, karena humus cenderung mampu menyimpan air lebih lama. Pemberian pupuk organik tambahan 10–15 ton/ha dan penanaman cover crop akan membantu mempertahankan kelembapan sekaligus meningkatkan kesuburan tanah. """
 
-        "Retensi" -> """
-        Tanah kapur umumnya bertekstur kasar, cepat meresapkan air, tetapi sulit menyimpannya sehingga kelembapan cepat hilang. Untuk meningkatkan retensi air, gunakan mulsa organik (jerami, serasah, daun kering) setebal 7–10 cm agar mengurangi penguapan. Tambahkan biochar 4–6 ton/ha serta pupuk organik 15–20 ton/ha untuk memperbaiki porositas dan daya simpan air. Penyiraman perlu lebih sering, terutama saat kelembapan turun di bawah 60% kapasitas lapang, dengan sistem irigasi tetes atau alur agar penyerapan lebih efisien. Penanaman cover crop juga disarankan untuk menjaga kelembapan tanah dan menambah bahan organik.
-"""
+        "Retensi" -> """ Tanah kapur umumnya bertekstur kasar, cepat meresapkan air, tetapi sulit menyimpannya sehingga kelembapan cepat hilang. Untuk meningkatkan retensi air, gunakan mulsa organik (jerami, serasah, daun kering) setebal 7–10 cm agar mengurangi penguapan. Tambahkan biochar 4–6 ton/ha serta pupuk organik 15–20 ton/ha untuk memperbaiki porositas dan daya simpan air. Penyiraman perlu lebih sering, terutama saat kelembapan turun di bawah 60% kapasitas lapang, dengan sistem irigasi tetes atau alur agar penyerapan lebih efisien. Penanaman cover crop juga disarankan untuk menjaga kelembapan tanah dan menambah bahan organik. """
 
-        "Laterit" -> """
-        Tanah laterit memiliki kandungan liat tinggi, drainase kurang baik, dan mudah mengeras saat kering sehingga retensi airnya rendah. Untuk menjaga ketersediaan air, gunakan mulsa organik (jerami, serasah, daun kering) setebal 5–8 cm agar kelembapan lebih stabil. Tambahkan biochar 3–5 ton/ha serta pupuk organik 15–20 ton/ha untuk memperbaiki struktur tanah dan meningkatkan kapasitas menahan air. Penyiraman dilakukan ketika kelembapan turun hingga <65% kapasitas lapang, dengan metode irigasi tetes atau sprinkle agar air terserap merata. Penanaman cover crop dianjurkan untuk mencegah pemadatan, menjaga kelembapan, dan menambah bahan organik.
-"""
+        "Laterit" -> """ Tanah laterit memiliki kandungan liat tinggi, drainase kurang baik, dan mudah mengeras saat kering sehingga retensi airnya rendah. Untuk menjaga ketersediaan air, gunakan mulsa organik (jerami, serasah, daun kering) setebal 5–8 cm agar kelembapan lebih stabil. Tambahkan biochar 3–5 ton/ha serta pupuk organik 15–20 ton/ha untuk memperbaiki struktur tanah dan meningkatkan kapasitas menahan air. Penyiraman dilakukan ketika kelembapan turun hingga <65% kapasitas lapang, dengan metode irigasi tetes atau sprinkle agar air terserap merata. Penanaman cover crop dianjurkan untuk mencegah pemadatan, menjaga kelembapan, dan menambah bahan organik. """
 
-        "Pasir" -> """
-        Tanah pasir memiliki pori besar, sehingga cepat meloloskan air dan sangat rendah daya menahan airnya. Untuk meningkatkan retensi, gunakan mulsa organik (jerami, sekam, daun kering) setebal 7–10 cm agar mengurangi penguapan. Tambahkan biochar 5–7 ton/ha serta pupuk organik 20–25 ton/ha untuk meningkatkan kandungan bahan organik dan memperbaiki struktur tanah. Penyiraman perlu lebih sering, dilakukan saat kelembapan turun di bawah 50–55% kapasitas lapang, dengan metode irigasi tetes agar air langsung terserap ke zona perakaran. Penanaman cover crop juga penting untuk menahan kelembapan dan menambah unsur organik pada tanah berpasir.
-"""
+        "Pasir" -> """ Tanah pasir memiliki pori besar, sehingga cepat meloloskan air dan sangat rendah daya menahan airnya. Untuk meningkatkan retensi, gunakan mulsa organik (jerami, sekam, daun kering) setebal 7–10 cm agar mengurangi penguapan. Tambahkan biochar 5–7 ton/ha serta pupuk organik 20–25 ton/ha untuk meningkatkan kandungan bahan organik dan memperbaiki struktur tanah. Penyiraman perlu lebih sering, dilakukan saat kelembapan turun di bawah 50–55% kapasitas lapang, dengan metode irigasi tetes agar air langsung terserap ke zona perakaran. Penanaman cover crop juga penting untuk menahan kelembapan dan menambah unsur organik pada tanah berpasir. """
 
-        else -> "Tidak tersedia"
+        else -> "Belum tersedia untuk jenis tanah ini"
     }
 }
+
+fun Double.round(): String = String.format("%.2f", this)
+fun Float.round(): String = String.format("%.2f", this)

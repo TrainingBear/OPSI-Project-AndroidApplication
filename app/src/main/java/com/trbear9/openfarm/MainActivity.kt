@@ -1,6 +1,7 @@
 package com.trbear9.openfarm
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LightbulbCircle
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
@@ -59,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -99,7 +102,6 @@ var perm: ActivityResultLauncher<Array<String>> = object: ActivityResultLauncher
 
     override fun unregister() {
     }
-
 }
 
 class MainActivity : AppCompatActivity() {
@@ -112,53 +114,40 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Data.load(this)
         setContent {
-            App()
+            App(this)
         }
-        getLocation()
+        getLocation(this)
         perm.launch(arrayOf(Manifest.permission.CAMERA))
-        if (ContextCompat.checkSelfPermission
-                (this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-        ) else {
-            cam = true
-            Toast.makeText(this, "Camera permission granted!", Toast.LENGTH_SHORT).show()
-        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         TFService.close()
     }
-
-    private fun getLocation() {
-        perm.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        );
-        if (ActivityCompat.checkSelfPermission(
-                this@MainActivity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(this, "Tolong aktifkan dan izikan GPS", Toast.LENGTH_SHORT).show();
-        } else gps = true
-
-        val geo = GeoParameters();
-        LocationServices.getFusedLocationProviderClient(this)
-            .lastLocation
-            .addOnSuccessListener {
-                if (it != null) {
-                    geo.latitude = it.latitude;
-                    geo.longtitude = it.longitude;
-                }
-            };
-        inputs.geo = geo;
+}
+fun getLocation(context: Context) {
+    perm.launch(
+        arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    );
+    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, "Tolong izinkan untuk menggunakan fitur ini?", Toast.LENGTH_SHORT).show();
+        return
     }
+    else gps = true
+
+    val geo = GeoParameters();
+    LocationServices.getFusedLocationProviderClient(context)
+        .lastLocation
+        .addOnSuccessListener {
+            if (it != null) {
+                geo.latitude = it.latitude;
+                geo.longtitude = it.longitude;
+            }
+        }
+    inputs.geo = geo;
+    "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("GETLOCATION")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +156,7 @@ class MainActivity : AppCompatActivity() {
 fun Home(nav: NavController? = null) {
     val context = LocalContext.current
     var scroll = rememberScrollState()
-    var coffe by remember {mutableStateOf(false)}
+    var coffe by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -191,15 +180,6 @@ fun Home(nav: NavController? = null) {
                     icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
                     label = { Text("Tanaman") }
                 )
-                NavigationBarItem(
-                    selected = selected == 2,
-                    onClick = {
-                        selected = 2
-                        nav?.navigate(Screen.soilStats)
-                    },
-                    icon = { Icon(Icons.Default.Grain, contentDescription = "Tanah") },
-                    label = { Text("Tanah") }
-                )
             }
         },
         topBar = {
@@ -219,7 +199,7 @@ fun Home(nav: NavController? = null) {
                                     contentDescription = "Help",
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .clickable{nav?.navigate(Screen.about)}
+                                        .clickable { nav?.navigate(Screen.about) }
                                 )
                                 Column(
                                     horizontalAlignment = Alignment.Start,
@@ -248,7 +228,7 @@ fun Home(nav: NavController? = null) {
                                             }
                                         },
                                         lineHeight = 18.sp,
-                                        modifier = Modifier.clickable{nav?.navigate(Screen.about)}
+                                        modifier = Modifier.clickable { nav?.navigate(Screen.about) }
                                     )
                                 }
                             }
@@ -257,12 +237,12 @@ fun Home(nav: NavController? = null) {
                         Box(Modifier.fillMaxHeight().weight(3f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Coffee,
+                                    imageVector = Icons.Default.MonetizationOn,
                                     tint = Color.Black,
                                     contentDescription = "Buy us a coffe!",
                                     modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
                                         .size(30.dp)
-                                        .clickable {coffe = !coffe}
+                                        .clickable { coffe = !coffe }
                                 )
 
                                 Icon(
@@ -282,72 +262,81 @@ fun Home(nav: NavController? = null) {
             )
         }
     ) {
-        if(coffe){
+        if (coffe == false) {
             BasicAlertDialog(
-                onDismissRequest = {coffe = false},
+                onDismissRequest = { coffe = false },
                 modifier = Modifier
                     .padding(it)
-                    .wrapContentSize()
-                ,
+                    .wrapContentSize(),
             ) {
-                Column(modifier = Modifier
-                    .wrapContentSize()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFFFB7B7))
-                    .border(BorderStroke(1.dp, Color.Black))
-
-                    ,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        imageVector = Icons.Default.Coffee,
-                        contentDescription = "Coffee",
-                        modifier = Modifier.size(50.dp)
-                    )
-                    Text(
-                        text = "Aplikasi ini di buat oleh salah satu tim OPSI SMA Negeri 1 Ambarawa." +
-                                "Aplikasi ini tentang bagaimana anda merawat tanaman, dan bagaimana" +
-                                "cara merawat tanah di lahan anda.\n\n" +
-                                "Sebagai tanda dukungan, berikan kami secangkir kopi:",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                        Button(
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.padding(10.dp).wrapContentSize(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(
-                                    0xFFFF9100
-                                )
-                            )
-                        ) {
-                            Text(
-                                text = "Beri dukungan!",
-                                fontSize = 18.sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                        Button(
-                            onClick = {coffe = false},
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(Color(0x99FFFFFF)),
+//                            .border(BorderStroke(1.dp, Color.Black)),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            imageVector = Icons.Default.MonetizationOn,
+                            contentDescription = "Coffee",
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Text(
+                            text = "Aplikasi ini di buat oleh pelajar SMAN 1 Ambarawa dan pelajar MAN 3 Jakarta pusat." +
+                                    "\nSebagai tanda dukungan, bisa beri kami secangkir kopi:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier.padding(10.dp)
-                                .wrapContentSize(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent
-                            )
-                        ){
-                            Text(
-                                text = "Tidak, terimakasih!",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Normal
-                            )
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Button(
+                                onClick = {
+                                    val intent =
+                                        Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier
+                                    .padding(10.dp).wrapContentSize()
+                                    .shadow(10.dp, RoundedCornerShape(20.dp))
+                                ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFFFF9100
+                                    )
+                                ),
+                            ) {
+                                Text(
+                                    text = "Beri dukungan!",
+                                    fontSize = 18.sp,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    val intent =
+                                        Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier
+                                    .padding(bottom = 10.dp).wrapContentSize()
+                                    .shadow(10.dp, RoundedCornerShape(20.dp))
+                                ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Gray
+                                ),
+                            ) {
+                                val fontsize = (this@BoxWithConstraints.maxWidth.value / 27).sp
+                                Text(
+                                    text = "Tidak, terimakasih!",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = fontsize
+                                )
+                            }
                         }
                     }
                 }
@@ -358,16 +347,15 @@ fun Home(nav: NavController? = null) {
                 .fillMaxSize()
                 .padding(it)
                 .background(Color(0xFF6FAD4F))
-                .verticalScroll(scroll)
-            ,
+                .verticalScroll(scroll),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(Modifier.fillMaxWidth().weight(1f)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
                     val dynamicFontSize = (maxHeight.value / 4.4).sp
-                    val icon = (maxHeight/ 3)
+                    val icon = (maxHeight / 3)
                     Button(
-                        onClick = {nav?.navigate(Screen.search)},
+                        onClick = { nav?.navigate(Screen.search) },
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(10.dp)
@@ -396,7 +384,7 @@ fun Home(nav: NavController? = null) {
             Box(Modifier.fillMaxWidth().weight(2f)) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
                     val dynamicFontSize = (maxHeight.value / 4).sp
-                    val dy2 = (maxHeight.value / 9).sp
+                    val dy2 = (maxHeight.value / 8).sp
                     Text(
                         text = buildAnnotatedString {
                             append("Open Farm")
@@ -408,7 +396,7 @@ fun Home(nav: NavController? = null) {
                                 )
                             ) {
                                 append("\n")
-                                append("Teman belajar bertani anda\nkapan saja dan dimana saja!")
+                                append("Panduan cerdas untuk Agrikultur berkelanjutan berbasis tehnologi.")
                             }
                         },
                         fontWeight = FontWeight.ExtraBold,
@@ -420,62 +408,67 @@ fun Home(nav: NavController? = null) {
                     )
                 }
             }
-            Box(modifier = Modifier.fillMaxWidth().weight(5f)) {
-
+            Box(modifier = Modifier.fillMaxWidth().weight(5f).padding(bottom = 50.dp)) {
                 Image(
                     painter = painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16/13.5f)
+                        .aspectRatio(16 / 13.5f)
                         .align(Alignment.Center),
                 )
-
-                BoxWithConstraints(Modifier.fillMaxWidth()
+            }
+        }
+        Box(Modifier.fillMaxSize().padding(it)) {
+            BoxWithConstraints(
+                Modifier.fillMaxWidth()
                     .fillMaxWidth()
-                    .aspectRatio(16/3f)
+                    .aspectRatio(16 / 3f)
                     .align(Alignment.BottomCenter)
                     .padding(start = 50.dp, end = 50.dp, bottom = 20.dp)
-                ) {
-                    val dynamicFontSize = (maxHeight.value / 2).sp
-                    Button(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        onClick = {
+            ) {
+                val dynamicFontSize = (maxHeight.value / 2).sp
+                Button(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .shadow(10.dp, RoundedCornerShape(15.dp))
+                    ,
+                    onClick = {
+                        perm.launch(arrayOf(Manifest.permission.CAMERA))
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ){
                             perm.launch(arrayOf(Manifest.permission.CAMERA))
-                            if (ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) else {
-                                cam = true
-                                Toast.makeText(
-                                    context,
-                                    "Camera permission granted!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                if(gps) nav?.navigate(Screen.camera)
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFF5A623)
-                        ),
+                            Toast.makeText(
+                                context,
+                                "Tolong izinkan kamera untuk menggunakan fitur ini!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else {
+                            cam = true
+                            nav?.navigate(Screen.camera)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF5A623)
+                    ),
 //                            border = BorderStroke(2.dp, Color.White),
-                    ) {
-                        Text(
-                            text = "Scan tanahmu!",
-                            fontSize = dynamicFontSize,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White,
-                            modifier = Modifier.fillMaxSize()
-                                .align(Alignment.CenterVertically),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
+                ) {
+                    Text(
+                        text = "Scan tanahmu!",
+                        fontSize = dynamicFontSize,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        modifier = Modifier.fillMaxSize()
+                            .align(Alignment.CenterVertically),
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
         }
-
     }
 }

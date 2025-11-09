@@ -15,6 +15,9 @@ import com.openmeteo.api.common.time.Date
 import com.openmeteo.api.common.units.TemperatureUnit
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.activities.SoilResult
+import com.trbear9.openfarm.debug
+import com.trbear9.openfarm.getLocation
+import com.trbear9.openfarm.info
 import com.trbear9.plants.CsvHandler
 import com.trbear9.plants.E.Category
 import com.trbear9.plants.E.Common_names
@@ -23,16 +26,22 @@ import com.trbear9.plants.api.GeoParameters
 import com.trbear9.plants.api.Response
 import com.trbear9.plants.api.UserVariable
 import com.trbear9.plants.api.blob.Plant
+//import com.trbear9.plants.save
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import lombok.Getter
 import org.apache.commons.csv.CSVRecord
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutput
+import java.io.ObjectOutputStream
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 @Getter
@@ -96,56 +105,85 @@ object Data {
 
     val tags = mutableSetOf<String>()
     var kew = mutableMapOf<String, JsonNode?>()
-    fun load(context: Context) {
-        CsvHandler.load(context)
-        TFService.load(context)
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                val plants = context.assets.open("plants.json").use {
-                    objectMapper.readValue(it, Array<Plant>::class.java)
-                }
-                for (item in plants) {
-                    plant[item.nama_ilmiah] = item
-                }
-                Log.d("Data Processor", "Loaded ${plant.size} plants")
-
-                context.assets.open("KEW.json").use {
-                    val type = object : TypeReference<Map<String, JsonNode>>() {}
-                    val k = objectMapper.readValue(it, type)
-                    for (entry in k) {
-                        val name = entry.key
-                        val ke = k[name]
-                        kew[name] = ke
-                    }
-                }
-            }
-            CsvHandler.ecocropcsv?.forEach {
-                if (!ecocrop.containsKey(it[Science_name]))
-                    ecocrop[it[Science_name]] = it
-                loadPlant(it, true)
-            }
-        }
-        Log.d("Data Processor", "Loaded ${ecocrop.size} ecocrop")
-        Log.d("Data Processor", "Loaded ${kew.size} kew")
-        Log.d("Data Processor", "Loaded ${plant.size} plants")
-        Log.d("Data Processor", "Loaded ${namaUmumToNamaIlmiah.size} namaUmumToNamaIlmiah")
-        Log.d("Data Processor", "Loaded ${namaIlmiahToNamaUmum.size} namaIlmiahToNamaUmum")
-        Log.d("Data Processor", "Loaded ${tags.size} Tags size")
-    }
-
     val namaUmumToNamaIlmiah = mutableMapOf<String, String>()
     val namaIlmiahToNamaUmum = mutableMapOf<String, String>()
 
     val plant = mutableMapOf<String, Plant>()
     val normalize = mutableMapOf<String, String>()
-    var plantByTag = SnapshotStateMap<String, MutableSet<String>>()
+    var plantByTag = mutableMapOf<String, MutableSet<String>>()
     val ecocrop = mutableMapOf<String, CSVRecord>()
+    fun load(context: Context) {
+        CsvHandler.load(context)
+        CsvHandler.ecocropcsv?.forEach {
+            ecocrop[it[Science_name]] = it
+        }
+        TFService.load(context)
+        context.assets.list("serialized")?.forEach {
+            if(it!="CSV" && it!="ecocrop.ser") {
+                val field = this::class.java.getDeclaredField(it.replace(".ser", ""))
+                field.isAccessible = true
+
+                field.set(
+                    this, ObjectInputStream(
+                        context.assets.open("serialized/$it")
+                    ).readObject()
+                )
+                "Deserialized $it".info("Data Processor")
+            }
+        }
+    }
+
+    fun preLoad() {
+//        CsvHandler.preload()
+//        TFService.load(context)
+        val plants = File("plants.json").inputStream().use {
+            objectMapper.readValue(it, Array<Plant>::class.java)
+        }
+        for (item in plants) {
+            plant[item.nama_ilmiah] = item
+        }
+//        Log.d("Data Processor", "Loaded ${plant.size} plants")
+
+        File("KEW.json").inputStream().use {
+            val type = object : TypeReference<Map<String, JsonNode>>() {}
+            val k = objectMapper.readValue(it, type)
+            for (entry in k) {
+                val name = entry.key
+                val ke = k[name]
+                kew[name] = ke
+            }
+        }
+        CsvHandler.ecocropcsv?.forEach {
+            if (!ecocrop.containsKey(it[Science_name]))
+                ecocrop[it[Science_name]] = it
+            loadPlant(it, true)
+        }
+//        Log.d("Data Processor", "Loaded ${ecocrop.size} ecocrop")
+//        Log.d("Data Processor", "Loaded ${kew.size} kew")
+//        Log.d("Data Processor", "Loaded ${plant.size} plants")
+//        Log.d("Data Processor", "Loaded ${namaUmumToNamaIlmiah.size} namaUmumToNamaIlmiah")
+//        Log.d("Data Processor", "Loaded ${namaIlmiahToNamaUmum.size} namaIlmiahToNamaUmum")
+//        Log.d("Data Processor", "Loaded ${tags.size} Tags size")
+
+        for (field in Data::class.java.declaredFields) {
+            try {
+//                ObjectOutputStream(save("${field.name}.ser").outputStream())
+//                    .use{it.writeObject(field.get(this))}
+            } catch (_: Throwable){
+//                error("Failed to serialize ${field.name}")
+                continue
+            }
+            println("Serialized ${field.name}")
+//            "Serialized ${field.name}".info(this::class.simpleName.toString())
+        }
+    }
+
     fun loadPlant(record: CSVRecord, load: Boolean = false): Plant {
         val ilmiah = record[Science_name]
         if (plant.containsKey(ilmiah) && !load) return plant[ilmiah]!!
 
         val plant = if (plant[ilmiah] == null) {
-            Log.e("Data Processor", "Full plant version of $ilmiah not found")
+//            Log.e("Data Processor", "Full plant version of $ilmiah not found")
             val plant = Plant()
             plant.commonName = ilmiah ?: "Tidak diketahui"
             plant
@@ -181,7 +219,7 @@ object Data {
 
         this.plant[ilmiah] = plant
         normalize[ilmiah.lowercase()] = ilmiah
-        Log.d("Data Processor", "Loaded ${plant.commonName} plants")
+//        Log.d("Data Processor", "Loaded ${plant.commonName} plants")
         return plant
     }
 
@@ -312,7 +350,8 @@ object Data {
         geo.altitude = elevation.toDouble()
         geo.min = min
         geo.max = max
-        Log.d("Data Processor", "Meteo temperatur: $min, $max with elevation: $elevation")
+        "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("Data Processor")
+        "temperatur: $min, $max with elevation: $elevation".debug("Data Processor")
     }
 
     val log: org.slf4j.Logger = LoggerFactory.getLogger(Data::class.java)!!

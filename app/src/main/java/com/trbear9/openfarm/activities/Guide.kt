@@ -1,5 +1,7 @@
 package com.trbear9.openfarm.activities
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -48,6 +52,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -70,20 +75,17 @@ object Guide {
 /**
  * Guide/Tutorial progress list missions
  * */
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(device = "spec:width=411dp,height=891dp,dpi=160")
 @Composable
 fun Guide(nav: NavController? = null) {
-    val guideCards: List<@Composable () -> Unit> = listOf(
-        { GuideCard(num = 1) },
-        { GuideCard(num = 2) },
-        { GuideCard(num = 3) },
-        { GuideCard(num = 4) },
-        { GuideCard(num = 5) },
-        { GuideCard(num = 6) },
-        { GuideCard(num = 7) }
-    )
+    val context = LocalContext.current
+    val pref = context.getSharedPreferences("learning_progress", Context.MODE_PRIVATE)
+    val achieved = (pref.getStringSet("completed", null) ?: emptySet()).size
+    var query: String by remember { mutableStateOf("") }
 
+    val GUIDECARDS: List<Unit> = listOf(GuideCard(num = 1), GuideCard(num = 1))
     Scaffold(
         topBar = {
             Box(
@@ -123,8 +125,7 @@ fun Guide(nav: NavController? = null) {
                         }
                     },
                     title = {
-                        var query: String by remember { mutableStateOf("") }
-                        OutlinedTextField(
+                        TextField(
                             value = query,
                             textStyle = TextStyle(
                                 color = Color.Black,
@@ -162,7 +163,6 @@ fun Guide(nav: NavController? = null) {
                             ),
                             onValueChange = { input: String ->
                                 query = input
-                                //TODO LATER
                             }
                         )
                     }
@@ -170,7 +170,7 @@ fun Guide(nav: NavController? = null) {
             }
         }
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
@@ -183,62 +183,65 @@ fun Guide(nav: NavController? = null) {
                         )
                     )
                 )
-//                .border(width = 2.5.dp, color = Color(0x60000000))
         ) {
-            Box(
-                modifier = Modifier
+            BoxWithConstraints(
+                Modifier
                     .padding(18.dp)
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .weight(2.4f)
                     .clip(RoundedCornerShape(20.dp))
                     .background(Color(0x8BFFFFFF))
             ) {
+                val maxHeight = maxHeight
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(end = 120.dp)
+                        .fillMaxWidth()
                 ) {
-                    Text(
-                        text = "Track your progress",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 35.sp,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)
-                    )
+                    BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
+                        val fontSize = (maxHeight.value / 5f).sp
+                        Text(
+                            text = "Track your progress",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = fontSize,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.padding(start = 20.dp, end = (maxHeight.value/2).dp, top = 20.dp)
+                        )
+                    }
                     Row(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp, 20.dp, 0.dp, 37.dp),
-                        horizontalArrangement = Arrangement.Center
+                            .fillMaxWidth()
+                            .weight(0.8f)
+                            .padding(start = 20.dp, end = (maxHeight.value/2).dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
+                        BoxWithConstraints(
                             modifier = Modifier
-                                .weight(.8f)
-                                .fillMaxHeight()
+                                .height(maxHeight/4)
+                                .weight(.5f)
                                 .clip(RoundedCornerShape(50))
                                 .background(Color(0xFF7BD6FF))
                         ) {
                             LinearProgressIndicator(
                                 progress = {
-                                    9f / 67f //TODO lu backend ini
+                                    achieved / 67f
                                 },
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .matchParentSize(), // isi penuh tinggi kotak
+                                    .fillMaxWidth(),
                                 color = Color(0xFF2196F3),
                                 trackColor = Color.Transparent,
                                 strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                             )
                         }
-                        Text(
-                            text = "9/67", //TODO ubah2 tar
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 20.sp,
-                            modifier = Modifier
-                                .weight(.2f)
-                                .fillMaxSize()
-                        )
+                        BoxWithConstraints(Modifier.weight(.2f)) {
+                            val fontSize = (maxHeight.value / 7f).sp
+                            Text(
+                                text = "$achieved/67",
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = fontSize,
+                            )
+                        }
                     }
                 }
                 Icon(
@@ -246,20 +249,33 @@ fun Guide(nav: NavController? = null) {
                     tint = Color.Black,
                     contentDescription = "png",
                     modifier = Modifier
-                        .size(120.dp)
                         .align(Alignment.CenterEnd)
-                        .padding(end = 25.dp)
+                        .size(maxHeight / 2)
+//                            .align(Alignment.CenterEnd)
                 )
             }
-            LazyColumn(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxSize()
-                    .padding(start = 18.dp, end = 18.dp, top = 210.dp, bottom = 18.dp)
-                    .height(180.dp)
-                    .background(Color(0x56D3D3D3))
-            ) {
-                items(guideCards.size) { i -> guideCards[i]() }
+            Box(Modifier.weight(6f).fillMaxWidth()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxSize()
+                        .padding(start = 18.dp, end = 18.dp, bottom = 18.dp)
+                        .background(Color(0x56D3D3D3))
+                ) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0x99AFAFAF))
+                        ) {
+
+                        }
+                    }
+                    item { GuideCard(nav, num = 1) }
+                    item { GuideCard(nav, num = 2) }
+                    item { GuideCard(nav, num = 3) }
+                    item { GuideCard(nav, num = 4) }
+                }
             }
         }
     }
@@ -303,10 +319,16 @@ fun GuideCard(
                     end = Offset(w, size.height),
                     strokeWidth = 3f
                 )
-            }.clickable { // TODO paling lu bisa urus biar efisien yg guide pointer
+            }
+            .clickable {
                 Guide.guidePointer = Triple(title, desc, details)
                 nav?.navigate(Screen.guidePointDetail)
             }
+        ,
+//        onClick = {
+//            Guide.guidePointer = Triple(title, desc, details)
+//            nav?.navigate(Screen.guidePointDetail)
+//        }
     ) {
         Row(
             modifier = Modifier.fillMaxSize()

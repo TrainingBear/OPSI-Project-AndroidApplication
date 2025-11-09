@@ -1,5 +1,8 @@
 package com.trbear9.openfarm.activities
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -76,61 +79,55 @@ fun PointDetail(
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                Box {
-                    TopAppBar(
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                        modifier = Modifier
-                            .wrapContentHeight(),
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    modifier = Modifier
+                        .wrapContentHeight(),
 //                        .border(width = 3.25.dp, color = Color(0x60000000)),
-                        navigationIcon = {
-                            IconButton(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                    navigationIcon = {
+                        IconButton(
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .clip(RoundedCornerShape(8.dp))
 //                                .background(Color(0x80EAEAEA))
-                                    .size(40.dp),
-                                onClick = { nav?.navigate(Screen.home) },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                    contentDescription = "back arrow",
-                                    tint = Color.Black,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(1.dp))
-                                        .background(Color(0x8BFFFFFF))
-//                                    .padding(5.dp)
-                                )
-                            }
-                        },
-                        title = {
-                            Box(
+                                .size(40.dp),
+                            onClick = { nav?.navigateUp() },
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "back arrow",
+                                tint = Color.Black,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = title,
-                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    overflow = TextOverflow.Visible
-                                )
-                            }
+                                    .clip(RoundedCornerShape(1.dp))
+                                    .background(Color(0x8BFFFFFF))
+//                                    .padding(5.dp)
+                            )
                         }
-                    )
-                }
+                    },
+                    title = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+//                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = title,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.ExtraBold,
+                                overflow = TextOverflow.Visible
+                            )
+                        }
+                    }
+                )
             }
         ) {
-            val cardsList: MutableList<@Composable () -> Unit> = mutableListOf()
-            for (perInfo in details) {
-                cardsList.add({ Card(perInfo) })
-            }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-                    .padding(20.dp)
+                    .padding(start = 20.dp, end = 20.dp)
             ) {
                 item {
                     Text(
@@ -142,12 +139,14 @@ fun PointDetail(
                             .padding(start = 20.dp, end = 20.dp, top = 20.dp)
                     )
                 }
-                items(cardsList.size) { i -> cardsList[i]() }
-                if (cardsList.size == 1)
+                for (perInfo in details) {
+                    item { Card(perInfo) }
                     item {
                         Spacer(modifier = Modifier.fillParentMaxSize()
                                 .background(Color(0x23FFFFFF)))
                     }
+                }
+
             }
         }
     }

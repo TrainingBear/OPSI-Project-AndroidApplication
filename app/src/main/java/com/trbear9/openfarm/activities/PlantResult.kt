@@ -1,5 +1,10 @@
 package com.trbear9.openfarm.activities
 
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +24,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,8 +42,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
@@ -61,12 +65,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -83,6 +87,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.patrykandpatrick.vico.compose.common.shape.rounded
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.FloatingButtons
+import com.trbear9.openfarm.LocalNav
+import com.trbear9.openfarm.MainActivity
 import com.trbear9.openfarm.ResultPagingSource
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.debug
@@ -109,53 +116,33 @@ class SearchResult {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview()
-fun SoilResultScreen(
-    onBack: () -> Unit = {},
-    nav: NavController? = null,
-) {
+fun SoilResultScreen() {
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
-    var finalQuery by rememberSaveable { mutableStateOf("") }
-    var selected by rememberSaveable { mutableStateOf("All") }
-    var expanded by rememberSaveable { mutableStateOf(false) }
-    var expandedSearch by rememberSaveable { mutableStateOf(false) }
-    var expandCat by rememberSaveable { mutableStateOf(false) }
-    var hasFocus by rememberSaveable { mutableStateOf(false) }
-    var order by rememberSaveable { mutableStateOf("Tertinggi") }
+    var finalQuery by rememberSaveable{ mutableStateOf("") }
+    var selected by rememberSaveable{ mutableStateOf("All") }
+    var expanded by rememberSaveable{ mutableStateOf(false) }
+    var expandedSearch by rememberSaveable{ mutableStateOf(false) }
+    var expandCat by rememberSaveable{ mutableStateOf(false) }
+    var hasFocus by rememberSaveable{ mutableStateOf(false) }
+    var order by rememberSaveable{ mutableStateOf("Tertinggi") }
     var scroll = rememberScrollState()
     var completerScroll = rememberScrollState()
 
-    var loaded by rememberSaveable {
+    var loaded by rememberSaveable{
         mutableStateOf<Boolean>(
-            if (inputs.soilResult == null) true
-            else inputs.soilResult.response?.loaded ?: false
-        )
+            if(inputs.soilResult == null) true
+            else inputs.soilResult.response?.loaded ?: false)
     }
-    var collected by rememberSaveable {
-        mutableStateOf<Boolean>(
-            inputs.soilResult.collected ?: true
-        )
-    }
-    var current by rememberSaveable {
-        mutableStateOf<String>(
-            inputs.soilResult?.response?.current ?: "Tanduran"
-        )
-    }
-    var progress by rememberSaveable {
-        mutableIntStateOf(
-            inputs.soilResult?.response?.progress?.toInt() ?: 0
-        )
-    }
-    var target by rememberSaveable {
-        mutableIntStateOf(
-            inputs.soilResult?.response?.target?.toInt() ?: 0
-        )
-    }
-    var predicted by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
-    var parameterLoaded by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
+    var collected by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult.collected ?: true) }
+    var current by rememberSaveable{ mutableStateOf<String>(inputs.soilResult?.response?.current ?: "Tanduran") }
+    var progress by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.progress?.toInt() ?: 0) }
+    var target by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.target?.toInt() ?: 0) }
+    var predicted by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
+    var parameterLoaded by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
 
-    var search = remember { mutableStateSetOf<String>() }
-    var focusRequester = remember { FocusRequester() }
+    var search = remember{ mutableStateSetOf<String>()}
+    var focusRequester = remember{ FocusRequester() }
 
     LaunchedEffect(Unit) {
         collected = inputs.soilResult?.collected ?: true
@@ -177,396 +164,361 @@ fun SoilResultScreen(
             }
         }
     }
-    var completer = rememberSaveable { mutableStateSetOf<String>() }
+    var completer = rememberSaveable{ mutableStateSetOf<String>() }
     LaunchedEffect(query) {
         completer.clear()
         completer(query, completer, 5)
         "updated ${completer.size} items".debug("PlantResult")
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background( // BACKGROUND
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFFD2C4),
-                        Color(0xFFFBD5C2),
-                        Color(0xFFEAD9BB)
-                    ), start = Offset(1f/0f, 0f), end = Offset(0f, 1f/0f)
-                )
-            )
-    ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFF5F5F5)),
-                    title = {
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = (if (expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(
-                                    1f
-                                ))
-                            ) {
-                                BasicTextField(
-                                    value = query,
-                                    onValueChange = { input ->
-                                        query = input
-                                        search.clear()
-                                        expandedSearch = true
-                                    },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(
-                                        imeAction = ImeAction.Search
-                                    ),
-                                    keyboardActions = KeyboardActions(
-                                        onSearch = {
-                                            expandedSearch = false
-                                            keyboard?.hide()
-                                            hasFocus = false
-                                            finalQuery = query
-                                            "ExpandedSearch: $expandedSearch".debug("PlantResult")
-                                        },
-                                    ),
-                                    modifier = Modifier
-                                        .height(35.dp)
-                                        .padding(end = 12.dp)
-                                        .focusRequester(focusRequester)
-                                        .onFocusChanged { focusState ->
-                                            hasFocus = focusState.hasFocus
-                                        },
-                                    decorationBox = { innerTextField ->
-                                        BoxWithConstraints(
-                                            Modifier
-                                                .height(35.dp)
-                                                .fillMaxWidth()
-                                                .border(
-                                                    1.dp,
-                                                    Color.Gray,
-                                                    RoundedCornerShape(10.dp)
-                                                ),
-                                            contentAlignment = Alignment.CenterStart
-                                        ) {
-                                            val size = (maxHeight.value / 2).sp
-                                            Column(verticalArrangement = Arrangement.Center) {
-                                                if (query.isEmpty() && !hasFocus) {
-                                                    Text(
-                                                        "Masukan nama tanaman",
-                                                        color = Color.Gray,
-                                                        fontSize = size,
-                                                        modifier = Modifier
-                                                            .padding(start = 10.dp)
-                                                    )
-                                                } else
-                                                    Box(
-                                                        Modifier
-                                                            .wrapContentSize()
-                                                            .padding(start = 10.dp)
-                                                    ) {
-                                                        if (expandedSearch && query.isNotEmpty()) Row(
-                                                            horizontalArrangement = Arrangement.End,
-                                                            modifier = Modifier.fillMaxWidth()
-                                                        ) {
-                                                            IconButton(
-                                                                onClick = { query = "" }
-                                                            ) {
-                                                                Icon(
-                                                                    Icons.Default.Close,
-                                                                    "Clear",
-                                                                    tint = Color.Gray
-                                                                )
-                                                            }
-                                                        }
-                                                        innerTextField()
-                                                    }
-                                            }
-                                        }
-                                    }
-                                )
-                            }
 
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Row(
-                                Modifier.clickable { expandCat = !expandCat },
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = order,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Normal,
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = "Order",
-                                    tint = Color.Yellow,
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                )
-                                DropdownMenu(
-                                    expanded = expandCat,
-                                    onDismissRequest = { expandCat = false },
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Tertinggi") },
-                                        onClick = {
-                                            order = "Tertinggi"
-                                            expandCat = false
-                                            expandedSearch = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("Terendah") },
-                                        onClick = {
-                                            order = "Terendah"
-                                            expandCat = false
-                                            expandedSearch = false
-                                        },
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .clickable { expanded = !expanded },
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = selected.take(10) + if (selected.length > 10) ".." else "",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Normal
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Filter",
-                                    modifier = Modifier.size(30.dp),
-                                    tint = Color.Black
-                                )
-                                Box {
-                                    DropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false },
-                                        modifier = Modifier.height(300.dp),
-                                        scrollState = scroll
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text("All") },
-                                            onClick = {
-                                                expanded = false
-                                                selected = "All"
-                                                expandedSearch = false
-//                                            query = ""
-                                            }
-                                        )
-                                        Util.getCategory().forEach {
-                                            DropdownMenuItem(
-                                                text = { Text(it) },
-                                                onClick = {
-                                                    expanded = false
-                                                    selected = it
-                                                    expandedSearch = false
-//                                                query = ""
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                )
-            },
-            bottomBar = {
-                if (true) { //before: if searchresult == null
-                    var selected by rememberSaveable { mutableIntStateOf(1) }
-                    NavigationBar {
-                        NavigationBarItem(
-                            selected = selected == 0,
-                            onClick = {
-                                selected = 0
-                                onBack()
-                                nav?.navigate(Screen.home)
-                            },
-                            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                            label = { Text("Home") }
-                        )
-                        NavigationBarItem(
-                            selected = selected == 1,
-                            onClick = {
-                                selected = 1
-                            },
-                            icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
-                            label = { Text("Tanaman") }
-                        )
-                    }
-                }
-            },
-            floatingActionButton = {
-                FloatingActionButton(onClick = {/* aksi */ }
-                ) {
-                    Icon(Icons.Default.Grain, contentDescription = "Tanah")
-                }
-            },
-            floatingActionButtonPosition = FabPosition.End, // kanan bawah
-        ) { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                if (!loaded) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = if (!predicted) "Menganalisa tanahmu.."
-                            else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
-                            else "Mencari data $current",
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(20.dp)
-                        )
-                    }
-                } else if (inputs.soilResult.plants?.isNotEmpty() == true) {
-                    val pagerFlow =
-                        if (finalQuery.isEmpty())
-                            remember(selected, order) {
-                                Pager(PagingConfig(pageSize = 7)) {
-                                    ResultPagingSource(
-                                        items = inputs.soilResult.plantByCategory?.get(selected)
-                                            ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
-                                    )
-                                }.flow
-                            }
-                        else
-                            remember(finalQuery, order, selected) {
-                                Pager(PagingConfig(pageSize = 7)) {
-                                    ResultPagingSource(items = search(query, order, selected))
-                                }.flow
-                            }
-                    val plants: LazyPagingItems<Pair<Int, String>> =
-                        pagerFlow.collectAsLazyPagingItems()
-
-                    LazyColumn(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFF5F5F5)),
+                title = {
+                    Row(
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-//                    if (plants.itemCount == 0)
-//                        item {
-//                            Column {
-//                                Text(
-//                                    text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-//                                    textAlign = TextAlign.Center,
-//                                    fontSize = 28.sp,
-//                                    modifier = Modifier.padding(top = 100.dp)
-//                                )
-//                            }
-//                        }
-//                    else
-                        items(plants.itemCount) { i ->
-                            PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
-                            "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+                        Box(
+                            modifier = (if(expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(1f))
+                        ) {
+                            BasicTextField (
+                                value = query,
+                                onValueChange = { input ->
+                                    query = input
+                                    search.clear()
+                                    expandedSearch = true
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Search
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onSearch = {
+                                        expandedSearch = false
+                                        keyboard?.hide()
+                                        hasFocus = false
+                                        finalQuery = query
+                                        "ExpandedSearch: $expandedSearch".debug("PlantResult")
+                                    },
+                                ),
+                                modifier = Modifier
+                                    .height(35.dp)
+                                    .padding(end = 12.dp)
+                                    .focusRequester(focusRequester)
+                                    .onFocusChanged { focusState ->
+                                        hasFocus = focusState.hasFocus
+                                    }
+                                ,
+                                decorationBox = { innerTextField ->
+                                    BoxWithConstraints(
+                                        Modifier
+                                            .height(35.dp)
+                                            .fillMaxWidth()
+                                            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        val size = (maxHeight.value / 2).sp
+                                        Column(verticalArrangement = Arrangement.Center) {
+                                            if (query.isEmpty() && !hasFocus) {
+                                                Text(
+                                                    "Masukan nama tanaman",
+                                                    color = Color.Gray,
+                                                    fontSize = size,
+                                                    modifier = Modifier
+                                                        .padding(start = 10.dp)
+                                                )
+                                            } else
+                                                Box(
+                                                    Modifier
+                                                        .wrapContentSize()
+                                                        .padding(start = 10.dp)
+                                                ) {
+                                                    if(expandedSearch && query.isNotEmpty()) Row(horizontalArrangement = Arrangement.End,
+                                                        modifier = Modifier.fillMaxWidth()
+                                                        ) {
+                                                        IconButton(
+                                                            onClick = { query = "" }
+                                                        ) {
+                                                            Icon(
+                                                                Icons.Default.Close,
+                                                                "Clear",
+                                                                tint = Color.Gray
+                                                            )
+                                                        }
+                                                    }
+                                                    innerTextField()
+                                                }
+                                        }
+                                    }
+                                }
+                            )
                         }
 
-                        plants.apply {
-                            when {
-                                loadState.refresh is LoadState.Loading -> {
-                                    item { Text("Loading...") }
-                                }
-
-                                loadState.append is LoadState.Loading -> {
-                                    item { Text("Loading more...") }
-                                }
-
-                                loadState.append is LoadState.Error -> {
-                                    item { Text("Error loading more.") }
-                                }
-                            }
-                        }
-
-                    }
-                } else {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Text(
-                            text = "Ooops!",
-                            textAlign = TextAlign.Center,
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-                            textAlign = TextAlign.Center,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Button(
-                            onClick = {
-                                nav?.navigate(Screen.camera)
-                            },
-                            modifier = Modifier
-                                .padding(top = 20.dp)
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Row(
+                            Modifier.clickable { expandCat = !expandCat },
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "Scan tanahmu!",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 30.sp
+                                text = order,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Order",
+                                tint = Color.Yellow,
+                                modifier = Modifier
+                                    .size(30.dp)
+                            )
+                            DropdownMenu(
+                                expanded = expandCat,
+                                onDismissRequest = { expandCat = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Tertinggi") },
+                                    onClick = {
+                                        order = "Tertinggi"
+                                        expandCat = false
+                                        expandedSearch = false
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Terendah") },
+                                    onClick = {
+                                        order = "Terendah"
+                                        expandCat = false
+                                        expandedSearch = false
+                                    },
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .clickable { expanded = !expanded },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = selected.take(10) + if (selected.length > 10) ".." else "",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Filter",
+                                modifier = Modifier.size(30.dp),
+                                tint = Color.Black
+                            )
+                            Box {
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.height(300.dp),
+                                    scrollState = scroll
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("All") },
+                                        onClick = {
+                                            expanded = false
+                                            selected = "All"
+                                            expandedSearch = false
+//                                            query = ""
+                                        }
+                                    )
+                                    Util.getCategory().forEach {
+                                        DropdownMenuItem(
+                                            text = { Text(it) },
+                                            onClick = {
+                                                expanded = false
+                                                selected = it
+                                                expandedSearch = false
+//                                                query = ""
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            var selected by rememberSaveable{ mutableIntStateOf(1) }
+            NavigationBar {
+                NavigationBarItem(
+                    selected = selected == 0,
+                    onClick = {
+                        selected = 0
+                        LocalNav.current?.navigate(Screen.home)
+                    },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                NavigationBarItem(
+                    selected = selected == 1,
+                    onClick = {
+                        selected = 1
+                    },
+                    icon = { Icon(Icons.Default.Park, contentDescription = "Hasil") },
+                    label = { Text("Rekomendasi Tanaman") }
+                )
+            }
+        }) { padding ->
+        "ExpandedSearch: $expandedSearch".debug("PlantResult")
+        if (expandedSearch) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize().padding(padding)
+                    .background(Color.DarkGray.copy(alpha = 0.8f))
+                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(top = 10.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.verticalScroll(completerScroll),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        completer.forEach {
+                            Text(
+                                text = it,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable {
+                                    query = it
+                                }.padding(start = 16.dp)
                             )
                         }
                     }
                 }
             }
-            "ExpandedSearch: $expandedSearch".debug("PlantResult")
-            if (expandedSearch) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .background(Color.DarkGray.copy(alpha = 0.8f))
-                        .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            if(inputs.soilResult.response == null) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Box(
+                    Text(
+                        text = "Ooops!",
+                        textAlign = TextAlign.Center,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                        textAlign = TextAlign.Center,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Button(
+                        onClick = {
+                            LocalNav.current?.navigate(Screen.camera)
+                        },
                         modifier = Modifier
-                            .height(150.dp)
-                            .fillMaxWidth()
-                            .background(Color.White)
-                            .padding(top = 10.dp),
+                            .padding(top = 20.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.verticalScroll(completerScroll),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            completer.forEach {
-                                Text(
-                                    text = it,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier
-                                        .clickable {
-                                            query = it
-                                        }
-                                        .padding(start = 16.dp)
-                                )
+                        Text(
+                            text = "Scan tanahmu!",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 30.sp
+                        )
+                    }
+                }
+                return@Box
+            }
+            else if (!loaded) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = if (!predicted) "Menganalisa tanahmu.."
+                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
+                        else "Mencari data $current",
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(20.dp)
+                    )
+                }
+                return@Box
+            }
+            val pagerFlow =
+                if (finalQuery.isEmpty())
+                    remember(selected, order) {
+                        Pager(PagingConfig(pageSize = 7)) {
+                            ResultPagingSource(
+                                items = inputs.soilResult.plantByCategory?.get(selected)
+                                    ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
+                            )
+                        }.flow
+                    }
+                else
+                    remember(finalQuery, order, selected) {
+                        Pager(PagingConfig(pageSize = 7)) {
+                            ResultPagingSource(items = search(query, order, selected))
+                        }.flow
+                    }
+            val plants: LazyPagingItems<Pair<Int, String>> =
+                pagerFlow.collectAsLazyPagingItems()
+
+            if (inputs.soilResult.plants?.isNotEmpty() == true) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(plants.itemCount) { i ->
+                        PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
+                        "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+                    }
+
+                    plants.apply {
+                        when {
+                            loadState.refresh is LoadState.Loading -> {
+                                item { Text("Loading...") }
+                            }
+
+                            loadState.append is LoadState.Loading -> {
+                                item { Text("Loading more...") }
+                            }
+
+                            loadState.append is LoadState.Error -> {
+                                item { Text("Error loading more.") }
                             }
                         }
                     }
+
                 }
             }
+            else if (plants.itemCount == 0)
+                Text(
+                    text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                    textAlign = TextAlign.Center,
+                    fontSize = 28.sp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            FloatingButtons.NavigateSoilStats(Modifier.fillMaxSize())
         }
     }
 }
-
 fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableList<Pair<Int, String>> {
-    val reversedList = if (order == "Tertinggi") {
+    val reversedList = if(order == "Tertinggi"){
         this.toList().asReversed()
     } else this.toList()
     val result = mutableListOf<Pair<Int, String>>()
@@ -578,16 +530,15 @@ fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableLis
     return result
 }
 
-fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE) {
-    inputs.soilResult.plants ?: return
+fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE){
+    inputs.soilResult.plants?:return
     var i = 0
     outer@ for (it in (inputs.soilResult.plants) ?: return) {
         outer2@ for (plant in it.value) {
             val commonName = Data.namaIlmiahToNamaUmum[plant.lowercase()]
             val prefix = query.lowercase()
             if (commonName != null && (commonName.startsWith(prefix) ||
-                        commonName.endsWith(prefix) || commonName.contains(prefix))
-            ) {
+                        commonName.endsWith(prefix) || commonName.contains(prefix))) {
                 holder.add(commonName)
                 if (i++ > limit) {
                     break@outer
@@ -606,8 +557,7 @@ fun search(query: String, order: String, category: String): MutableList<Pair<Int
         val name = Data.namaIlmiahToNamaUmum[plant.second.lowercase()]
         val prefix = query.lowercase()
         if (name != null && (name.startsWith(prefix) ||
-                    name.endsWith(prefix) || name.contains(prefix))
-        ) {
+                    name.endsWith(prefix) || name.contains(prefix))) {
             result.add(plant.first to plant.second)
         }
     }

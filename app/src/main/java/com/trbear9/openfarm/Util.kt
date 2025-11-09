@@ -80,6 +80,25 @@ object Util {
         }
         return "Lainnya"
     }
+
+    fun translateClimate(climate: String): String {
+        return when (climate) {
+            "tropical wet & dry (Aw)" -> "tropis basah & kering (Aw)"
+            "tropical wet (Ar)" -> "tropis kering"
+            "steppe or semiarid (Bs)" -> "steppe or semiarid (Bs)" // flag
+            "subtropical humid (Cf)" -> "subtropis basah"
+            "subtropical dry summer (Cs)" -> "mediterania"
+            "subtropical dry winter (Cw)" -> "subtropis lembab"
+            "temperate oceanic (Do)" -> "maritim"
+            "temperate continental (Dc)" -> "temperate continental (Dc)"
+            "temperate with humid winters (Df)" -> "temperate with humid winters (Df)"
+            "temperate with dry winters (Dw)" -> "dingin"
+            "desert or arid (Bw)" -> "gurun"
+            "boreal (E)" -> "taiga"
+            "polar (F)" -> "kutub"
+            else -> ""
+        }
+    }
     fun getCategory(): List<String>{
         return listOf("Lainya", "Sayur", "Pseudocereal", "Akar/Umbi", "Pakan ternak",
             "Buah & kacang", "Bahan", "Rumput hias", "Obat & aromatik", "Hutan/Kayu",

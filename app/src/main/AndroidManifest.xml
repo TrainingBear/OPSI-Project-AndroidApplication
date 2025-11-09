@@ -8,14 +8,14 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<!--    <uses-permission android:name="android.permission.RECORD_AUDIO" />-->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<!--    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature
@@ -40,11 +40,15 @@
         android:theme="@style/Theme.OpenFarm"
         tools:targetApi="31">
         <activity android:name="com.trbear9.openfarm.activities.PlantDetail"
-            android:launchMode="singleTop"
             android:exported="true" />
         <activity android:name="com.trbear9.openfarm.TutorialActivity"
             android:exported="true" />
 
+        <activity android:name="com.trbear9.openfarm.activities.SoilStatsActivity"
+            android:exported="true" />
+        <activity android:name="com.trbear9.openfarm.activities.PlantResultActivity"
+            android:launchMode="singleTask"
+            android:exported="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

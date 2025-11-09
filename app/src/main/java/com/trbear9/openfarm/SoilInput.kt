@@ -121,7 +121,6 @@ fun InputSoil(
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),
-                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp)
@@ -150,8 +149,7 @@ fun InputSoil(
                     onClick = {
                         onClick(pH, depth)
                         Log.d("SOIL", "pH = $pH and depth = $depth")
-                        Toast.makeText(context, "pH: $pH, depth: $depth", Toast.LENGTH_SHORT)
-                            .show()
+//                        Toast.makeText(context, "pH: $pH, depth: $depth", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
