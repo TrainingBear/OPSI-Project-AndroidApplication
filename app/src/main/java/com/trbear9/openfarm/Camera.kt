@@ -1,6 +1,5 @@
 package com.trbear9.openfarm
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.ScaleGestureDetector

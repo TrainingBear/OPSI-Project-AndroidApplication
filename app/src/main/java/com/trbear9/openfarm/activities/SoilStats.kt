@@ -13,17 +13,20 @@
 //   limitations under the License.
 package com.trbear9.openfarm.activities
 
+import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Layout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.WaterDrop
@@ -62,7 +66,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -260,6 +269,19 @@ fun SoilStats(click: () -> Unit = {}) {
                         }
 //                        if (response?.soilPrediction == null)
                         else {
+                            Image(
+                                painter = if(inputs.image!=null)
+                                    BitmapPainter(inputs.image!!.asImageBitmap())
+                                else rememberVectorPainter(Icons.Default.Image),
+                                contentDescription = "Tanah",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(2f)
+                                    .clip(RoundedCornerShape(clipRound))
+                                    .background(backgroundCardColor)
+                                    .padding(5.dp)
+                            )
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
