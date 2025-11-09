@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LightbulbCircle
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Search
@@ -236,7 +237,7 @@ fun Home(nav: NavController? = null) {
                         Box(Modifier.fillMaxHeight().weight(3f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Coffee,
+                                    imageVector = Icons.Default.MonetizationOn,
                                     tint = Color.Black,
                                     contentDescription = "Buy us a coffe!",
                                     modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
@@ -261,69 +262,81 @@ fun Home(nav: NavController? = null) {
             )
         }
     ) {
-        if (coffe) {
+        if (coffe == false) {
             BasicAlertDialog(
                 onDismissRequest = { coffe = false },
                 modifier = Modifier
                     .padding(it)
                     .wrapContentSize(),
             ) {
-                Column(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFFFB7B7))
-                        .border(BorderStroke(1.dp, Color.Black)),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        imageVector = Icons.Default.Coffee,
-                        contentDescription = "Coffee",
-                        modifier = Modifier.size(50.dp)
-                    )
-                    Text(
-                        text = "Selamat menggunakan aplikasi ini, semoga dapat bermanfaat untuk petani masa depan" +
-                                "Sebagai tanda dukungan, berikan kami secangkir kopi:",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                        Button(
-                            onClick = {
-                                val intent =
-                                    Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.padding(10.dp).wrapContentSize(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(
-                                    0xFFFF9100
-                                )
-                            )
-                        ) {
-                            Text(
-                                text = "Beri dukungan!",
-                                fontSize = 18.sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                        Button(
-                            onClick = { coffe = false },
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(Color(0x99FFFFFF)),
+//                            .border(BorderStroke(1.dp, Color.Black)),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            imageVector = Icons.Default.MonetizationOn,
+                            contentDescription = "Coffee",
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Text(
+                            text = "Aplikasi ini di buat oleh pelajar SMAN 1 Ambarawa dan pelajar MAN 3 Jakarta pusat." +
+                                    "\nSebagai tanda dukungan, bisa beri kami secangkir kopi:",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier.padding(10.dp)
-                                .wrapContentSize(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent
-                            )
-                        ) {
-                            Text(
-                                text = "Tidak, terimakasih!",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Normal
-                            )
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Button(
+                                onClick = {
+                                    val intent =
+                                        Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier
+                                    .padding(10.dp).wrapContentSize()
+                                    .shadow(10.dp, RoundedCornerShape(20.dp))
+                                ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(
+                                        0xFFFF9100
+                                    )
+                                ),
+                            ) {
+                                Text(
+                                    text = "Beri dukungan!",
+                                    fontSize = 18.sp,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    val intent =
+                                        Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier
+                                    .padding(bottom = 10.dp).wrapContentSize()
+                                    .shadow(10.dp, RoundedCornerShape(20.dp))
+                                ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Gray
+                                ),
+                            ) {
+                                val fontsize = (this@BoxWithConstraints.maxWidth.value / 27).sp
+                                Text(
+                                    text = "Tidak, terimakasih!",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = fontsize
+                                )
+                            }
                         }
                     }
                 }
