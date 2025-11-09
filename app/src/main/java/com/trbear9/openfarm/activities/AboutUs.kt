@@ -1,5 +1,6 @@
 package com.trbear9.openfarm.activities
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -58,15 +60,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.trbear9.openfarm.R
 import com.trbear9.openfarm.util.Screen
@@ -78,7 +87,9 @@ private val clipRound: Dp = 15.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun AboutUs(nav: NavController?) {
+fun AboutUs(nav: NavController? = null) {
+    val context = LocalContext.current
+    val urihandler = LocalUriHandler.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -171,7 +182,7 @@ fun AboutUs(nav: NavController?) {
                             .padding(vertical = 5.dp, horizontal = 10.dp)
                     )
                     Text(
-                        text = "Aplikasi ini dikembangkan oleh Kukuh, Refan, dan Renaldi. Blabla bla bla blaaa bla",
+                        text = "Aplikasi ini mulai dikembangkan pada 24 Mei 2025 oleh Kukuh, Refan (Pelajar SMA Negeri 1 Ambarawa) dan Renaldi (Pelajar MAN 3 Jakarta Pusat)",
                         fontSize = 20.sp,
                         textAlign = TextAlign.Justify,
                         modifier = Modifier
@@ -187,8 +198,72 @@ fun AboutUs(nav: NavController?) {
                         imageVector = Icons.Default.LocalPolice,
                         isExpanded = licenseExpand
                     ) {
-                        Text(
-                            text = "https://cdn.discordapp.com/attachments/1330496061558620191/1372439934291677215/New_Piskel-1.png_13.png?ex=6910214b&is=690ecfcb&hm=5872d37954dfc6fd0780eabe1baf516c49587bc99b1671ebfce2fe25a52600fe&",
+                        val annotated = buildAnnotatedString {
+                            append("© 2025 Jasper\n")
+                            append("Aplikasi ini di dalam lisensi Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).\n")
+                            append("Anda bebas menggunakan dan membagikan aplikasi ini dengan atribusi yang tepat.\n\n")
+
+                            append("License details: ")
+
+                            // add clickable link
+                            pushStringAnnotation(
+                                tag = "URL",
+                                annotation = "https://creativecommons.org/licenses/by-sa/4.0/"
+                            )
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color(0xFF1565C0),
+                                    textDecoration = TextDecoration.Underline,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            ) {
+                                append("https://creativecommons.org/licenses/by-sa/4.0/")
+                            }
+                            pop()
+
+                            append("\n\nThird-party data and components:\n")
+                            append("Ecocrop database © FAO 2025\n")
+
+                            pushStringAnnotation(
+                                tag = "URL",
+                                annotation = "https://gaez.fao.org/pages/ecocrop-search"
+                            )
+                            withStyle(
+                                SpanStyle(
+                                    color = Color(0xFF1565C0),
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            ) {
+                                append("https://gaez.fao.org/pages/ecocrop-search")
+                            }
+                            pop()
+
+                            append(" — Accessed 9 November 2025\nUsed under FAO Terms and Conditions for non-commercial use.\n\n")
+
+                            append("Taxonomic data © The Trustees of the Royal Botanic Gardens, Kew.\n")
+                            append("Licensed under CC BY 4.0.\n")
+                            pushStringAnnotation(
+                                tag = "URL",
+                                annotation = "https://www.kew.org/science/data-and-resources"
+                            )
+                            withStyle(
+                                SpanStyle(
+                                    color = Color(0xFF1565C0),
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            ) {
+                                append("https://www.kew.org/science/data-and-resources")
+                            }
+                            pop()
+                        }
+                        ClickableText(
+                            text = annotated,
+                            onClick = { offset ->
+                                annotated.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                                    .firstOrNull()?.let { annotation ->
+                                        urihandler.openUri(annotation.item) // 🔗 opens in browser
+                                    }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(5.dp)
@@ -203,8 +278,55 @@ fun AboutUs(nav: NavController?) {
                         imageVector = Icons.AutoMirrored.Filled.Message,
                         isExpanded = medSosExpand
                     ) {
-                        Text(
-                            text = "https://cdn.discordapp.com/attachments/1330496061558620191/1372439934291677215/New_Piskel-1.png_13.png?ex=6910214b&is=690ecfcb&hm=5872d37954dfc6fd0780eabe1baf516c49587bc99b1671ebfce2fe25a52600fe&",
+                        val anotated = buildAnnotatedString {
+                            withStyle(
+                                SpanStyle(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ){
+                                append("Discord: ")
+                            }
+                            pushStringAnnotation(
+                                tag = "URL",
+                                annotation = "https://discord.gg/fbAZSd3Hf2"
+                            )
+                            withStyle(
+                                SpanStyle(
+                                    color = Color(0xFF1565C0),
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            ) {
+                                append("https://discord.gg/fbAZSd3Hf2")
+                            }
+                            append("\n")
+                            withStyle(
+                                SpanStyle(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ){
+                                append("Youtube: ")
+                            }
+                            pushStringAnnotation(
+                                tag = "URL",
+                                annotation = "https://www.youtube.com/channel/UCglCTRnlIGvO5o5VfI1t9NQ"
+                            )
+                            withStyle(
+                                SpanStyle(
+                                    color = Color(0xFF1565C0),
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            ) {
+                                append("https://www.youtube.com/channel/kujatic")
+                            }
+                        }
+                        ClickableText(
+                            text = anotated,
+                            onClick = { offset ->
+                                anotated.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                                    .firstOrNull()?.let { annotation ->
+                                        urihandler.openUri(annotation.item)
+                                    }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(5.dp)
@@ -242,6 +364,10 @@ fun AboutUs(nav: NavController?) {
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .padding(5.5.dp)
+                                .clickable {
+                                    val intent = Intent(Intent.ACTION_VIEW, "https://sman1ambarawa.sch.id/".toUri())
+                                    context.startActivity(intent)
+                                }
                         )
                         Image(
                             painter = painterResource(id = R.drawable.logoman3),
@@ -249,10 +375,14 @@ fun AboutUs(nav: NavController?) {
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .padding(5.dp)
+                                .clickable {
+                                    val intent = Intent(Intent.ACTION_VIEW, "https://man3jkt.sch.id/".toUri())
+                                    context.startActivity(intent)
+                                }
                         )
                     }
                     Text(
-                        text = "Versi: #.#.#   Tahun rilis: 2025",
+                        text = "Version: 1.0.0   Tahun rilis: 2025",
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier

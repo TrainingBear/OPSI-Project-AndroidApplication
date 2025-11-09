@@ -262,7 +262,7 @@ fun Home(nav: NavController? = null) {
             )
         }
     ) {
-        if (coffe == false) {
+        if (coffe) {
             BasicAlertDialog(
                 onDismissRequest = { coffe = false },
                 modifier = Modifier
@@ -317,9 +317,7 @@ fun Home(nav: NavController? = null) {
                             }
                             Button(
                                 onClick = {
-                                    val intent =
-                                        Intent(Intent.ACTION_VIEW, "https://saweria.co/Kujatic".toUri())
-                                    context.startActivity(intent)
+                                    coffe = false
                                 },
                                 modifier = Modifier
                                     .padding(bottom = 10.dp).wrapContentSize()

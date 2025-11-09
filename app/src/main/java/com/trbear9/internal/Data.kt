@@ -239,6 +239,8 @@ object Data {
         data.geo.let {
             meteo(it)
             response.geo = data.geo
+            response.parameterLoaded = true
+            emit(response)
         }
         data.soil.let {
             it.texture = resultSoil!!.texture;
@@ -249,8 +251,6 @@ object Data {
             response.soil = it
         }
         Log.d("Data Processor", "DONE")
-        response.parameterLoaded = true
-        emit(response)
 
         val processedData = CsvHandler.process(data)
         for (i in processedData.keys)

@@ -140,6 +140,7 @@ fun SoilResultScreen() {
     var target by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.target?.toInt() ?: 0) }
     var predicted by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
     var parameterLoaded by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
+    var noResponse by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult.response == null) }
 
     var search = remember{ mutableStateSetOf<String>()}
     var focusRequester = remember{ FocusRequester() }
@@ -154,13 +155,14 @@ fun SoilResultScreen() {
                 inputs.soilResult.res = null
                 Util.debug("Collected")
             }?.collect {
+                inputs.soilResult.response = it
+                noResponse = inputs.soilResult.response == null
                 loaded = it.loaded
                 current = it.current
                 progress = it.progress
                 target = it.target
                 predicted = it.predicted
                 parameterLoaded = it.parameterLoaded
-                inputs.soilResult.response = it
             }
         }
     }
@@ -407,7 +409,7 @@ fun SoilResultScreen() {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if(inputs.soilResult.response == null) {
+            if(noResponse) {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
