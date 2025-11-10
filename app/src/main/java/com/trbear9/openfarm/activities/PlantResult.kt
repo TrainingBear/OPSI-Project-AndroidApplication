@@ -382,7 +382,8 @@ fun SoilResultScreen() {
         })
     { padding ->
         "ExpandedSearch: $expandedSearch".debug("PlantResult")
-        if(false) Box(
+        UnifyCoachmark {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -420,7 +421,8 @@ fun SoilResultScreen() {
                     }
                 }
                 return@Box
-            } else if (!loaded) {
+            }
+            else if (!loaded) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -457,33 +459,37 @@ fun SoilResultScreen() {
             val plants: LazyPagingItems<Pair<Int, String>> =
                 pagerFlow.collectAsLazyPagingItems()
             if (inputs.soilResult.plants?.isNotEmpty() == true) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(plants.itemCount) { i ->
-                        PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
-                        "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
-                    }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(plants.itemCount) { i ->
+                            PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
+                            "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+                        }
 
-                    plants.apply {
-                        when {
-                            loadState.refresh is LoadState.Loading -> {
-                                item { Text("Loading...") }
-                            }
+//                        if(plants.itemCount >= 1) item {
+//                            PlantCardDisplayer(plants[0]!!.first, Data.plant[plants[0]!!.second])
+////                            "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+//                        }
 
-                            loadState.append is LoadState.Loading -> {
-                                item { Text("Loading more...") }
-                            }
+                        plants.apply {
+                            when {
+                                loadState.refresh is LoadState.Loading -> {
+                                    item { Text("Loading...") }
+                                }
 
-                            loadState.append is LoadState.Error -> {
-                                item { Text("Error loading more.") }
+                                loadState.append is LoadState.Loading -> {
+                                    item { Text("Loading more...") }
+                                }
+
+                                loadState.append is LoadState.Error -> {
+                                    item { Text("Error loading more.") }
+                                }
                             }
                         }
+
                     }
-
-                }
-
             }
             else if (plants.itemCount == 0)
                 Text(
@@ -493,7 +499,13 @@ fun SoilResultScreen() {
                     modifier = Modifier.align(Alignment.Center)
                 )
         }
-        if (false && expandedSearch) {
+        if(loaded)
+            LaunchedEffect(Unit) {
+//                show(MarkKey.analisa)
+            }
+            NavigateSoilStats(Modifier.fillMaxSize().padding(padding))
+        }
+        if (expandedSearch) {
             Box(
                 modifier = Modifier
                     .fillMaxSize().padding(padding)
@@ -524,16 +536,6 @@ fun SoilResultScreen() {
                     }
                 }
             }
-        }
-        UnifyCoachmark {
-//            if(loaded)
-                LaunchedEffect(Unit) {
-                Toast.makeText(context, "Tap untuk melihat analisa tanahmu", Toast.LENGTH_LONG)
-                if (firstTime) show(
-                    MarkKey.analisa
-                )
-            }
-            NavigateSoilStats()
         }
     }
 }

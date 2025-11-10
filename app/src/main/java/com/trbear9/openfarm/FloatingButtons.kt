@@ -39,9 +39,9 @@ import com.trbear9.openfarm.activities.SoilStatsActivity
 import com.trbear9.openfarm.util.Screen
 
 @Composable
-fun CoachMarkScope.NavigateSoilStats() {
+fun CoachMarkScope.NavigateSoilStats(modifier: Modifier) {
     val context = LocalContext.current
-    BoxWithConstraints(Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier) {
         Column(
             Modifier
             .align(Alignment.BottomEnd)
