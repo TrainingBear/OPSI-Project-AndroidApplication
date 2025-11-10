@@ -5,8 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,48 +33,60 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.pseudoankit.coachmark.model.ToolTipPlacement
+import com.pseudoankit.coachmark.scope.CoachMarkScope
 import com.trbear9.openfarm.activities.SoilStatsActivity
 import com.trbear9.openfarm.util.Screen
 
-object FloatingButtons {
-    @Composable
-    fun NavigateSoilStats(modifier: Modifier) {
-        val context = LocalContext.current
-        BoxWithConstraints(modifier) {
-            Column(
-                Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally
+@Composable
+fun CoachMarkScope.NavigateSoilStats(modifier: Modifier) {
+    val context = LocalContext.current
+    BoxWithConstraints(modifier) {
+        Column(
+            Modifier
+            .align(Alignment.BottomEnd)
+            .padding(20.dp)
+            .enableCoachMark(
+                key = MarkKey.analisa,
+                toolTipPlacement = ToolTipPlacement.Start,
+                highlightedViewConfig = highlightConfig
             ) {
-                val fontSize = (this@BoxWithConstraints.maxWidth.value / 27).sp
-                Icon(
-                    Icons.Default.Grain, contentDescription = "Tanah",
-                    modifier = Modifier.size(this@BoxWithConstraints.maxWidth / 9)
+                MarkKey.analisa.tooltip(ToolTipPlacement.Start)
+            },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val fontSize = (this@BoxWithConstraints.maxWidth.value / 27).sp
+            Icon(
+                Icons.Default.Grain, contentDescription = "Tanah",
+                modifier = Modifier.size(this@BoxWithConstraints.maxWidth / 9)
 //                        .border(5.dp, Color(0xFFCFE5D4))
-                        .shadow(10.dp, RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp), clip = true)
-                        .clip(RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp))
-                        .clickable {
-                            val intent = Intent(context, SoilStatsActivity::class.java)
-                            context.startActivity(intent)
-                        }
-                        .background(Color(0xFFEEEED9).copy(alpha = 1f))
-                )
-                Box(
-                    Modifier
-                        .padding(top = 10.dp)
-                        .wrapContentSize()
-                        .shadow(10.dp, RoundedCornerShape(5.dp), clip = true)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(Color(0xFFCFE5D4))
-                ) {
-                    Text(
-                        text = "Analisa tahahmu",
-                        fontSize = fontSize,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(5.dp)
+                    .shadow(
+                        10.dp,
+                        RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp),
+                        clip = true
                     )
-                }
+                    .clip(RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp))
+                    .clickable {
+                        val intent = Intent(context, SoilStatsActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                    .background(Color(0xFFEEEED9).copy(alpha = 1f))
+            )
+            Box(
+                Modifier
+                    .padding(top = 10.dp)
+                    .wrapContentSize()
+                    .shadow(10.dp, RoundedCornerShape(5.dp), clip = true)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(Color(0xFFCFE5D4))
+            ) {
+                Text(
+                    text = "Analisa tahahmu",
+                    fontSize = fontSize,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(5.dp)
+                )
             }
         }
     }

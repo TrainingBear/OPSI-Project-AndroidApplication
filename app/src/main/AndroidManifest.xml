@@ -46,9 +46,6 @@
 
         <activity android:name="com.trbear9.openfarm.activities.SoilStatsActivity"
             android:exported="true" />
-        <activity android:name="com.trbear9.openfarm.activities.PlantResultActivity"
-            android:launchMode="singleTask"
-            android:exported="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -3,6 +3,7 @@ package com.trbear9.openfarm.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -86,13 +87,19 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.patrykandpatrick.vico.compose.common.shape.rounded
+import com.pseudoankit.coachmark.UnifyCoachmark
+import com.pseudoankit.coachmark.model.ToolTipPlacement
+import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.trbear9.internal.Data
-import com.trbear9.openfarm.FloatingButtons
 import com.trbear9.openfarm.LocalNav
 import com.trbear9.openfarm.MainActivity
+import com.trbear9.openfarm.MarkKey
+import com.trbear9.openfarm.NavigateSoilStats
 import com.trbear9.openfarm.ResultPagingSource
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.debug
+import com.trbear9.openfarm.firstTime
+import com.trbear9.openfarm.highlightConfig
 import com.trbear9.openfarm.info
 import com.trbear9.openfarm.inputs
 import com.trbear9.openfarm.util.Screen
@@ -117,6 +124,8 @@ class SearchResult {
 @Composable
 @Preview()
 fun SoilResultScreen() {
+    val context = LocalContext.current
+
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable{ mutableStateOf("") }
@@ -140,6 +149,7 @@ fun SoilResultScreen() {
     var target by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.target?.toInt() ?: 0) }
     var predicted by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
     var parameterLoaded by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
+    var noResponse by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult.response == null) }
 
     var search = remember{ mutableStateSetOf<String>()}
     var focusRequester = remember{ FocusRequester() }
@@ -154,13 +164,14 @@ fun SoilResultScreen() {
                 inputs.soilResult.res = null
                 Util.debug("Collected")
             }?.collect {
+                inputs.soilResult.response = it
+                noResponse = inputs.soilResult.response == null
                 loaded = it.loaded
                 current = it.current
                 progress = it.progress
                 target = it.target
                 predicted = it.predicted
                 parameterLoaded = it.parameterLoaded
-                inputs.soilResult.response = it
             }
         }
     }
@@ -238,7 +249,7 @@ fun SoilResultScreen() {
                                                 ) {
                                                     if(expandedSearch && query.isNotEmpty()) Row(horizontalArrangement = Arrangement.End,
                                                         modifier = Modifier.fillMaxWidth()
-                                                        ) {
+                                                    ) {
                                                         IconButton(
                                                             onClick = { query = "" }
                                                         ) {
@@ -368,46 +379,16 @@ fun SoilResultScreen() {
                     label = { Text("Rekomendasi Tanaman") }
                 )
             }
-        }) { padding ->
+        })
+    { padding ->
         "ExpandedSearch: $expandedSearch".debug("PlantResult")
-        if (expandedSearch) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize().padding(padding)
-                    .background(Color.DarkGray.copy(alpha = 0.8f))
-                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(150.dp)
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(top = 10.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.verticalScroll(completerScroll),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        completer.forEach {
-                            Text(
-                                text = it,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable {
-                                    query = it
-                                }.padding(start = 16.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        UnifyCoachmark {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if(inputs.soilResult.response == null) {
+            if (noResponse) {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -450,7 +431,7 @@ fun SoilResultScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = if (!predicted) "Menganalisa tanahmu.."
-                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
+                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu...\nPastikan koneksimu terhubung ke internet!"
                         else "Mencari data $current",
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -477,34 +458,38 @@ fun SoilResultScreen() {
                     }
             val plants: LazyPagingItems<Pair<Int, String>> =
                 pagerFlow.collectAsLazyPagingItems()
-
             if (inputs.soilResult.plants?.isNotEmpty() == true) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(plants.itemCount) { i ->
-                        PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
-                        "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
-                    }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(plants.itemCount) { i ->
+                            PlantCardDisplayer(plants[i]!!.first, Data.plant[plants[i]!!.second])
+                            "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+                        }
 
-                    plants.apply {
-                        when {
-                            loadState.refresh is LoadState.Loading -> {
-                                item { Text("Loading...") }
-                            }
+//                        if(plants.itemCount >= 1) item {
+//                            PlantCardDisplayer(plants[0]!!.first, Data.plant[plants[0]!!.second])
+////                            "Displaying ${Data.plant[plants[i]!!.second]?.commonName}".info("SoilResultScreen")
+//                        }
 
-                            loadState.append is LoadState.Loading -> {
-                                item { Text("Loading more...") }
-                            }
+                        plants.apply {
+                            when {
+                                loadState.refresh is LoadState.Loading -> {
+                                    item { Text("Loading...") }
+                                }
 
-                            loadState.append is LoadState.Error -> {
-                                item { Text("Error loading more.") }
+                                loadState.append is LoadState.Loading -> {
+                                    item { Text("Loading more...") }
+                                }
+
+                                loadState.append is LoadState.Error -> {
+                                    item { Text("Error loading more.") }
+                                }
                             }
                         }
-                    }
 
-                }
+                    }
             }
             else if (plants.itemCount == 0)
                 Text(
@@ -513,7 +498,44 @@ fun SoilResultScreen() {
                     fontSize = 28.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
-            FloatingButtons.NavigateSoilStats(Modifier.fillMaxSize())
+        }
+        if(loaded)
+            LaunchedEffect(Unit) {
+//                show(MarkKey.analisa)
+            }
+            NavigateSoilStats(Modifier.fillMaxSize().padding(padding))
+        }
+        if (expandedSearch) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize().padding(padding)
+                    .background(Color.DarkGray.copy(alpha = 0.8f))
+                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(top = 10.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.verticalScroll(completerScroll),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        completer.forEach {
+                            Text(
+                                text = it,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable {
+                                    query = it
+                                }.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -5,13 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -49,7 +52,15 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.pseudoankit.coachmark.UnifyCoachmark
+import com.pseudoankit.coachmark.model.ToolTipPlacement
+import com.pseudoankit.coachmark.scope.CoachMarkScope
+import com.pseudoankit.coachmark.scope.enableCoachMark
+import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
+import com.trbear9.openfarm.MarkKey
+import com.trbear9.openfarm.firstTime
+import com.trbear9.openfarm.highlightConfig
 import com.trbear9.plants.E
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.api.blob.Plant
@@ -61,13 +72,30 @@ object CONS {
     val noImage2 = Icons.Default.WbSunny
 }
 
+var coached by mutableStateOf(false)
 @SuppressLint("NotConstructor")
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun PlantCardDisplayer(score: Int = 0, ref: Plant?) {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CoachMarkScope.PlantCardDisplayer(
+    score: Int = 0, ref: Plant?,
+    scoreModifier: BoxScope.() -> Modifier = {Modifier
+        .padding(end = 10.dp, top = 7.dp)
+        .clip(RoundedCornerShape(8.dp))
+        .wrapContentSize(Alignment.Center)
+        .background(Color.Black.copy(alpha = 0.5f))
+        .align(Alignment.TopEnd)},
+    cardModifier: Modifier = Modifier
+        .fillMaxWidth()
+        .heightIn(max = 600.dp)
+        .padding(8.dp)
+) {
     val context = LocalContext.current
 
     if (ref != null) {
+        val cmodifier: Modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 600.dp)
+                .padding(8.dp)
         Card(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
@@ -77,10 +105,19 @@ object CONS {
                 intent.putExtra("score", score)
                 context.startActivity(intent)
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(8.dp)
+            modifier =
+//                cardModifier
+                    if (!coached) {
+                        cmodifier
+                            .enableCoachMark(
+                                key = MarkKey.cocok,
+                                toolTipPlacement = ToolTipPlacement.Bottom,
+                                highlightedViewConfig = highlightConfig
+                            ) {
+                                MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
+                            }
+                    } else
+                    cmodifier
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
                 Box(
@@ -108,7 +145,7 @@ object CONS {
                                 .fillMaxSize()
                                 .clip(RoundedCornerShape(16.dp))
                         )
-                        if(state is AsyncImagePainter.State.Error || state is AsyncImagePainter.State.Loading){
+                        if (state is AsyncImagePainter.State.Error || state is AsyncImagePainter.State.Loading) {
                             Column(
                                 modifier = Modifier.align(Alignment.Center),
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -130,13 +167,25 @@ object CONS {
                         if (score != 0) {
                             val star = (score / 10f) * 5
                             val half = (star - star.toInt()) > 0.1f
+                            val modifier = Modifier
+                                .padding(end = 10.dp, top = 7.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .wrapContentSize(Alignment.Center)
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .align(Alignment.TopEnd)
                             androidx.compose.foundation.layout.Row(
-                                modifier = Modifier
-                                    .padding(end = 10.dp, top = 7.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .wrapContentSize(Alignment.Center)
-                                    .background(Color.Black.copy(alpha = 0.5f))
-                                    .align(Alignment.TopEnd)
+                                modifier =
+//                                    scoreModifier()
+                                        if (!coached) modifier
+                                            .enableCoachMark(
+                                                key = MarkKey.skor,
+                                                toolTipPlacement = ToolTipPlacement.Bottom,
+                                                highlightedViewConfig = highlightConfig
+                                            ){
+                                                MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
+                                            }
+                                        else
+                                            modifier
                             ) {
                                 repeat(star.toInt()) {
                                     Icon(
@@ -171,7 +220,9 @@ object CONS {
 
                 // Plant Description
                 Text(
-                    text = ref.description?.take(100) + if ((ref.description?.length ?: 0) > 100) "..." else "",
+                    text = ref.description?.take(100) + if ((ref.description?.length
+                            ?: 0) > 100
+                    ) "..." else "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 6.dp)
                 )
@@ -197,101 +248,112 @@ object CONS {
                         bcolor = Color.LightGray
                     )
                     ref.category?.forEach {
-                            Kat(
-                                translateCategory(it), tcolor = Color.White,
-                                bcolor = categoryToColor(it)
-                            )
-                        }
+                        Kat(
+                            translateCategory(it), tcolor = Color.White,
+                            bcolor = categoryToColor(it)
+                        )
+                    }
                 }
+            }
+        }
+        LaunchedEffect(Unit){
+            if(!coached && firstTime){
+                show(
+                    MarkKey.cocok,
+                    MarkKey.skor,
+                    MarkKey.analisa,
+                )
+                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
+                coached = true
             }
         }
     }
 }
 
 
-    @Composable
-    fun Kat(
-        text: String,
-        tcolor: Color = Color.Black,
-        bcolor: Color = Color(0xFFFF9800),
-        icon: ImageVector? = null
+@Composable
+fun Kat(
+    text: String,
+    tcolor: Color = Color.Black,
+    bcolor: Color = Color(0xFFFF9800),
+    icon: ImageVector? = null
+) {
+    if(text.isNotEmpty()) Box(
+        modifier = Modifier.wrapContentSize()
+            .clip(RoundedCornerShape(4.dp))
+            .background(bcolor)
     ) {
-        if(text.isNotEmpty()) Box(
-            modifier = Modifier.wrapContentSize()
-                .clip(RoundedCornerShape(4.dp))
-                .background(bcolor)
-        ) {
-            androidx.compose.foundation.layout.Row() {
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = "Icon",
-                        modifier = Modifier.padding(6.dp)
-                    )
-                }
-                Text(
-                    text = text,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = tcolor,
+        androidx.compose.foundation.layout.Row() {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Icon",
                     modifier = Modifier.padding(6.dp)
                 )
             }
+            Text(
+                text = text,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = tcolor,
+                modifier = Modifier.padding(6.dp)
+            )
         }
     }
+}
 
 
-    fun diffToColor(diff: String): Color {
-        return when (diff) {
-            "EASY" -> Color.Green
-            "MEDIUM" -> Color.Yellow
-            "HARD" -> Color.Red
-            else -> Color.Gray
-        }
+fun diffToColor(diff: String): Color {
+    return when (diff) {
+        "EASY" -> Color.Green
+        "MEDIUM" -> Color.Yellow
+        "HARD" -> Color.Red
+        else -> Color.Gray
     }
+}
 
-    fun scoreToColor(score: Int): Color {
-        return when (score) {
-            in 0..2 -> Color.Red
-            in 3..6 -> Color.Yellow
-            in 7..354 -> Color.Green
-            else -> Color.Blue
-        }
+fun scoreToColor(score: Int): Color {
+    return when (score) {
+        in 0..2 -> Color.Red
+        in 3..6 -> Color.Yellow
+        in 7..354 -> Color.Green
+        else -> Color.Blue
     }
+}
 
-        fun categoryToColor(category: String): Color {
-            return when (category) {
-                other.head -> Color.Gray
-                vegetables.head -> Color.Green
-                cereals_pseudocereals.head -> Color(0xFF4CAF50)
-                roots_tubers.head -> Color.Red
-                forage_pastures.head -> Color.Blue
-                fruit_nut.head -> Color(0xFF9C27B0)
-                materials.head -> Color(0xFFFF9100)
-                ornamentals_turf.head -> Color(0xFFE91E63)
-                medicinals_and_armoatic.head -> Color(0xFF936123)
-                else -> Color(0xFF9E9E9E)
-            }
-        }
+fun categoryToColor(category: String): Color {
+    return when (category) {
+        other.head -> Color.Gray
+        vegetables.head -> Color.Green
+        cereals_pseudocereals.head -> Color(0xFF4CAF50)
+        roots_tubers.head -> Color.Red
+        forage_pastures.head -> Color.Blue
+        fruit_nut.head -> Color(0xFF9C27B0)
+        materials.head -> Color(0xFFFF9100)
+        ornamentals_turf.head -> Color(0xFFE91E63)
+        medicinals_and_armoatic.head -> Color(0xFF936123)
+        else -> Color(0xFF9E9E9E)
+    }
+}
 
-        fun translateCategory(category: String): String {
-            when (category) {
-                other.head -> return "Lainnya"
-                vegetables.head -> return "Sayur"
-                cereals_pseudocereals.head -> return "Pseudocereal"
-                roots_tubers.head -> return "Akar/Umbi"
-                forage_pastures.head -> return "Padang rumput"
-                fruit_nut.head -> return "Buah & kacang"
-                materials.head -> return "Bahan"
-                ornamentals_turf.head -> return "Rumput hias"
-                medicinals_and_armoatic.head -> return "Obat & aromatik"
-                forest_or_wood.head -> return "Hutan/Kayu"
-                cover_crop.head -> return "Tanaman penutup"
-                environmental.head -> return "Lingkungan"
-                weed.head -> return "Gulma"
-            }
-            return "Lainnya"
-        }
+fun translateCategory(category: String): String {
+    when (category) {
+        other.head -> return "Lainnya"
+        vegetables.head -> return "Sayur"
+        cereals_pseudocereals.head -> return "Pseudocereal"
+        roots_tubers.head -> return "Akar/Umbi"
+        forage_pastures.head -> return "Padang rumput"
+        fruit_nut.head -> return "Buah & kacang"
+        materials.head -> return "Bahan"
+        ornamentals_turf.head -> return "Rumput hias"
+        medicinals_and_armoatic.head -> return "Obat & aromatik"
+        forest_or_wood.head -> return "Hutan/Kayu"
+        cover_crop.head -> return "Tanaman penutup"
+        environmental.head -> return "Lingkungan"
+        weed.head -> return "Gulma"
+    }
+    return "Lainnya"
+}
 class ImageAsset {
     companion object {
         val images = mutableMapOf<String, Bitmap>()
