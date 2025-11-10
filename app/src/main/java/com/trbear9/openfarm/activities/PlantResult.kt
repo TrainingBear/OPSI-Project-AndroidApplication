@@ -3,6 +3,7 @@ package com.trbear9.openfarm.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -86,13 +87,19 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.patrykandpatrick.vico.compose.common.shape.rounded
+import com.pseudoankit.coachmark.UnifyCoachmark
+import com.pseudoankit.coachmark.model.ToolTipPlacement
+import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.trbear9.internal.Data
-import com.trbear9.openfarm.FloatingButtons
 import com.trbear9.openfarm.LocalNav
 import com.trbear9.openfarm.MainActivity
+import com.trbear9.openfarm.MarkKey
+import com.trbear9.openfarm.NavigateSoilStats
 import com.trbear9.openfarm.ResultPagingSource
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.debug
+import com.trbear9.openfarm.firstTime
+import com.trbear9.openfarm.highlightConfig
 import com.trbear9.openfarm.info
 import com.trbear9.openfarm.inputs
 import com.trbear9.openfarm.util.Screen
@@ -117,6 +124,8 @@ class SearchResult {
 @Composable
 @Preview()
 fun SoilResultScreen() {
+    val context = LocalContext.current
+
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
     var finalQuery by rememberSaveable{ mutableStateOf("") }
@@ -240,7 +249,7 @@ fun SoilResultScreen() {
                                                 ) {
                                                     if(expandedSearch && query.isNotEmpty()) Row(horizontalArrangement = Arrangement.End,
                                                         modifier = Modifier.fillMaxWidth()
-                                                        ) {
+                                                    ) {
                                                         IconButton(
                                                             onClick = { query = "" }
                                                         ) {
@@ -370,46 +379,15 @@ fun SoilResultScreen() {
                     label = { Text("Rekomendasi Tanaman") }
                 )
             }
-        }) { padding ->
+        })
+    { padding ->
         "ExpandedSearch: $expandedSearch".debug("PlantResult")
-        if (expandedSearch) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize().padding(padding)
-                    .background(Color.DarkGray.copy(alpha = 0.8f))
-                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(150.dp)
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(top = 10.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.verticalScroll(completerScroll),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        completer.forEach {
-                            Text(
-                                text = it,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable {
-                                    query = it
-                                }.padding(start = 16.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Box(
+        if(false) Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if(noResponse) {
+            if (noResponse) {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -442,8 +420,7 @@ fun SoilResultScreen() {
                     }
                 }
                 return@Box
-            }
-            else if (!loaded) {
+            } else if (!loaded) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -452,7 +429,7 @@ fun SoilResultScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = if (!predicted) "Menganalisa tanahmu.."
-                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu"
+                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu...\nPastikan koneksimu terhubung ke internet!"
                         else "Mencari data $current",
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -479,7 +456,6 @@ fun SoilResultScreen() {
                     }
             val plants: LazyPagingItems<Pair<Int, String>> =
                 pagerFlow.collectAsLazyPagingItems()
-
             if (inputs.soilResult.plants?.isNotEmpty() == true) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -507,6 +483,7 @@ fun SoilResultScreen() {
                     }
 
                 }
+
             }
             else if (plants.itemCount == 0)
                 Text(
@@ -515,7 +492,48 @@ fun SoilResultScreen() {
                     fontSize = 28.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
-            FloatingButtons.NavigateSoilStats(Modifier.fillMaxSize())
+        }
+        if (false && expandedSearch) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize().padding(padding)
+                    .background(Color.DarkGray.copy(alpha = 0.8f))
+                    .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(top = 10.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.verticalScroll(completerScroll),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        completer.forEach {
+                            Text(
+                                text = it,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable {
+                                    query = it
+                                }.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        UnifyCoachmark {
+//            if(loaded)
+                LaunchedEffect(Unit) {
+                Toast.makeText(context, "Tap untuk melihat analisa tanahmu", Toast.LENGTH_LONG)
+                if (firstTime) show(
+                    MarkKey.analisa
+                )
+            }
+            NavigateSoilStats()
         }
     }
 }

@@ -70,6 +70,7 @@ import com.trbear9.openfarm.error
 import kotlinx.coroutines.delay
 import kotlin.math.min
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.pseudoankit.coachmark.UnifyCoachmark
 import com.trbear9.openfarm.debug
 import com.trbear9.openfarm.inputs
 import com.trbear9.plants.api.blob.Plant
@@ -296,33 +297,34 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
         val plants: LazyPagingItems<String> =
             pagerFlow.collectAsLazyPagingItems()
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .padding(padding)
-            ,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(plants.itemCount) { i ->
-                val plant = Data.plant[plants[i]!!]
-                if(plant != null) PlantCardDisplayer(0, plant)
-            }
+        UnifyCoachmark {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+                    .padding(padding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(plants.itemCount) { i ->
+                    val plant = Data.plant[plants[i]!!]
+                    if (plant != null) PlantCardDisplayer(0, plant)
+                }
 
-            plants.apply {
-                when {
-                    loadState.refresh is LoadState.Loading -> {
-                        item { Text("Loading...") }
-                    }
+                plants.apply {
+                    when {
+                        loadState.refresh is LoadState.Loading -> {
+                            item { Text("Loading...") }
+                        }
 
-                    loadState.append is LoadState.Loading -> {
-                        item { Text("Loading more...") }
-                    }
+                        loadState.append is LoadState.Loading -> {
+                            item { Text("Loading more...") }
+                        }
 
-                    loadState.append is LoadState.Error -> {
-                        item { Text("Error loading more.") }
+                        loadState.append is LoadState.Error -> {
+                            item { Text("Error loading more.") }
+                        }
                     }
                 }
-            }
 
+            }
         }
         if (focus) {
             Box(

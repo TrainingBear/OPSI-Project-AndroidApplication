@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,10 +53,12 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.pseudoankit.coachmark.UnifyCoachmark
 import com.pseudoankit.coachmark.model.ToolTipPlacement
+import com.pseudoankit.coachmark.scope.CoachMarkScope
 import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.MarkKey
+import com.trbear9.openfarm.firstTime
 import com.trbear9.openfarm.highlightConfig
 import com.trbear9.plants.E
 import com.trbear9.plants.E.CATEGORY.*
@@ -72,15 +75,26 @@ var coached by mutableStateOf(false)
 @SuppressLint("NotConstructor")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun PlantCardDisplayer(score: Int = 0, ref: Plant?) {
-    val context = LocalContext.current
-
-    if (ref != null) {
-        UnifyCoachmark {
-            val cmodifier = Modifier
+    fun PlantCardDisplayer(
+    score: Int = 0, ref: Plant?,
+    scoreModifier: BoxScope.() -> Modifier = {Modifier
+                                    .padding(end = 10.dp, top = 7.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .wrapContentSize(Alignment.Center)
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .align(Alignment.TopEnd)},
+    cardModifier: Modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 600.dp)
                 .padding(8.dp)
+    ) {
+    val context = LocalContext.current
+
+    if (ref != null) {
+//        val cmodifier: Modifier = Modifier
+//                .fillMaxWidth()
+//                .heightIn(max = 600.dp)
+//                .padding(8.dp)
             Card(
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(8.dp),
@@ -90,18 +104,19 @@ var coached by mutableStateOf(false)
                     intent.putExtra("score", score)
                     context.startActivity(intent)
                 },
-                modifier = if(!coached) {
-//                    coached = true
-                    cmodifier
-                        .enableCoachMark(
-                            key = MarkKey.cocok,
-                            toolTipPlacement = ToolTipPlacement.Bottom,
-                            highlightedViewConfig = highlightConfig
-                        ) {
-                            MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
-                        }
-                }
-                else cmodifier
+                modifier = cardModifier
+//                    if (!coached) {
+//                        coached = true
+//                        cmodifier
+//                            .enableCoachMark(
+//                                key = MarkKey.cocok,
+//                                toolTipPlacement = ToolTipPlacement.Bottom,
+//                                highlightedViewConfig = highlightConfig
+//                            ) {
+//                                MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
+//                            }
+//                    } else
+//                    cmodifier
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
                     Box(
@@ -158,15 +173,17 @@ var coached by mutableStateOf(false)
                                     .background(Color.Black.copy(alpha = 0.5f))
                                     .align(Alignment.TopEnd)
                                 androidx.compose.foundation.layout.Row(
-                                    modifier = if(!coached) modifier
-                                        .enableCoachMark(
-                                            key = MarkKey.skor,
-                                            toolTipPlacement = ToolTipPlacement.Top,
-                                            highlightedViewConfig = highlightConfig
-                                        ){
-                                            MarkKey.skor.tooltip(ToolTipPlacement.Top)
-                                        }
-                                    else modifier
+                                    modifier = scoreModifier()
+//                                        if (!coached) modifier
+//                                            .enableCoachMark(
+//                                                key = MarkKey.skor,
+//                                                toolTipPlacement = ToolTipPlacement.Top,
+//                                                highlightedViewConfig = highlightConfig
+//                                            ){
+//                                                MarkKey.skor.tooltip(ToolTipPlacement.Top)
+//                                            }
+//                                        else
+//                                            modifier
                                 ) {
                                     repeat(star.toInt()) {
                                         Icon(
@@ -237,8 +254,12 @@ var coached by mutableStateOf(false)
                     }
                 }
             }
-            coached = true
+        LaunchedEffect(Unit){
+            if(!coached && firstTime){
+//                show(MarkKey.cocok, MarkKey.skor)
+            }
         }
+        coached = true
     }
 }
 

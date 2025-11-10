@@ -235,8 +235,8 @@ object Data {
         response.predicted = true
         emit(response)
 
-        Log.d("Data Processor", "Getting temperature..")
         data.geo.let {
+            Log.d("Data Processor", "Getting temperature..")
             meteo(it)
             response.geo = data.geo
             response.parameterLoaded = true

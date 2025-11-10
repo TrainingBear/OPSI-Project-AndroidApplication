@@ -96,6 +96,7 @@ import com.trbear9.internal.TFService
 import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.Inputs
 import com.trbear9.plants.api.GeoParameters
+import androidx.core.content.edit
 
 val inputs = Inputs()
 var cam: Boolean = false
@@ -125,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val pref = getSharedPreferences("openfarm", MODE_PRIVATE)
         firstTime = pref.getBoolean("firstTime", true)
-        pref.edit().putBoolean("firstTime", false)
+        pref.edit { putBoolean("firstTime", true) }
         Data.load(this)
         setContent {
             App(this)
