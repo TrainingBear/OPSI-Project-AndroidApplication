@@ -85,7 +85,6 @@ fun Guide(nav: NavController? = null) {
     val achieved = (pref.getStringSet("completed", null) ?: emptySet()).size
     var query: String by remember { mutableStateOf("") }
 
-    val GUIDECARDS: List<Unit> = listOf(GuideCard(num = 1), GuideCard(num = 1))
     Scaffold(
         topBar = {
             Box(
