@@ -417,7 +417,7 @@ fun AboutUs(nav: NavController? = null) {
                             contentDescription = "logo MAN Jakarta 3",
                             modifier = Modifier
                                 .fillMaxHeight()
-//                                .padding(4.dp)
+                                .padding(5.5.dp)
                                 .clickable {
                                     val intent = Intent(
                                         Intent.ACTION_VIEW,
