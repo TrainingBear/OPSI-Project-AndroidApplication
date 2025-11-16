@@ -1,11 +1,5 @@
 package com.trbear9.openfarm.activities
 
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,11 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -33,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Park
@@ -55,7 +46,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
@@ -66,13 +56,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateSet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -80,26 +68,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.patrykandpatrick.vico.compose.common.shape.rounded
 import com.pseudoankit.coachmark.UnifyCoachmark
-import com.pseudoankit.coachmark.model.ToolTipPlacement
-import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.LocalNav
-import com.trbear9.openfarm.MainActivity
-import com.trbear9.openfarm.MarkKey
 import com.trbear9.openfarm.NavigateSoilStats
 import com.trbear9.openfarm.ResultPagingSource
 import com.trbear9.openfarm.Util
 import com.trbear9.openfarm.debug
-import com.trbear9.openfarm.firstTime
-import com.trbear9.openfarm.highlightConfig
 import com.trbear9.openfarm.info
 import com.trbear9.openfarm.inputs
 import com.trbear9.openfarm.util.Screen
@@ -128,31 +108,48 @@ fun SoilResultScreen() {
 
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
-    var finalQuery by rememberSaveable{ mutableStateOf("") }
-    var selected by rememberSaveable{ mutableStateOf("All") }
-    var expanded by rememberSaveable{ mutableStateOf(false) }
-    var expandedSearch by rememberSaveable{ mutableStateOf(false) }
-    var expandCat by rememberSaveable{ mutableStateOf(false) }
-    var hasFocus by rememberSaveable{ mutableStateOf(false) }
-    var order by rememberSaveable{ mutableStateOf("Tertinggi") }
+    var finalQuery by rememberSaveable { mutableStateOf("") }
+    var selected by rememberSaveable { mutableStateOf("All") }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expandedSearch by rememberSaveable { mutableStateOf(false) }
+    var expandCat by rememberSaveable { mutableStateOf(false) }
+    var hasFocus by rememberSaveable { mutableStateOf(false) }
+    var order by rememberSaveable { mutableStateOf("Tertinggi") }
     var scroll = rememberScrollState()
     var completerScroll = rememberScrollState()
 
-    var loaded by rememberSaveable{
+    var loaded by rememberSaveable {
         mutableStateOf<Boolean>(
-            if(inputs.soilResult == null) true
-            else inputs.soilResult.response?.loaded ?: false)
+            if (inputs.soilResult == null) true
+            else inputs.soilResult.response?.loaded ?: false
+        )
     }
-    var collected by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult.collected ?: true) }
-    var current by rememberSaveable{ mutableStateOf<String>(inputs.soilResult?.response?.current ?: "Tanduran") }
-    var progress by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.progress?.toInt() ?: 0) }
-    var target by rememberSaveable{ mutableIntStateOf(inputs.soilResult?.response?.target?.toInt() ?: 0) }
-    var predicted by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
-    var parameterLoaded by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
-    var noResponse by rememberSaveable{ mutableStateOf<Boolean>(inputs.soilResult.response == null) }
+    var collected by rememberSaveable {
+        mutableStateOf<Boolean>(
+            inputs.soilResult.collected ?: true
+        )
+    }
+    var current by rememberSaveable {
+        mutableStateOf<String>(
+            inputs.soilResult?.response?.current ?: "Tanduran"
+        )
+    }
+    var progress by rememberSaveable {
+        mutableIntStateOf(
+            inputs.soilResult?.response?.progress?.toInt() ?: 0
+        )
+    }
+    var target by rememberSaveable {
+        mutableIntStateOf(
+            inputs.soilResult?.response?.target?.toInt() ?: 0
+        )
+    }
+    var predicted by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.predicted == true) }
+    var parameterLoaded by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult?.response?.parameterLoaded == true) }
+    var noResponse by rememberSaveable { mutableStateOf<Boolean>(inputs.soilResult.response == null) }
 
-    var search = remember{ mutableStateSetOf<String>()}
-    var focusRequester = remember{ FocusRequester() }
+    var search = remember { mutableStateSetOf<String>() }
+    var focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         collected = inputs.soilResult?.collected ?: true
@@ -175,7 +172,7 @@ fun SoilResultScreen() {
             }
         }
     }
-    var completer = rememberSaveable{ mutableStateSetOf<String>() }
+    var completer = rememberSaveable { mutableStateSetOf<String>() }
     LaunchedEffect(query) {
         completer.clear()
         completer(query, completer, 5)
@@ -193,9 +190,11 @@ fun SoilResultScreen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
-                            modifier = (if(expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(1f))
+                            modifier = (if (expandedSearch) Modifier.fillMaxWidth() else Modifier.weight(
+                                1f
+                            ))
                         ) {
-                            BasicTextField (
+                            BasicTextField(
                                 value = query,
                                 onValueChange = { input ->
                                     query = input
@@ -221,8 +220,7 @@ fun SoilResultScreen() {
                                     .focusRequester(focusRequester)
                                     .onFocusChanged { focusState ->
                                         hasFocus = focusState.hasFocus
-                                    }
-                                ,
+                                    },
                                 decorationBox = { innerTextField ->
                                     BoxWithConstraints(
                                         Modifier
@@ -247,7 +245,8 @@ fun SoilResultScreen() {
                                                         .wrapContentSize()
                                                         .padding(start = 10.dp)
                                                 ) {
-                                                    if(expandedSearch && query.isNotEmpty()) Row(horizontalArrangement = Arrangement.End,
+                                                    if (expandedSearch && query.isNotEmpty()) Row(
+                                                        horizontalArrangement = Arrangement.End,
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
                                                         IconButton(
@@ -359,7 +358,7 @@ fun SoilResultScreen() {
             )
         },
         bottomBar = {
-            var selected by rememberSaveable{ mutableIntStateOf(1) }
+            var selected by rememberSaveable { mutableIntStateOf(1) }
             NavigationBar {
                 NavigationBarItem(
                     selected = selected == 0,
@@ -383,82 +382,81 @@ fun SoilResultScreen() {
     { padding ->
         "ExpandedSearch: $expandedSearch".debug("PlantResult")
         UnifyCoachmark {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (noResponse) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        text = "Ooops!",
-                        textAlign = TextAlign.Center,
-                        fontSize = 40.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-                        textAlign = TextAlign.Center,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Button(
-                        onClick = {
-                            LocalNav.current?.navigate(Screen.camera)
-                        },
-                        modifier = Modifier
-                            .padding(top = 20.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                if (noResponse) {
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         Text(
-                            text = "Scan tanahmu!",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp
+                            text = "Ooops!",
+                            textAlign = TextAlign.Center,
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                            textAlign = TextAlign.Center,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Button(
+                            onClick = {
+                                LocalNav.current?.navigate(Screen.camera)
+                            },
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                        ) {
+                            Text(
+                                text = "Scan tanahmu!",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 30.sp
+                            )
+                        }
+                    }
+                    return@Box
+                } else if (!loaded) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (!predicted) "Menganalisa tanahmu.."
+                            else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu...\nPastikan koneksimu terhubung ke internet!"
+                            else "Mencari data $current",
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(20.dp)
                         )
                     }
+                    return@Box
                 }
-                return@Box
-            }
-            else if (!loaded) {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = if (!predicted) "Menganalisa tanahmu.."
-                        else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu...\nPastikan koneksimu terhubung ke internet!"
-                        else "Mencari data $current",
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(20.dp)
-                    )
-                }
-                return@Box
-            }
-            val pagerFlow =
-                if (finalQuery.isEmpty())
-                    remember(selected, order) {
-                        Pager(PagingConfig(pageSize = 7)) {
-                            ResultPagingSource(
-                                items = inputs.soilResult.plantByCategory?.get(selected)
-                                    ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
-                            )
-                        }.flow
-                    }
-                else
-                    remember(finalQuery, order, selected) {
-                        Pager(PagingConfig(pageSize = 7)) {
-                            ResultPagingSource(items = search(query, order, selected))
-                        }.flow
-                    }
-            val plants: LazyPagingItems<Pair<Int, String>> =
-                pagerFlow.collectAsLazyPagingItems()
-            if (inputs.soilResult.plants?.isNotEmpty() == true) {
+                val pagerFlow =
+                    if (finalQuery.isEmpty())
+                        remember(selected, order) {
+                            Pager(PagingConfig(pageSize = 7)) {
+                                ResultPagingSource(
+                                    items = inputs.soilResult.plantByCategory?.get(selected)
+                                        ?.flatten(order) ?: mutableListOf<Pair<Int, String>>()
+                                )
+                            }.flow
+                        }
+                    else
+                        remember(finalQuery, order, selected) {
+                            Pager(PagingConfig(pageSize = 7)) {
+                                ResultPagingSource(items = search(query, order, selected))
+                            }.flow
+                        }
+                val plants: LazyPagingItems<Pair<Int, String>> =
+                    pagerFlow.collectAsLazyPagingItems()
+                if (inputs.soilResult.plants?.isNotEmpty() == true) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -490,25 +488,27 @@ fun SoilResultScreen() {
                         }
 
                     }
+                } else if (plants.itemCount == 0)
+                    Text(
+                        text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
+                        textAlign = TextAlign.Center,
+                        fontSize = 28.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
             }
-            else if (plants.itemCount == 0)
-                Text(
-                    text = "Tidak dapat menemukan jenis tanaman dengan tanahmu",
-                    textAlign = TextAlign.Center,
-                    fontSize = 28.sp,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-        }
-        if(loaded)
-            LaunchedEffect(Unit) {
+            if (loaded)
+                LaunchedEffect(Unit) {
 //                show(MarkKey.analisa)
-            }
-            NavigateSoilStats(Modifier.fillMaxSize().padding(padding))
+                }
+            NavigateSoilStats(Modifier
+                .fillMaxSize()
+                .padding(padding))
         }
         if (expandedSearch) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize().padding(padding)
+                    .fillMaxSize()
+                    .padding(padding)
                     .background(Color.DarkGray.copy(alpha = 0.8f))
                     .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
             ) {
@@ -528,9 +528,11 @@ fun SoilResultScreen() {
                                 text = it,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable {
-                                    query = it
-                                }.padding(start = 16.dp)
+                                modifier = Modifier
+                                    .clickable {
+                                        query = it
+                                    }
+                                    .padding(start = 16.dp)
                             )
                         }
                     }
@@ -539,8 +541,9 @@ fun SoilResultScreen() {
         }
     }
 }
+
 fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableList<Pair<Int, String>> {
-    val reversedList = if(order == "Tertinggi"){
+    val reversedList = if (order == "Tertinggi") {
         this.toList().asReversed()
     } else this.toList()
     val result = mutableListOf<Pair<Int, String>>()
@@ -552,15 +555,16 @@ fun SnapshotStateMap<Int, MutableSet<String>>.flatten(order: String): MutableLis
     return result
 }
 
-fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE){
-    inputs.soilResult.plants?:return
+fun completer(query: String, holder: SnapshotStateSet<String>, limit: Int = Int.MAX_VALUE) {
+    inputs.soilResult.plants ?: return
     var i = 0
     outer@ for (it in (inputs.soilResult.plants) ?: return) {
         outer2@ for (plant in it.value) {
             val commonName = Data.namaIlmiahToNamaUmum[plant.lowercase()]
             val prefix = query.lowercase()
             if (commonName != null && (commonName.startsWith(prefix) ||
-                        commonName.endsWith(prefix) || commonName.contains(prefix))) {
+                        commonName.endsWith(prefix) || commonName.contains(prefix))
+            ) {
                 holder.add(commonName)
                 if (i++ > limit) {
                     break@outer
@@ -579,7 +583,8 @@ fun search(query: String, order: String, category: String): MutableList<Pair<Int
         val name = Data.namaIlmiahToNamaUmum[plant.second.lowercase()]
         val prefix = query.lowercase()
         if (name != null && (name.startsWith(prefix) ||
-                    name.endsWith(prefix) || name.contains(prefix))) {
+                    name.endsWith(prefix) || name.contains(prefix))
+        ) {
             result.add(plant.first to plant.second)
         }
     }

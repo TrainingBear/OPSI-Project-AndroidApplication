@@ -97,6 +97,7 @@ import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.Inputs
 import com.trbear9.plants.api.GeoParameters
 import androidx.core.content.edit
+import com.trbear9.openfarm.util.DataStore
 
 val inputs = Inputs()
 var cam: Boolean = false
@@ -115,7 +116,7 @@ var perm: ActivityResultLauncher<Array<String>> = object: ActivityResultLauncher
     }
 }
 
-var firstTime = false
+//var firstTime = false
 
 class MainActivity : AppCompatActivity() {
     private val perm = registerForActivityResult(
@@ -124,9 +125,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val pref = getSharedPreferences("openfarm", MODE_PRIVATE)
-        firstTime = pref.getBoolean("firstTime", true)
-        pref.edit { putBoolean("firstTime", true) }
+//        val pref = getSharedPreferences("openfarm", MODE_PRIVATE)
+//        firstTime = pref.getBoolean("firstTime", true)
+//        pref.edit { putBoolean("firstTime", true) }
+        DataStore.init(this)
+        DataStore.getPref()!!.edit { putBoolean("firstTime", true) }
         Data.load(this)
         setContent {
             App(this)
@@ -175,7 +178,7 @@ fun Home(nav: NavController? = null) {
 
     UnifyCoachmark() {
         LaunchedEffect(Unit) {
-            if (firstTime) {
+            if (DataStore.getBoolean(DataStore.firstTime)) {
                 coffe = true
             }
 //            show(MarkKey.help)
@@ -347,7 +350,7 @@ fun Home(nav: NavController? = null) {
                                 Button(
                                     onClick = {
                                         coffe = false
-                                        if(firstTime){
+                                        if(DataStore.getBoolean(DataStore.firstTime)){
                                             show(MarkKey.scantanah, MarkKey.help)
                                         }
                                     },

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,12 +25,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -64,12 +61,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.trbear9.openfarm.R
+import com.trbear9.openfarm.util.DataStore
 import com.trbear9.openfarm.util.Screen
 
 object Guide {
     /** MUST BE NULLED AFTER USE */
-    internal var guidePointer: Triple<String, String,
-            List<Triple<Painter?, String, String>>>? = null
+    internal var guidePointer: // Data/Storage, (Title, Subtitle, Credits..?), ((Image, credit?)?, Info, infos...)..?
+            Triple<String, Triple<String, String, List<String>?>, List<Triple<Pair<Painter, String?>?, String, String>>>? =
+        null
 }
 
 /**
@@ -80,12 +79,11 @@ object Guide {
 @Preview(device = "spec:width=411dp,height=891dp,dpi=160")
 @Composable
 fun Guide(nav: NavController? = null) {
-    val context = LocalContext.current
-    val pref = context.getSharedPreferences("learning_progress", Context.MODE_PRIVATE)
-    val achieved = (pref.getStringSet("completed", null) ?: emptySet()).size
+//    val context = LocalContext.current
+//    val pref = context.getSharedPreferences("learning_progress", Context.MODE_PRIVATE)
+//    val achieved = (pref.getStringSet("completed", null) ?: emptySet()).size
     var query: String by remember { mutableStateOf("") }
 
-    val GUIDECARDS: List<Unit> = listOf(GuideCard(num = 1), GuideCard(num = 1))
     Scaffold(
         topBar = {
             Box(
@@ -197,37 +195,53 @@ fun Guide(nav: NavController? = null) {
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
+                    BoxWithConstraints(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
                         val fontSize = (maxHeight.value / 5f).sp
                         Text(
                             text = "Track your progress",
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = fontSize,
                             textAlign = TextAlign.Start,
-                            modifier = Modifier.padding(start = 20.dp, end = (maxHeight.value/2).dp, top = 20.dp)
+                            modifier = Modifier.padding(
+                                start = 20.dp,
+                                end = (maxHeight.value / 2).dp,
+                                top = 20.dp
+                            )
                         )
                     }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.8f)
-                            .padding(start = 20.dp, end = (maxHeight.value/2).dp),
+                            .padding(start = 20.dp, end = (maxHeight.value / 2).dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        var achieved: Byte = 0
+                        if(DataStore.getBoolean(DataStore.isCompleteTanah)) //TODO jangan lupa diuncomment
+                            achieved++
+                        if(DataStore.getBoolean(DataStore.isCompletePupuk))
+                            achieved++
+                        if(DataStore.getBoolean(DataStore.isCompleteTanaman))
+                            achieved++
                         BoxWithConstraints(
                             modifier = Modifier
-                                .height(maxHeight/4)
+                                .height(maxHeight / 7)
                                 .weight(.5f)
+                                .padding(end = 7.5.dp)
                                 .clip(RoundedCornerShape(50))
                                 .background(Color(0xFF7BD6FF))
                         ) {
                             LinearProgressIndicator(
                                 progress = {
-                                    achieved / 67f
+                                    achieved / 3f
                                 },
                                 modifier = Modifier
-                                    .fillMaxWidth(),
+                                    .fillMaxSize(),
                                 color = Color(0xFF2196F3),
                                 trackColor = Color.Transparent,
                                 strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
@@ -236,7 +250,7 @@ fun Guide(nav: NavController? = null) {
                         BoxWithConstraints(Modifier.weight(.2f)) {
                             val fontSize = (maxHeight.value / 7f).sp
                             Text(
-                                text = "$achieved/67",
+                                text = "$achieved/3",
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = fontSize,
@@ -254,7 +268,11 @@ fun Guide(nav: NavController? = null) {
 //                            .align(Alignment.CenterEnd)
                 )
             }
-            Box(Modifier.weight(6f).fillMaxWidth()) {
+            Box(
+                Modifier
+                    .weight(6f)
+                    .fillMaxWidth()
+            ) {
                 LazyColumn(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -271,10 +289,111 @@ fun Guide(nav: NavController? = null) {
 
                         }
                     }
-                    item { GuideCard(nav, num = 1) }
-                    item { GuideCard(nav, num = 2) }
-                    item { GuideCard(nav, num = 3) }
-                    item { GuideCard(nav, num = 4) }
+                    item {
+                        GuideCard(
+                            nav, num = 1, isComplete = DataStore.isCompleteTanah,
+                            title = "Tanah",
+                            desc = "Apa itu tanah? Tanah liat? Tanah basah? Tanah kering?",
+                            credits = listOf(
+                                "https://en.wikipedia.org/wiki/Soil_pH",
+                                "https://fnb.tech/id/what-is-soil-ph/",
+                                "https://id.wikipedia.org/wiki/Tanah",
+                                "https://agrotek.id/istilah/retensi-air/",
+                                "https://en.wikipedia.org/wiki/Soil_water_(retention)"
+                            ),
+                            details = listOf(
+                                Triple(
+                                    null, //TODO isi tod klo mau
+                                    "Pengertian",
+                                    "Tanah sangat vital peranannya bagi semua kehidupan di bumi " +
+                                            "karena tanah mendukung kehidupan tumbuhan dengan menyediakan unsur " +
+                                            "hara dan air sekaligus sebagai penopang akar tanaman. Komposisi " +
+                                            "tanah berbeda-beda pada satu lokasi dengan lokasi yang lain. " +
+                                            "Air dan udara merupakan bagian dari tanah."
+                                ),
+                                Triple(
+                                    Pair(painterResource(id = R.drawable.lapisanairtanah), null),
+                                    "Retensi Air Tanah",
+                                    "Retensi air adalah kemampuan tanah untuk menahan atau menyimpan " +
+                                            "air di dalamnya setelah proses penyiraman atau hujan. Mengacu " +
+                                            "pada kapasitas tanah untuk mempertahankan kelembaban dan ketersediaan " +
+                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n" +
+                                            "- Tekstur tanah: Tanah berbutir halus seperti lempung memiliki " +
+                                            "kemampuan yang lebih baik untuk menahan air dibandingkan dengan " +
+                                            "tanah berbutir kasar seperti pasir. Partikel halus dalam " +
+                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n" +
+                                            "- Struktur Tanah: Struktur tanah yang hancur atau terkompaksi " +
+                                            "(padat) dapat menghambat infiltrasi air dan menyebabkan aliran " +
+                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n" +
+                                            "- Kandungan Bahan Organik: Bahan organik meningkatkan kemampuan tanah " +
+                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n" +
+                                            "- Kedalaman Tanah: Tanah yang dalam memiliki daya tampung yang " +
+                                            "lebih besar untuk menahan atau menyimpan air dibandingkan dengan tanah yang dangkal."
+                                ),
+                                Triple(
+                                    Pair(painterResource(id = R.drawable.diagramphtanah), null),
+                                    "pH Tanah",
+                                    "Tingkat pH tanah mengacu pada tingkat keasaman atau kebasaannya " +
+                                            "tanah, jika tanah terlalu asam atau terlalu basa, hal itu " +
+                                            "dapat membatasi kemampuan tanaman untuk menyerap nutrisi tertentu. " +
+                                            "Pada tanah asam (pH rendah), nutrisi penting seperti nitrogen, " +
+                                            "fosfor, dan kalium sering kali tidak tersedia bagi tanaman. " +
+                                            "Di sisi lain, tanah basa (pH tinggi) dapat menyebabkan pengikatan " +
+                                            "mikronutrien seperti zat besi, seng, dan mangan, sehingga " +
+                                            "tanaman tidak dapat menyerapnya. Berikut adalah klasifikasi pH pada tanah:\n" +
+                                            "Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
+                                            "hujan tinggi dan tanah yang sudah tua. Kondisi ini dapat menyebabkan kekurangan nutrisi.\n" +
+                                            "Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n" +
+                                            "Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering " +
+                                            "dan gersang. Hal ini dapat menyebabkan kekurangan nutrisi bagi tanaman tertentu."
+                                )
+                            )
+                        )
+                    }
+                    item {
+                        GuideCard(
+                            nav, num = 2, isComplete = DataStore.isCompleteTanaman,
+                            title = "Tanaman",
+                            desc = "",
+                            details = listOf(
+                                Triple(
+                                    null,
+                                    "Pengertian",
+                                    ""
+                                )
+                            )
+                        )
+                    }
+                    item {
+                        GuideCard(
+                            nav, num = 3, isComplete = DataStore.isCompletePupuk,
+                            title = "Pupuk",
+                            desc = " ",
+                            credits = listOf("https://id.wikipedia.org/wiki/Pupuk"),
+                            details = listOf(
+                                Triple(
+                                    null,
+                                    "Pengertian",
+                                    "Pupuk juga penting bagi tanaman, seperti menyediakan dan " +
+                                            "meningkatkan ketersediaan zat hara yang sangat dibutuhkan " +
+                                            "tanamanmu sehingga tanaman dapat tumbuh dengan optimal. Akan " +
+                                            "tetapi perlu juga diperhatikan apa kebutuhan tumbuhanmu, agar " +
+                                            "tumbuhan tidak mendapat terlalu banyak zat makanan. Terlalu sedikit " +
+                                            "atau terlalu banyak zat makanan dapat berbahaya bagi tumbuhan."
+                                ),
+                                Triple(
+                                    null,
+                                    "Pupuk NPK",
+                                    "Pupuk NPK adalah pupuk buatan yang berbentuk cair atau padat " +
+                                            "berupa butiran kasar yang mengandung unsur hara utama nitrogen, " +
+                                            "fosfor, dan kalium. Berikut fungsi ketiga unsur dalam pupuk NPK:\n" +
+                                            "- Nitrogen (N): membantu pertumbuhan vegetatif, terutama daun.\n" +
+                                            "- Fosfor (P): membantu pertumbuhan akar dan tunas.\n" +
+                                            "- Kalium (K): membantu pembungaan dan pembuahan."
+                                )
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -286,14 +405,19 @@ fun Guide(nav: NavController? = null) {
  * */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun GuideCard(
+private fun GuideCard(
     nav: NavController? = null,
     num: Int,
     title: String = "temp",
     desc: String = "lorem ipsum dolor sit amet",
-    details: List<Triple<Painter?, String, String>> = listOf(
+    isComplete: String,
+    credits: List<String>? = null,
+    details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
         Triple(
-            painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
+            Pair(
+                painterResource(id = R.drawable.background_opsi_mainactivity_rescaled),
+                "Somewhere"
+            ),
             "lorem ipsum sit amet test",
             """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt
                 |
@@ -308,8 +432,10 @@ fun GuideCard(
         modifier = Modifier
             .fillMaxSize()
             .height(110.dp)
-            .padding(horizontal = 10.dp)
-            .background(Color(0x72FFFFFF))
+            .background(
+                if (DataStore.getBoolean(isComplete)) Color(0x4D4BF81A)
+                else Color(0x72FFFFFF)
+            )
             .border(width = 1.dp, color = Color(0x32000000))
             .drawBehind {
                 val w = 25.dp.toPx()
@@ -321,10 +447,9 @@ fun GuideCard(
                 )
             }
             .clickable {
-                Guide.guidePointer = Triple(title, desc, details)
+                Guide.guidePointer = Triple(isComplete, Triple(title, desc, credits), details)
                 nav?.navigate(Screen.guidePointDetail)
-            }
-        ,
+            },
 //        onClick = {
 //            Guide.guidePointer = Triple(title, desc, details)
 //            nav?.navigate(Screen.guidePointDetail)

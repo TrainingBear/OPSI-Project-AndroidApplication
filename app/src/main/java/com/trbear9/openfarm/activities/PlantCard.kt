@@ -59,8 +59,8 @@ import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.MarkKey
-import com.trbear9.openfarm.firstTime
 import com.trbear9.openfarm.highlightConfig
+import com.trbear9.openfarm.util.DataStore
 import com.trbear9.plants.E
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.api.blob.Plant
@@ -257,7 +257,7 @@ fun CoachMarkScope.PlantCardDisplayer(
             }
         }
         LaunchedEffect(Unit){
-            if(!coached && firstTime){
+            if(!coached && DataStore.getBoolean(DataStore.firstTime)){
                 show(
                     MarkKey.cocok,
                     MarkKey.skor,

@@ -7,10 +7,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,14 +15,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -36,10 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocalPolice
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -74,7 +67,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.trbear9.openfarm.R
@@ -169,7 +161,12 @@ fun AboutUs(nav: NavController? = null) {
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        modifier = Modifier.padding(start = 60.dp, end = 60.dp,top = 6.dp, bottom = 10.dp)
+                        modifier = Modifier.padding(
+                            start = 60.dp,
+                            end = 60.dp,
+                            top = 6.dp,
+                            bottom = 10.dp
+                        )
                     )
                 }
                 item @Composable {
@@ -259,7 +256,11 @@ fun AboutUs(nav: NavController? = null) {
                         ClickableText(
                             text = annotated,
                             onClick = { offset ->
-                                annotated.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                                annotated.getStringAnnotations(
+                                    tag = "URL",
+                                    start = offset,
+                                    end = offset
+                                )
                                     .firstOrNull()?.let { annotation ->
                                         urihandler.openUri(annotation.item) // 🔗 opens in browser
                                     }
@@ -283,7 +284,7 @@ fun AboutUs(nav: NavController? = null) {
                                 SpanStyle(
                                     fontWeight = FontWeight.Bold
                                 )
-                            ){
+                            ) {
                                 append("Discord: ")
                             }
                             pushStringAnnotation(
@@ -304,7 +305,7 @@ fun AboutUs(nav: NavController? = null) {
                                 SpanStyle(
                                     fontWeight = FontWeight.Bold
                                 )
-                            ){
+                            ) {
                                 append("Youtube: ")
                             }
                             pushStringAnnotation(
@@ -324,7 +325,11 @@ fun AboutUs(nav: NavController? = null) {
                         ClickableText(
                             text = anotated,
                             onClick = { offset ->
-                                anotated.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                                anotated.getStringAnnotations(
+                                    tag = "URL",
+                                    start = offset,
+                                    end = offset
+                                )
                                     .firstOrNull()?.let { annotation ->
                                         urihandler.openUri(annotation.item)
                                     }
@@ -344,10 +349,43 @@ fun AboutUs(nav: NavController? = null) {
                         isExpanded = medSosExpand
                     ) {
                         Text(
-                            text = "https://cdn.discordapp.com/attachments/1330496061558620191/1372439934291677215/New_Piskel-1.png_13.png?ex=6910214b&is=690ecfcb&hm=5872d37954dfc6fd0780eabe1baf516c49587bc99b1671ebfce2fe25a52600fe&",
+                            text = buildAnnotatedString {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("1. Q: ") }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("Bagaimana aplikasi ini dapat di percaya?\n")
+                                }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("   A: ") }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("Kami menggunakan data tanaman dari ECOCROP oleh FAO. ")
+                                    append("Setiap data umum pada tanaman sudah terverifikasi oleh para ahli, ")
+                                    append("sehingga semua data tanaman di aplikasi ini sangat dapat dipercaya.\n\n")
+                                }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("2. Q: ") }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("Mengapa terdapat tanaman asing di hasil rekomendasi tanaman saya?\n")
+                                }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("   A: ") }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("Data tanaman mencakup tanaman di seluruh dunia. ")
+                                    append("Tanaman tersebut tidak tersebar secara luas, ")
+                                    append("sehingga tidak tersebar ke indonesia.\n\n")
+                                }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("3. Q: ") }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("Apakah aplikasi ini berguna untuk para petani maupun ")
+                                    append("seseorang yang ingin memulai untuk bertani/berkebun?\n")
+                                }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("   A: ") }
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("Ya, sangat berguna seperti mencari informasi maupun rekomendasi ")
+                                    append("tanaman atau tumbuhan, yang cocok untuk ditanam ")
+                                    append("yang sesuai dengan tanah/media yang ingin ditanam.")
+                                }
+                            },
+                            fontSize = 18.5.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(5.dp)
+                                .padding(7.25.dp)
                         )
                     }
                 }
@@ -367,7 +405,10 @@ fun AboutUs(nav: NavController? = null) {
                                 .fillMaxHeight()
                                 .padding(5.5.dp)
                                 .clickable {
-                                    val intent = Intent(Intent.ACTION_VIEW, "https://sman1ambarawa.sch.id/".toUri())
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        "https://sman1ambarawa.sch.id/".toUri()
+                                    )
                                     context.startActivity(intent)
                                 }
                         )
@@ -376,9 +417,12 @@ fun AboutUs(nav: NavController? = null) {
                             contentDescription = "logo MAN Jakarta 3",
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .padding(5.dp)
+                                .padding(5.5.dp)
                                 .clickable {
-                                    val intent = Intent(Intent.ACTION_VIEW, "https://man3jkt.sch.id/".toUri())
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        "https://man3jkt.sch.id/".toUri()
+                                    )
                                     context.startActivity(intent)
                                 }
                         )
@@ -407,7 +451,7 @@ fun AboutUs(nav: NavController? = null) {
 private fun ExpandCard(
     text: String,
     backgroundColor: Color,
-    contentColor: Color = lerp(backgroundColor, Color.White, .75f),
+    contentColor: Color = lerp(backgroundColor, Color.White, .5f),
     imageVector: ImageVector,
     isExpanded: MutableState<Boolean>,
     content: @Composable (BoxScope.() -> Unit)
@@ -465,8 +509,7 @@ private fun ExpandCard(
                 durationMillis = animateTime,
                 easing = FastOutLinearInEasing
             )
-        ),
-        modifier = Modifier.zIndex(0f)
+        )
     ) {
         Box(
             modifier = Modifier

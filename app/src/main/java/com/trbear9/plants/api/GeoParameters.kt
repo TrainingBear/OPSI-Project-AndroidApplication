@@ -17,8 +17,11 @@ class GeoParameters : Parameters {
     var latitude: Double = -7.2565293 // di sekitar ambarawa (default)
     var longtitude: Double = 110.402824 // di sekitar ambarawa (default)
     var altitude: Double = 0.0
+    /** Curah hujan */
     var rainfall: Double = 2000.0 // di jawa tengah (default)
+    /** Tempratur min*/
     var min: Double = 18.0
+    /** Tempratur max */
     var max: Double = 31.0 // di seluruh indonesia (default)
     override fun getParameters(): MutableMap<String?, String?> {
         val map: MutableMap<String?, String?> = HashMap()

@@ -120,9 +120,11 @@ fun App(app: AppCompatActivity) {
         composable(Screen.guidePointDetail){
             PointDetail(
                 nav = nav,
-                title = Guide.guidePointer!!.first,
-                subtitle = Guide.guidePointer!!.second,
-                details = Guide.guidePointer!!.third
+                title = Guide.guidePointer!!.second.first,
+                subtitle = Guide.guidePointer!!.second.second,
+                isComplete = Guide.guidePointer!!.first,
+                details = Guide.guidePointer!!.third,
+                credits = Guide.guidePointer!!.second.third
             )
 //            Guide.guidePointer = null
         }
