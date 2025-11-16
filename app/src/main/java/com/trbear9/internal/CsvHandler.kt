@@ -2,6 +2,7 @@ package com.trbear9.plants
 
 import android.content.Context
 import android.util.Log
+import com.trbear9.openfarm.error
 import com.trbear9.openfarm.info
 import com.trbear9.plants.api.Parameters
 import com.trbear9.plants.api.UserVariable
@@ -176,6 +177,7 @@ object CsvHandler {
                             try {
                                 max = record.get(E.A_maximum_temperature).toFloat()
                             } catch (_: NumberFormatException){
+                                "Can't parse ${record.get(E.A_maximum_temperature)} to float (TEMPMAX)".error("CsvHandler")
                                 continue
                             }
                             if (max >= floatVar) {
@@ -189,6 +191,7 @@ object CsvHandler {
                             try{
                                 min = record.get(E.A_minimum_temperature).toFloat()
                             }catch (_: NumberFormatException){
+                                "Can't parse ${record.get(E.A_minimum_temperature)} to float (TEMPMAX)".error("CsvHandler")
                                  continue
                             }
                             if (min <= floatVar) {

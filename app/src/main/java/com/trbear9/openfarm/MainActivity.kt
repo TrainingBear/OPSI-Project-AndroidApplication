@@ -83,6 +83,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.google.android.gms.location.LocationServices
 import com.pseudoankit.coachmark.LocalCoachMarkScope
@@ -97,6 +98,7 @@ import com.trbear9.openfarm.util.DataStore
 import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.Inputs
 import com.trbear9.plants.api.GeoParameters
+import kotlinx.coroutines.launch
 
 val inputs = Inputs()
 var cam: Boolean = false
@@ -122,18 +124,21 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) {}
 
+    private val allLoaded = mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LoadingScreen()
+            if(!allLoaded.value) LoadingScreen()
+            else App(this)
         }
-        DataStore.init(this)
-        Data.load(this)
-        setContent {
-            App(this)
+
+        lifecycleScope.launch {
+            DataStore.init(this@MainActivity)
+            Data.load(this@MainActivity)
+//            getLocation(this@MainActivity)
+//            perm.launch(arrayOf(Manifest.permission.CAMERA))
+            allLoaded.value = true
         }
-        getLocation(this)
-        perm.launch(arrayOf(Manifest.permission.CAMERA))
     }
 
     override fun onDestroy() {

@@ -319,7 +319,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
 
             }
         }
-        if (focus) {
+        if (focus && query.isNotEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize().padding(padding)

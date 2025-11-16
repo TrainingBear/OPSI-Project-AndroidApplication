@@ -113,12 +113,9 @@ fun PointDetail(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize(),
-//                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = title,
-                                textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.ExtraBold,
                                 overflow = TextOverflow.Visible
                             )

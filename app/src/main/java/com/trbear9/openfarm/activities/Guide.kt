@@ -49,6 +49,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -209,7 +210,8 @@ fun Guide(nav: NavController? = null) {
                                 start = 20.dp,
                                 end = (maxHeight.value / 2).dp,
                                 top = 20.dp
-                            )
+                            ),
+                            lineHeight = 2.sp
                         )
                     }
                     Row(
@@ -258,8 +260,8 @@ fun Guide(nav: NavController? = null) {
                     }
                 }
                 Icon(
-                    imageVector = Icons.Default.Image,
-                    tint = Color.Black,
+                    painter = painterResource(R.drawable.oak_sapling),
+//                    tint = Color.Black,
                     contentDescription = "png",
                     modifier = Modifier
                         .align(Alignment.CenterEnd)

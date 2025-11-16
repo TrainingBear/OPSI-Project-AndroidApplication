@@ -419,7 +419,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                 Map("Kesuburan:", ferr.toString())
                                 Map("Kedalaman:", depth.toString())
                             } else {
-                                Map("Altitude:", geo?.altitude?.round())
+                                Map("MDPL:", geo?.altitude?.round())
                                 Map("Iklim:", geo?.iklim?.head)
                                 Map("Min ºC:", geo?.min?.round())
                                 Map("Max ºC:", geo?.max?.round())
