@@ -1,7 +1,9 @@
 package com.trbear9.openfarm
 
+import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.view.LayoutInflater
 import android.widget.ImageButton
 import android.widget.Toast
@@ -9,12 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,7 +23,6 @@ import com.trbear9.openfarm.activities.Guide
 import com.trbear9.openfarm.activities.PointDetail
 import com.trbear9.openfarm.activities.SearchLayout
 import com.trbear9.openfarm.activities.SoilResultScreen
-import com.trbear9.openfarm.activities.SoilStats
 import com.trbear9.openfarm.activities.SoilStatsActivity
 import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.api.SoilParameters
@@ -66,7 +64,11 @@ fun App(app: AppCompatActivity) {
 //                    .show()
                 Util.debug("Job has been finished!")
                 inputs.soilResult.res = inputs.response
-                nav.navigate(Screen.soilResult)
+
+                if(isNetworkAvailable(app))
+                    nav.navigate(Screen.soilResult)
+                else Toast.makeText(context, "Tidak ada koneksi internet!", Toast.LENGTH_SHORT)
+                    .show()
             })
         }
         composable(Screen.soilResult) {
@@ -122,11 +124,18 @@ fun App(app: AppCompatActivity) {
                 nav = nav,
                 title = Guide.guidePointer!!.second.first,
                 subtitle = Guide.guidePointer!!.second.second,
-                isComplete = Guide.guidePointer!!.first,
+                id = Guide.guidePointer!!.first,
                 details = Guide.guidePointer!!.third,
                 credits = Guide.guidePointer!!.second.third
             )
 //            Guide.guidePointer = null
         }
     }
+}
+
+fun isNetworkAvailable(context: Context): Boolean {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = cm.activeNetwork ?: return false
+    val capabilities = cm.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }

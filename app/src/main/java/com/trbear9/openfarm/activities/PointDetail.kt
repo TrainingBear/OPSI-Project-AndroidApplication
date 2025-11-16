@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -53,8 +52,8 @@ import com.trbear9.openfarm.util.Screen
 fun PointDetail(
     nav: NavController? = null,
     title: String = "LOREM IPSUM DOLOR",
-    subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt",
-    isComplete: String = " ",
+    subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicular, mauris ut faucets tincidunt",
+    id: String = " ",
     credits: List<String>? = listOf("play.jasperproject.com", "www.google.com"),
     details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
         Triple(
@@ -172,13 +171,13 @@ fun PointDetail(
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(Color(0xBE16B613))
                                 .clickable {
-                                    DataStore.setBoolean(isComplete, true)
+                                    DataStore.setBoolean(id, true)
                                     nav?.navigate(Screen.help)
                                 }
                         ) {
                             Text(
                                 text =
-                                    if (DataStore.getBoolean(isComplete)) "Kembali"
+                                    if (DataStore.contains(id)) "Kembali"
                                     else "Selesaikan",
                                 color = Color(0xFFF0F3D0),
                                 fontWeight = FontWeight.Bold,

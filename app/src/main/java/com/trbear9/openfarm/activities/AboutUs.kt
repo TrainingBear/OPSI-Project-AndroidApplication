@@ -235,9 +235,9 @@ fun AboutUs(nav: NavController? = null) {
                             }
                             pop()
 
-                            append(" — Accessed 9 November 2025\nUsed under FAO Terms and Conditions for non-commercial use.\n\n")
+                            append("Accessed 9 November 2025\nUsed under FAO Terms and Conditions for non-commercial use.\n\n")
 
-                            append("Taxonomic data © The Trustees of the Royal Botanic Gardens, Kew.\n")
+                            append("Taxonomic plant © The Trustees of the Royal Botanic Gardens, Kew.\n")
                             append("Licensed under CC BY 4.0.\n")
                             pushStringAnnotation(
                                 tag = "URL",
@@ -252,6 +252,22 @@ fun AboutUs(nav: NavController? = null) {
                                 append("https://www.kew.org/science/data-and-resources")
                             }
                             pop()
+
+                            append("\nWeather API © Open Meteo API.\n")
+                            append("Licensed under Licensed under Attribution 4.0 International (CC BY 4.0)\n")
+                            pushStringAnnotation(
+                                tag = "URL",
+                                annotation = "https://open-meteo.com/"
+                            )
+                            withStyle(
+                                SpanStyle(
+                                    color = Color(0xFF1565C0),
+                                    textDecoration = TextDecoration.Underline
+                                )
+                            ) {
+                                append("https://open-meteo.com/")
+                            }
+                            pop()
                         }
                         ClickableText(
                             text = annotated,
@@ -262,7 +278,7 @@ fun AboutUs(nav: NavController? = null) {
                                     end = offset
                                 )
                                     .firstOrNull()?.let { annotation ->
-                                        urihandler.openUri(annotation.item) // 🔗 opens in browser
+                                        urihandler.openUri(annotation.item)
                                     }
                             },
                             modifier = Modifier

@@ -100,6 +100,8 @@ class SearchResult {
     var plantByCategory: SnapshotStateMap<String, MutableSet<String>>? = null
 }
 
+var coachStep = 0
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview()

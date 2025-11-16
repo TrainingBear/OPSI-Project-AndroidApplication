@@ -89,7 +89,6 @@ import com.pseudoankit.coachmark.UnifyCoachmark
 import com.pseudoankit.coachmark.model.HighlightedViewConfig
 import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.enableCoachMark
-import com.pseudoankit.coachmark.util.CoachMarkDefaults
 import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
 import com.trbear9.internal.TFService
@@ -178,10 +177,9 @@ fun Home(nav: NavController? = null) {
 
     UnifyCoachmark() {
         LaunchedEffect(Unit) {
-            if (DataStore.getBoolean(DataStore.firstTime)) {
+            if (DataStore.firstTime) {
                 coffe = true
             }
-//            show(MarkKey.help)
         }
         Scaffold(
             bottomBar = {
@@ -350,8 +348,9 @@ fun Home(nav: NavController? = null) {
                                 Button(
                                     onClick = {
                                         coffe = false
-                                        if(DataStore.getBoolean(DataStore.firstTime)){
+                                        if(DataStore.firstTime){
                                             show(MarkKey.scantanah, MarkKey.help)
+                                            DataStore.completeFirstTime()
                                         }
                                     },
                                     modifier = Modifier

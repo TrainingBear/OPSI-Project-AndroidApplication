@@ -37,6 +37,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,7 +84,6 @@ fun Guide(nav: NavController? = null) {
 //    val pref = context.getSharedPreferences("learning_progress", Context.MODE_PRIVATE)
 //    val achieved = (pref.getStringSet("completed", null) ?: emptySet()).size
     var query: String by remember { mutableStateOf("") }
-
     Scaffold(
         topBar = {
             Box(
@@ -222,11 +222,11 @@ fun Guide(nav: NavController? = null) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         var achieved: Byte = 0
-                        if(DataStore.getBoolean(DataStore.isCompleteTanah)) //TODO jangan lupa diuncomment
+                        if(DataStore.contains("tanah")) //TODO jangan lupa diuncomment
                             achieved++
-                        if(DataStore.getBoolean(DataStore.isCompletePupuk))
+                        if(DataStore.contains("pupuk"))
                             achieved++
-                        if(DataStore.getBoolean(DataStore.isCompleteTanaman))
+                        if(DataStore.contains("tanaman"))
                             achieved++
                         BoxWithConstraints(
                             modifier = Modifier
@@ -291,7 +291,7 @@ fun Guide(nav: NavController? = null) {
                     }
                     item {
                         GuideCard(
-                            nav, num = 1, isComplete = DataStore.isCompleteTanah,
+                            nav, num = 1, id = "tanah",
                             title = "Tanah",
                             desc = "Apa itu tanah? Tanah liat? Tanah basah? Tanah kering?",
                             credits = listOf(
@@ -352,7 +352,7 @@ fun Guide(nav: NavController? = null) {
                     }
                     item {
                         GuideCard(
-                            nav, num = 2, isComplete = DataStore.isCompleteTanaman,
+                            nav, num = 2, id = "tanaman",
                             title = "Tanaman",
                             desc = "",
                             details = listOf(
@@ -366,7 +366,7 @@ fun Guide(nav: NavController? = null) {
                     }
                     item {
                         GuideCard(
-                            nav, num = 3, isComplete = DataStore.isCompletePupuk,
+                            nav, num = 3, id = "pupuk",
                             title = "Pupuk",
                             desc = " ",
                             credits = listOf("https://id.wikipedia.org/wiki/Pupuk"),
@@ -410,7 +410,7 @@ private fun GuideCard(
     num: Int,
     title: String = "temp",
     desc: String = "lorem ipsum dolor sit amet",
-    isComplete: String,
+    id: String,
     credits: List<String>? = null,
     details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
         Triple(
@@ -433,7 +433,7 @@ private fun GuideCard(
             .fillMaxSize()
             .height(110.dp)
             .background(
-                if (DataStore.getBoolean(isComplete)) Color(0x4D4BF81A)
+                if (DataStore.contains(id)) Color(0x4D4BF81A)
                 else Color(0x72FFFFFF)
             )
             .border(width = 1.dp, color = Color(0x32000000))
@@ -447,7 +447,7 @@ private fun GuideCard(
                 )
             }
             .clickable {
-                Guide.guidePointer = Triple(isComplete, Triple(title, desc, credits), details)
+                Guide.guidePointer = Triple(id, Triple(title, desc, credits), details)
                 nav?.navigate(Screen.guidePointDetail)
             },
 //        onClick = {
