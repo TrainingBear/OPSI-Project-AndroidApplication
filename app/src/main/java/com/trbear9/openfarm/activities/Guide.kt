@@ -316,16 +316,16 @@ fun Guide(nav: NavController? = null) {
                                     "Retensi air adalah kemampuan tanah untuk menahan atau menyimpan " +
                                             "air di dalamnya setelah proses penyiraman atau hujan. Mengacu " +
                                             "pada kapasitas tanah untuk mempertahankan kelembaban dan ketersediaan " +
-                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n" +
+                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n\n" +
                                             "- Tekstur tanah: Tanah berbutir halus seperti lempung memiliki " +
                                             "kemampuan yang lebih baik untuk menahan air dibandingkan dengan " +
                                             "tanah berbutir kasar seperti pasir. Partikel halus dalam " +
-                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n" +
+                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n\n" +
                                             "- Struktur Tanah: Struktur tanah yang hancur atau terkompaksi " +
                                             "(padat) dapat menghambat infiltrasi air dan menyebabkan aliran " +
-                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n" +
+                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n\n" +
                                             "- Kandungan Bahan Organik: Bahan organik meningkatkan kemampuan tanah " +
-                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n" +
+                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n\n" +
                                             "- Kedalaman Tanah: Tanah yang dalam memiliki daya tampung yang " +
                                             "lebih besar untuk menahan atau menyimpan air dibandingkan dengan tanah yang dangkal."
                                 ),
@@ -340,10 +340,10 @@ fun Guide(nav: NavController? = null) {
                                             "Di sisi lain, tanah basa (pH tinggi) dapat menyebabkan pengikatan " +
                                             "mikronutrien seperti zat besi, seng, dan mangan, sehingga " +
                                             "tanaman tidak dapat menyerapnya. Berikut adalah klasifikasi pH pada tanah:\n" +
-                                            "Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
+                                            "- Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
                                             "hujan tinggi dan tanah yang sudah tua. Kondisi ini dapat menyebabkan kekurangan nutrisi.\n" +
-                                            "Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n" +
-                                            "Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering " +
+                                            "- Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n" +
+                                            "- Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering " +
                                             "dan gersang. Hal ini dapat menyebabkan kekurangan nutrisi bagi tanaman tertentu."
                                 )
                             )
@@ -356,7 +356,9 @@ fun Guide(nav: NavController? = null) {
                             desc = "Apa itu tanaman? padi, nasi, touch some grass?",
                             credits = listOf(
                                 "https://id.wikipedia.org/wiki/Tanaman",
-                                "https://id.wikipedia.org/wiki/Hama"
+                                "https://id.wikipedia.org/wiki/Hama",
+                                "https://id.wikipedia.org/wiki/Hidroponik",
+                                "https://id.wikipedia.org/wiki/Irigasi"
                             ),
                             details = listOf(
                                 Triple(
@@ -379,11 +381,20 @@ fun Guide(nav: NavController? = null) {
                                 Triple(
                                     Pair(painterResource(R.drawable.hama), "Shutterstock"),
                                     "Hama",
-                                    "istilah \"hama\" dapat digunakan untuk semua organisme, tetapi " +
-                                            "istilah ini paling sering dipakai hanya kepada hewan. Organisme " +
-                                            "yang bersifat invasif juga merupakan hama. Suatu hewan juga " +
-                                            "dapat disebut hama jika menyebabkan kerusakan pada ekosistem alami " +
-                                            "atau menjadi agen penyebaran penyakit dalam habitat manusia."
+                                    "Istilah hama dapat digunakan untuk semua organisme, tetapi " +
+                                            "istilah ini paling sering dipakai hanya kepada hewan. Organisme yang " +
+                                            "bersifat invasif juga merupakan hama. Suatu hewan juga dapat " +
+                                            "disebut hama jika menyebabkan kerusakan pada ekosistem alami " +
+                                            "atau menjadi agen penyebaran penyakit dalam habitat manusia. " +
+                                            "Hama dapat dikontrol dengan cara:\n" +
+                                            "- menggunakan hewan predatornya\n" +
+                                            "- insektisida dengan dosis yang aman\n" +
+                                            "- memasang jebakan/perangkap untuk hama seperti tikus ataupun ular."
+                                ),
+                                Triple(
+                                    null,
+                                    "Metode Budidaya",
+                                    ""
                                 )
                             )
                         )

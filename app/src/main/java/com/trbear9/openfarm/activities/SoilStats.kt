@@ -416,6 +416,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                 Map("Tekstur:", texr.toString())
                                 Map("Drainase:", drain.toString())
                                 Map("Kesuburan:", ferr.toString())
+                                Map("Kedalaman:", depth.toString())
                             } else {
                                 Map("Altitude:", geo?.altitude?.round())
                                 Map("Iklim:", geo?.iklim?.head)
