@@ -11,10 +11,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,22 +21,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Coffee
-import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LightbulbCircle
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.QuestionMark
@@ -541,4 +539,42 @@ private fun ColumnScope.CoachMarkTargetText(
 
 @Composable
 fun Tooltip(key: CoachMarkKey) {
+}
+
+@Composable
+@Preview
+fun LoadingScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize().background(Color.White),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.oak_sapling),
+            contentDescription = "app icon",
+            modifier = Modifier.size(160.dp)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.smanega),
+                contentDescription = "logo sma ambarawa 1",
+                modifier = Modifier.width(60.dp)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.fertinnv),
+                contentDescription = "logo fert innovation",
+                modifier = Modifier.width(120.dp)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.logoman3),
+                contentDescription = "logo man jakarta 3",
+                modifier = Modifier.width(60.dp)
+            )
+        }
+    }
 }
