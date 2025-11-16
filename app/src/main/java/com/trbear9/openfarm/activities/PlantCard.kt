@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,11 +61,14 @@ import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.MarkKey
 import com.trbear9.openfarm.highlightConfig
+import com.trbear9.openfarm.info
 import com.trbear9.openfarm.util.DataStore
 import com.trbear9.plants.E
 import com.trbear9.plants.E.CATEGORY.*
 import com.trbear9.plants.api.blob.Plant
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
 
 object CONS {
@@ -73,6 +77,8 @@ object CONS {
 }
 
 var coached by mutableStateOf(false)
+var displayed by mutableStateOf(false)
+var ready by mutableStateOf(false)
 @SuppressLint("NotConstructor")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,9 +99,12 @@ fun CoachMarkScope.PlantCardDisplayer(
 
     if (ref != null) {
         val cmodifier: Modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 600.dp)
-                .padding(8.dp)
+            .fillMaxWidth()
+            .heightIn(max = 600.dp)
+            .padding(8.dp)
+            .onGloballyPositioned {
+                ready = true
+            }
         Card(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
@@ -107,16 +116,16 @@ fun CoachMarkScope.PlantCardDisplayer(
             },
             modifier =
 //                cardModifier
-                    if (!coached) {
-                        cmodifier
-                            .enableCoachMark(
-                                key = MarkKey.cocok,
-                                toolTipPlacement = ToolTipPlacement.Bottom,
-                                highlightedViewConfig = highlightConfig
-                            ) {
-                                MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
-                            }
-                    } else
+                if (!coached) {
+                    cmodifier
+                        .enableCoachMark(
+                            key = MarkKey.cocok,
+                            toolTipPlacement = ToolTipPlacement.Bottom,
+                            highlightedViewConfig = highlightConfig
+                        ) {
+                            MarkKey.cocok.tooltip(ToolTipPlacement.Bottom)
+                        }
+                } else
                     cmodifier
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
@@ -176,16 +185,16 @@ fun CoachMarkScope.PlantCardDisplayer(
                             androidx.compose.foundation.layout.Row(
                                 modifier =
 //                                    scoreModifier()
-                                        if (!coached) modifier
-                                            .enableCoachMark(
-                                                key = MarkKey.skor,
-                                                toolTipPlacement = ToolTipPlacement.Bottom,
-                                                highlightedViewConfig = highlightConfig
-                                            ){
-                                                MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
-                                            }
-                                        else
-                                            modifier
+                                    if (!coached) modifier
+                                        .enableCoachMark(
+                                            key = MarkKey.skor,
+                                            toolTipPlacement = ToolTipPlacement.Bottom,
+                                            highlightedViewConfig = highlightConfig
+                                        ){
+                                            MarkKey.skor.tooltip(ToolTipPlacement.Bottom)
+                                        }
+                                    else
+                                        modifier
                             ) {
                                 repeat(star.toInt()) {
                                     Icon(
@@ -255,17 +264,27 @@ fun CoachMarkScope.PlantCardDisplayer(
                     }
                 }
             }
+            if(!coached) "${ref.commonName} has been added coach mark highlighter!".info("PlantCard")
+            coached = true
         }
         LaunchedEffect(Unit){
-            if(!coached && DataStore.getBoolean(DataStore.firstTime)){
-                show(
-                    MarkKey.cocok,
-                    MarkKey.skor,
-                    MarkKey.analisa,
-                )
-                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
-                coached = true
+            if(!displayed && ready){
+                delay(1500)
+                if(!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman){
+                    show(
+                        MarkKey.analisa,
+                        MarkKey.cocok,
+                        MarkKey.skor,
+                    )
+                    DataStore.completeTanaman()
+//                    DataStore.completeTanah()
+                } else if (!DataStore.isCompleteTanah) {
+                    show(MarkKey.analisa)
+                }
+//                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
+                displayed = true
             }
+
         }
     }
 }

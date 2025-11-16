@@ -25,11 +25,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -242,34 +244,34 @@ fun SoilStats(click: () -> Unit = {}) {
                         modifier = Modifier.verticalScroll(scroll)
                     ) {
                         //TODO jangan lupa kondisi originalnya
-                        if (false) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp)
-                            ) {
-                                Text(
-                                    text = "Tunggu sebentar...",
-                                    fontSize = 20.sp,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            }
-                        }
+//                        if (false) {
+//                            Column(
+//                                horizontalAlignment = Alignment.CenterHorizontally,
+//                                verticalArrangement = Arrangement.Center,
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(10.dp)
+//                            ) {
+//                                Text(
+//                                    text = "Tunggu sebentar...",
+//                                    fontSize = 20.sp,
+//                                    fontFamily = FontFamily.Monospace
+//                                )
+//                            }
+//                        }
 //                        if (response?.soilPrediction == null) TODO jan lupa jga itu
-                        else {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .height(365.dp)
+                                    .wrapContentHeight()
                                     .padding(10.dp)
                                     .clip(RoundedCornerShape(clipRound))
                                     .background(backgroundCardColor)
                             ) {
                                 Text(
-                                    text = "Gambar yang kamu potret",
+                                    text = "Tanah yang kamu potret",
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 22.5.sp,
                                     textAlign = TextAlign.Center,
@@ -277,17 +279,20 @@ fun SoilStats(click: () -> Unit = {}) {
                                         .fillMaxWidth()
                                         .background(backgroundTitleColor)
                                 )
-                                Image(
-                                    painter = if (inputs.image != null)
-                                        BitmapPainter(inputs.image!!.asImageBitmap())
-                                    else rememberVectorPainter(Icons.Default.Image),
-                                    contentDescription = "Tanah",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
+                                Box(Modifier
                                         .fillMaxWidth()
+                                        .aspectRatio(1/8f)
                                         .padding(15.dp)
-                                        .clip(RoundedCornerShape(clipRound))
-                                )
+                                        .clip(RoundedCornerShape(clipRound))) {
+                                    Image(
+                                        painter = if (inputs.image != null)
+                                            BitmapPainter(inputs.image!!.asImageBitmap())
+                                        else rememberVectorPainter(Icons.Default.Image),
+                                        contentDescription = "Tanah",
+                                        contentScale = ContentScale.FillWidth,
+                                        modifier=Modifier.fillMaxSize()
+                                    )
+                                }
                             }
 
                             Column(
@@ -323,7 +328,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                     )
                                 }
                             }
-                        }
+
                         val value: Response? = response
                         val pH: Float? = inputs.soil.pH ?: value?.soil?.pH
                         Column(
@@ -406,10 +411,10 @@ fun SoilStats(click: () -> Unit = {}) {
                                 Map("Drainase:", drain.toString())
                                 Map("Kesuburan:", ferr.toString())
                             } else {
-                                Map("Altitude:", geo?.altitude?.toString())
+                                Map("Altitude:", geo?.altitude?.round())
                                 Map("Iklim:", geo?.iklim?.head)
-                                Map("Min ºC:", geo?.min?.toString())
-                                Map("Max ºC:", geo?.max?.toString())
+                                Map("Min ºC:", geo?.min?.round())
+                                Map("Max ºC:", geo?.max?.round())
                             }
                         }
                         if (pH != null && pH <= 7) {
@@ -417,17 +422,17 @@ fun SoilStats(click: () -> Unit = {}) {
                             Cat(
                                 Icons.Default.LocalHospital, "Netralisasi pH tanah",
 //                                "dengan kedalaman tanah: $depth cm. " +
-                                "untuk mencapai angka pH netral dari ${
+                                "Untuk mencapai angka pH netral **dari ${
                                     inputs.soil.pH
                                         ?: (value?.soil?.pH.toString() + " (default)")
-                                } -> 7," +
-                                        " di butuhkan ${dosisKg.round()} kg kapur dolmit per hektar atau ${(dosisKg / 100).round()} kg kapur dolmit per meter persegi",
+                                } -> 7**," +
+                                        " di butuhkan **${dosisKg.round()} kg** kapur dolmit per hektar atau **${(dosisKg / 100).round()} kg** kapur dolmit per meter persegi",
                             )
                         } else {
                             Cat(
                                 Icons.Default.LocalHospital,
                                 "Netralisasi pH tanah",
-                                "Tanah Anda bersifat terlalu basa (pH > 7). Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman. Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami." +
+                                "**Tanah Anda bersifat terlalu basa pH > 7. Kondisi ini dapat menghambat penyerapan unsur hara oleh tanaman.** Tambahkan bahan organik seperti kompos, pupuk kandang, atau serasah daun untuk menurunkan pH secara alami." +
                                         "Untuk hasil lebih cepat, Anda dapat menambahkan sedikit belerang (sulfur) dan menjaga kelembapan tanah dengan penyiraman rutin."
                             )
                         }

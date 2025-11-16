@@ -45,7 +45,6 @@ import androidx.navigation.NavController
 import com.trbear9.openfarm.R
 import com.trbear9.openfarm.util.DataStore
 import com.trbear9.openfarm.util.Screen
-import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -53,8 +52,8 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 fun PointDetail(
     nav: NavController? = null,
     title: String = "LOREM IPSUM DOLOR",
-    subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt",
-    isComplete: String = " ",
+    subtitle: String = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicular, mauris ut faucets tincidunt",
+    id: String = " ",
     credits: List<String>? = listOf("play.jasperproject.com", "www.google.com"),
     details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
         Triple(
@@ -172,15 +171,14 @@ fun PointDetail(
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(Color(0xBE16B613))
                                 .clickable {
-                                    DataStore.setBoolean(isComplete, true)
+                                    DataStore.setBoolean(id, true)
                                     nav?.navigate(Screen.help)
                                 }
                         ) {
                             Text(
                                 text =
-//                                    if (DataStore.getBoolean(isComplete)) "Kembali"
-//                                    else
-                                        "Selesai",
+                                    if (DataStore.contains(id)) "Kembali"
+                                    else "Selesai",
                                 color = Color(0xFFF0F3D0),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 30.sp,

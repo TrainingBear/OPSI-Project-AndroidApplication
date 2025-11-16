@@ -3,6 +3,7 @@ package com.trbear9.openfarm.util
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.core.content.edit
 
 /**
@@ -12,24 +13,28 @@ import androidx.core.content.edit
  */
 object DataStore {
     private var hasInited: Boolean = false
-    private lateinit var pref: SharedPreferences
+    lateinit var pref: SharedPreferences
+        private set
     internal fun init(context: Context) {
         if (hasInited) throw IllegalStateException("Public data storage been initialised!")
         pref = context.getSharedPreferences("settings_prefs", MODE_PRIVATE)
         hasInited = true
+        isCompleteTanah = pref.getBoolean("coachTanah", false)
+        isCompleteTanaman = pref.getBoolean("coachTanaman", false)
+        isCompletePupuk = pref.getBoolean("coachPupuk", false)
+        firstTime = pref.getBoolean("firstTime", true)
     }
 
-    internal fun getPref(): SharedPreferences? = pref
-
-    internal fun getBoolean(name: String) = pref.getBoolean(name, map[name] as Boolean)
-    internal fun getString(name: String) = pref.getString(name, map[name] as String)
-    internal fun getInt(name: String) = pref.getInt(name, map[name] as Int)
-    internal fun getLong(name: String) = pref.getLong(name, map[name] as Long)
-    internal fun getFloat(name: String) = pref.getFloat(name, map[name] as Float)
-    internal fun getStringSet(name: String) = pref.getStringSet(
-        name,
-        map[name] as Set<String>?
+    val globalKeys = listOf(
+        "coachTanah",
+        "coachTanaman",
+        "coachPupuk",
+        "firstTime"
     )
+
+    val guideKey = setOf<String>()
+
+    internal fun getPref(): SharedPreferences? = pref
 
     internal fun setBoolean(name: String, value: Boolean) {
         pref.edit { putBoolean(name, value) }
@@ -51,29 +56,44 @@ object DataStore {
         pref.edit { putFloat(name, value) }
     }
 
-    internal fun setStringSet(name: String, value: Set<String>) {
+    internal fun createSet(name: String, value: Set<String>) {
         pref.edit { putStringSet(name, value) }
     }
+
+    internal fun addSetElement(name: String, value: String){
+        pref.edit {
+            addSetElement(name, value)
+        }
+    }
+    fun contains(name: String) : Boolean = pref.contains(name)
 
 
     // ========================== Main Activity ==============================
     /** A [Boolean] indicate if the app is fresh or not*/
-    internal val firstTime = "firstTime"
+    internal var firstTime = true
+    fun completeFirstTime() {
+        firstTime = false
+        pref.edit { putBoolean("firstTime", false) }
+    }
     // =========================== Guide ================================
     /** A [Boolean] */
-    internal val isCompleteTanah = "isCompleteTanah"
+    internal var isCompleteTanah = true
+    fun completeTanah() {
+        isCompleteTanah = true
+        pref.edit { putBoolean("coachTanah", true) }
+    }
 
     /** A [Boolean] */
-    internal val isCompleteTanaman = "isCompleteTanaman"
+    internal var isCompleteTanaman = true
+    fun completeTanaman() {
+        isCompleteTanaman = true
+        pref.edit { putBoolean("coachTanaman", true) }
+    }
 
     /** A [Boolean] */
-    internal val isCompletePupuk = "isCompletePupuk"
-
-    val map: Map<String, Any> = mapOf(
-        firstTime to true,
-        isCompleteTanah to false,
-        isCompleteTanaman to false,
-        isCompletePupuk to false
-    )
-
+    internal var isCompletePupuk = true
+    fun completePupuk() {
+        isCompletePupuk = true
+        pref.edit { putBoolean("coachPupuk", true) }
+    }
 }

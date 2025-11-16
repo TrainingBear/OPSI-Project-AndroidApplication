@@ -100,6 +100,8 @@ class SearchResult {
     var plantByCategory: SnapshotStateMap<String, MutableSet<String>>? = null
 }
 
+var coachStep = 0
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview()
@@ -429,7 +431,7 @@ fun SoilResultScreen() {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = if (!predicted) "Menganalisa tanahmu.."
-                            else if (!parameterLoaded) "Mencari rata-rata suhu di daerah mu...\nPastikan koneksimu terhubung ke internet!"
+                            else if (!parameterLoaded) "Mencari riwayat suhu 6 hari terakhir di daerah mu...\nPastikan koneksimu terhubung ke internet!"
                             else "Mencari data $current",
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,

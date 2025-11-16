@@ -83,7 +83,6 @@ fun Guide(nav: NavController? = null) {
 //    val pref = context.getSharedPreferences("learning_progress", Context.MODE_PRIVATE)
 //    val achieved = (pref.getStringSet("completed", null) ?: emptySet()).size
     var query: String by remember { mutableStateOf("") }
-
     Scaffold(
         topBar = {
             Box(
@@ -222,12 +221,12 @@ fun Guide(nav: NavController? = null) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         var achieved: Byte = 0
-                        if (DataStore.getBoolean(DataStore.isCompleteTanah)) //TODO jangan lupa diuncomment
+                        if(DataStore.contains("tanah")) //TODO jangan lupa diuncomment
                             achieved++
-                        if (DataStore.getBoolean(DataStore.isCompletePupuk))
-//                            achieved++
-                            if (DataStore.getBoolean(DataStore.isCompleteTanaman))
-                                achieved++
+                        if(DataStore.contains("pupuk"))
+                            achieved++
+                        if(DataStore.contains("tanaman"))
+                            achieved++
                         BoxWithConstraints(
                             modifier = Modifier
                                 .height(maxHeight / 7)
@@ -291,7 +290,7 @@ fun Guide(nav: NavController? = null) {
                     }
                     item {
                         GuideCard(
-                            nav, num = 1, isComplete = DataStore.isCompleteTanah,
+                            nav, num = 1, id = "tanah",
                             title = "Tanah",
                             desc = "Apa itu tanah? Tanah liat? Tanah basah? Tanah kering?",
                             credits = listOf(
@@ -317,16 +316,16 @@ fun Guide(nav: NavController? = null) {
                                     "Retensi air adalah kemampuan tanah untuk menahan atau menyimpan " +
                                             "air di dalamnya setelah proses penyiraman atau hujan. Mengacu " +
                                             "pada kapasitas tanah untuk mempertahankan kelembaban dan ketersediaan " +
-                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n\n" +
+                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n" +
                                             "- Tekstur tanah: Tanah berbutir halus seperti lempung memiliki " +
                                             "kemampuan yang lebih baik untuk menahan air dibandingkan dengan " +
                                             "tanah berbutir kasar seperti pasir. Partikel halus dalam " +
-                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n\n" +
+                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n" +
                                             "- Struktur Tanah: Struktur tanah yang hancur atau terkompaksi " +
                                             "(padat) dapat menghambat infiltrasi air dan menyebabkan aliran " +
-                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n\n" +
+                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n" +
                                             "- Kandungan Bahan Organik: Bahan organik meningkatkan kemampuan tanah " +
-                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n\n" +
+                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n" +
                                             "- Kedalaman Tanah: Tanah yang dalam memiliki daya tampung yang " +
                                             "lebih besar untuk menahan atau menyimpan air dibandingkan dengan tanah yang dangkal."
                                 ),
@@ -340,19 +339,19 @@ fun Guide(nav: NavController? = null) {
                                             "fosfor, dan kalium sering kali tidak tersedia bagi tanaman. " +
                                             "Di sisi lain, tanah basa (pH tinggi) dapat menyebabkan pengikatan " +
                                             "mikronutrien seperti zat besi, seng, dan mangan, sehingga " +
-                                            "tanaman tidak dapat menyerapnya. Berikut adalah klasifikasi pH pada tanah:\n\n" +
-                                            "- Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
-                                            "hujan tinggi dan tanah yang sudah tua. Kondisi ini dapat menyebabkan kekurangan nutrisi.\n\n" +
-                                            "- Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n\n" +
-                                            "- Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering dan " +
-                                            "gersang. Hal ini dapat menyebabkan kekurangan nutrisi bagi tanaman tertentu."
+                                            "tanaman tidak dapat menyerapnya. Berikut adalah klasifikasi pH pada tanah:\n" +
+                                            "Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
+                                            "hujan tinggi dan tanah yang sudah tua. Kondisi ini dapat menyebabkan kekurangan nutrisi.\n" +
+                                            "Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n" +
+                                            "Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering " +
+                                            "dan gersang. Hal ini dapat menyebabkan kekurangan nutrisi bagi tanaman tertentu."
                                 )
                             )
                         )
                     }
                     item {
                         GuideCard(
-                            nav, num = 2, isComplete = DataStore.isCompleteTanaman,
+                            nav, num = 2, id = "tanaman",
                             title = "Tanaman",
                             desc = "Apa itu tanaman? padi, nasi, touch some grass?",
                             credits = listOf(
@@ -391,7 +390,7 @@ fun Guide(nav: NavController? = null) {
                     }
                     item {
                         GuideCard(
-                            nav, num = 3, isComplete = DataStore.isCompletePupuk,
+                            nav, num = 3, id = "pupuk",
                             title = "Pupuk",
                             desc = " ",
                             credits = listOf(
@@ -414,9 +413,9 @@ fun Guide(nav: NavController? = null) {
                                     "Pupuk NPK",
                                     "Pupuk NPK adalah pupuk buatan yang berbentuk cair atau padat " +
                                             "berupa butiran kasar yang mengandung unsur hara utama nitrogen, " +
-                                            "fosfor, dan kalium. Berikut fungsi ketiga unsur dalam pupuk NPK:\n\n" +
-                                            "- Nitrogen (N): membantu pertumbuhan vegetatif, terutama daun.\n\n" +
-                                            "- Fosfor (P): membantu pertumbuhan akar dan tunas.\n\n" +
+                                            "fosfor, dan kalium. Berikut fungsi ketiga unsur dalam pupuk NPK:\n" +
+                                            "- Nitrogen (N): membantu pertumbuhan vegetatif, terutama daun.\n" +
+                                            "- Fosfor (P): membantu pertumbuhan akar dan tunas.\n" +
                                             "- Kalium (K): membantu pembungaan dan pembuahan."
                                 ),
                                 Triple(
@@ -473,7 +472,7 @@ private fun GuideCard(
     num: Int,
     title: String = "temp",
     desc: String = "lorem ipsum dolor sit amet",
-    isComplete: String,
+    id: String,
     credits: List<String>? = null,
     details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
         Triple(
@@ -496,7 +495,7 @@ private fun GuideCard(
             .fillMaxSize()
             .height(110.dp)
             .background(
-                if (DataStore.getBoolean(isComplete)) Color(0x4D4BF81A)
+                if (DataStore.contains(id)) Color(0x4D4BF81A)
                 else Color(0x72FFFFFF)
             )
             .border(width = 1.dp, color = Color(0x32000000))
@@ -510,7 +509,7 @@ private fun GuideCard(
                 )
             }
             .clickable {
-                Guide.guidePointer = Triple(isComplete, Triple(title, desc, credits), details)
+                Guide.guidePointer = Triple(id, Triple(title, desc, credits), details)
                 nav?.navigate(Screen.guidePointDetail)
             },
 //        onClick = {
