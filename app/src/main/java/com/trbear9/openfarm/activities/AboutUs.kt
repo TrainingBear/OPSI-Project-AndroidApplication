@@ -130,7 +130,7 @@ fun AboutUs(nav: NavController? = null) {
                             ) {
                                 Text(
                                     text = "Tentang Kami",
-                                    textAlign = TextAlign.Center,
+//                                    textAlign = TextAlign.Center,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 30.sp,
                                     overflow = TextOverflow.Visible

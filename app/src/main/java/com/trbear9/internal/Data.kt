@@ -328,20 +328,35 @@ object Data {
         }.getOrThrow()
         Forecast.Daily.run {
             temperatur.daily.getValue(temperature2mMax).run {
-                for (m in values.values)
-                    max += m ?: 28.0
-                max /= values.size
+                var size = 0
+                for (m in values.values){
+                    max = Math.max(m ?: continue, max)
+//                    += (m ?: 28.0)
+                    "Maximum temperature: $m".debug("METEO")
+                    size++
+                }
+//                max /= size
             }
             temperatur.daily.getValue(temperature2mMin).run {
-                for (m in values.values)
-                    min += m ?: 20.0
-                min /= values.size
+                var size = 0
+                var flag = false
+                for (m in values.values) {
+                    min = m?:continue
+                    if(!flag){
+                        flag = true
+                    }
+                    min = Math.min(m, min)
+//                        (m ?: 20.0)
+                    "Minimum temperature: $m".debug("METEO")
+                    size++
+                }
+//                min /= size
             }
         }
 
         val MPDL = meteo.elevation {
-            latitude = (-7.257281798437764).toString()
-            longitude = 110.4031409940034.toString()
+            latitude = geo.latitude.toString()
+            longitude = geo.longtitude.toString()
         }.getOrThrow()
         for (f in MPDL.elevation) {
             elevation = f

@@ -2,6 +2,7 @@ package com.trbear9.openfarm
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -75,7 +78,7 @@ fun InputSoil(
                         Text(
                             text = "Soil",
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
+//                            textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
                     },
@@ -94,20 +97,29 @@ fun InputSoil(
             }
         ) { padding ->
             Column(
-                verticalArrangement = Arrangement.Center,
+//                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
                     .align(Alignment.Center),
             ) {
+                Image(
+                    painter = painterResource(id = R.drawable.grafik_ph),
+                    contentDescription = "Soil",
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp),
+                )
                 Text(
                     text = "Nilai pH lebih baik di kosongkan jika tak memiliki pH meter",
                     fontSize = 20.sp,
                     color = Color.Black,
                     style = TextStyle.Default,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 10.dp)
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 32.dp)
                 )
                 OutlinedTextField(
                     value = pH,
@@ -117,7 +129,7 @@ fun InputSoil(
                         }
                     },
                     label = { Text("pH tanah") },
-                    placeholder = { Text("1-14") },
+//                    placeholder = { Text("5.6") },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),

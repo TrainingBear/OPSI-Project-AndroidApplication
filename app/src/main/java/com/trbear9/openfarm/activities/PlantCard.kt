@@ -277,9 +277,9 @@ fun CoachMarkScope.PlantCardDisplayer(
                         MarkKey.skor,
                     )
                     DataStore.completeTanaman()
+//                    DataStore.completeTanah()
                 } else if (!DataStore.isCompleteTanah) {
-                    show(MarkKey.cocok, MarkKey.skor)
-                    DataStore.completeTanah()
+                    show(MarkKey.analisa)
                 }
 //                Toast.makeText(context, "Loaded ${ref.commonName}", Toast.LENGTH_SHORT).show()
                 displayed = true
