@@ -45,6 +45,7 @@ import androidx.navigation.NavController
 import com.trbear9.openfarm.R
 import com.trbear9.openfarm.util.DataStore
 import com.trbear9.openfarm.util.Screen
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -227,29 +228,20 @@ private fun Card(perInfo: Triple<Pair<Painter, String?>?, String, String>) {
                             .padding(end = 5.dp)
                     )
             }
-        Text(
-            text = perInfo.second,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-        )
+//        Text(
+//            text = perInfo.second,
+//            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
+//            textAlign = TextAlign.Center,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(top = 10.dp)
+//        )
         MarkdownText(
             markdown = perInfo.third,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.5.dp)
         )
-//        Text(
-//            text = parseMarkdown(perInfo.third),
-//            fontSize = 20.sp,
-//            fontWeight = FontWeight.Normal,
-////            textAlign = TextAlign.Justify,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(8.5.dp)
-//        )
     }
 }
