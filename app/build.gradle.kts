@@ -113,6 +113,7 @@ dependencies {
     implementation(libs.androidx.foundation.layout)
     kapt("androidx.room:room-compiler:2.6.1")
     implementation ("androidx.room:room-ktx:2.6.1")
+    implementation("com.github.jeziellago:compose-markdown:0.4.1")
 
     // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert-support
     implementation("com.google.ai.edge.litert:litert-support:1.4.0")

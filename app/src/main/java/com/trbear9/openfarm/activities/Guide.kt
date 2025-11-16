@@ -222,12 +222,12 @@ fun Guide(nav: NavController? = null) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         var achieved: Byte = 0
-                        if(DataStore.getBoolean(DataStore.isCompleteTanah)) //TODO jangan lupa diuncomment
+                        if (DataStore.getBoolean(DataStore.isCompleteTanah)) //TODO jangan lupa diuncomment
                             achieved++
-                        if(DataStore.getBoolean(DataStore.isCompletePupuk))
-                            achieved++
-                        if(DataStore.getBoolean(DataStore.isCompleteTanaman))
-                            achieved++
+                        if (DataStore.getBoolean(DataStore.isCompletePupuk))
+//                            achieved++
+                            if (DataStore.getBoolean(DataStore.isCompleteTanaman))
+                                achieved++
                         BoxWithConstraints(
                             modifier = Modifier
                                 .height(maxHeight / 7)
@@ -317,16 +317,16 @@ fun Guide(nav: NavController? = null) {
                                     "Retensi air adalah kemampuan tanah untuk menahan atau menyimpan " +
                                             "air di dalamnya setelah proses penyiraman atau hujan. Mengacu " +
                                             "pada kapasitas tanah untuk mempertahankan kelembaban dan ketersediaan " +
-                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n" +
+                                            "air bagi tanaman. Retensi air dalam tanah dipengaruhi oleh beberapa faktor, diantaranya:\n\n" +
                                             "- Tekstur tanah: Tanah berbutir halus seperti lempung memiliki " +
                                             "kemampuan yang lebih baik untuk menahan air dibandingkan dengan " +
                                             "tanah berbutir kasar seperti pasir. Partikel halus dalam " +
-                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n" +
+                                            "tanah lempung memiliki kapasitas adsorpsi (penyerapan air) yang tinggi.\n\n" +
                                             "- Struktur Tanah: Struktur tanah yang hancur atau terkompaksi " +
                                             "(padat) dapat menghambat infiltrasi air dan menyebabkan aliran " +
-                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n" +
+                                            "permukaan, sehingga mengurangi kemampuan tanah untuk menahan air.\n\n" +
                                             "- Kandungan Bahan Organik: Bahan organik meningkatkan kemampuan tanah " +
-                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n" +
+                                            "untuk menahan air dengan membentuk agregat dan meningkatkan retensi air di dalam pori-pori tanah.\n\n" +
                                             "- Kedalaman Tanah: Tanah yang dalam memiliki daya tampung yang " +
                                             "lebih besar untuk menahan atau menyimpan air dibandingkan dengan tanah yang dangkal."
                                 ),
@@ -340,12 +340,12 @@ fun Guide(nav: NavController? = null) {
                                             "fosfor, dan kalium sering kali tidak tersedia bagi tanaman. " +
                                             "Di sisi lain, tanah basa (pH tinggi) dapat menyebabkan pengikatan " +
                                             "mikronutrien seperti zat besi, seng, dan mangan, sehingga " +
-                                            "tanaman tidak dapat menyerapnya. Berikut adalah klasifikasi pH pada tanah:\n" +
-                                            "Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
-                                            "hujan tinggi dan tanah yang sudah tua. Kondisi ini dapat menyebabkan kekurangan nutrisi.\n" +
-                                            "Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n" +
-                                            "Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering " +
-                                            "dan gersang. Hal ini dapat menyebabkan kekurangan nutrisi bagi tanaman tertentu."
+                                            "tanaman tidak dapat menyerapnya. Berikut adalah klasifikasi pH pada tanah:\n\n" +
+                                            "- Tanah Asam (pH 0-6.9): Umum terjadi di wilayah dengan curah " +
+                                            "hujan tinggi dan tanah yang sudah tua. Kondisi ini dapat menyebabkan kekurangan nutrisi.\n\n" +
+                                            "- Tanah Netral (pH 7): Ideal untuk sebagian besar tanaman.\n\n" +
+                                            "- Tanah Alkali (pH 7.1-14): Sering ditemukan di daerah kering dan " +
+                                            "gersang. Hal ini dapat menyebabkan kekurangan nutrisi bagi tanaman tertentu."
                                 )
                             )
                         )
@@ -354,12 +354,37 @@ fun Guide(nav: NavController? = null) {
                         GuideCard(
                             nav, num = 2, isComplete = DataStore.isCompleteTanaman,
                             title = "Tanaman",
-                            desc = "",
+                            desc = "Apa itu tanaman? padi, nasi, touch some grass?",
+                            credits = listOf(
+                                "https://id.wikipedia.org/wiki/Tanaman",
+                                "https://id.wikipedia.org/wiki/Hama"
+                            ),
                             details = listOf(
                                 Triple(
-                                    null,
+                                    Pair(
+                                        painterResource(R.drawable.padi),
+                                        "https://pertanian.uma.ac.id/2023/04/27/sawah-padi-ter" +
+                                                "masuk-salah-satu-tumbuhan-yang-penting-bagi-manusia/"
+                                    ),
                                     "Pengertian",
-                                    ""
+                                    "Tanaman adalah organisme autotrof yang mampu menghasilkan makanan " +
+                                            "sendiri melalui fotosintesis menggunakan cahaya, air, dan CO₂. " +
+                                            "Tanaman menjadi dasar seluruh rantai makanan dan berperan penting " +
+                                            "sebagai sumber pangan, energi, oksigen, dan berbagai komoditas " +
+                                            "agrikultur. Hampir semua tanaman adalah \"tumbuhan\", tetapi tanaman " +
+                                            "kadang mencakup pula beberapa fungi (yakni jamur pangan " +
+                                            "seperti jamur kancing dan jamur merang) dan alga (seperti " +
+                                            "alga penghasil agar-agar dan nori) yang sengaja dibudidayakan " +
+                                            "untuk dimanfaatkan nilai ekonominya."
+                                ),
+                                Triple(
+                                    Pair(painterResource(R.drawable.hama), "Shutterstock"),
+                                    "Hama",
+                                    "istilah \"hama\" dapat digunakan untuk semua organisme, tetapi " +
+                                            "istilah ini paling sering dipakai hanya kepada hewan. Organisme " +
+                                            "yang bersifat invasif juga merupakan hama. Suatu hewan juga " +
+                                            "dapat disebut hama jika menyebabkan kerusakan pada ekosistem alami " +
+                                            "atau menjadi agen penyebaran penyakit dalam habitat manusia."
                                 )
                             )
                         )
@@ -369,10 +394,13 @@ fun Guide(nav: NavController? = null) {
                             nav, num = 3, isComplete = DataStore.isCompletePupuk,
                             title = "Pupuk",
                             desc = " ",
-                            credits = listOf("https://id.wikipedia.org/wiki/Pupuk"),
+                            credits = listOf(
+                                "https://id.wikipedia.org/wiki/Pupuk",
+                                "https://id.my-best.com/139242"
+                            ),
                             details = listOf(
                                 Triple(
-                                    null,
+                                    Pair(painterResource(R.drawable.pupukhighlight), null),
                                     "Pengertian",
                                     "Pupuk juga penting bagi tanaman, seperti menyediakan dan " +
                                             "meningkatkan ketersediaan zat hara yang sangat dibutuhkan " +
@@ -382,14 +410,49 @@ fun Guide(nav: NavController? = null) {
                                             "atau terlalu banyak zat makanan dapat berbahaya bagi tumbuhan."
                                 ),
                                 Triple(
-                                    null,
+                                    Pair(painterResource(R.drawable.pupuknpk), null),
                                     "Pupuk NPK",
                                     "Pupuk NPK adalah pupuk buatan yang berbentuk cair atau padat " +
                                             "berupa butiran kasar yang mengandung unsur hara utama nitrogen, " +
-                                            "fosfor, dan kalium. Berikut fungsi ketiga unsur dalam pupuk NPK:\n" +
-                                            "- Nitrogen (N): membantu pertumbuhan vegetatif, terutama daun.\n" +
-                                            "- Fosfor (P): membantu pertumbuhan akar dan tunas.\n" +
+                                            "fosfor, dan kalium. Berikut fungsi ketiga unsur dalam pupuk NPK:\n\n" +
+                                            "- Nitrogen (N): membantu pertumbuhan vegetatif, terutama daun.\n\n" +
+                                            "- Fosfor (P): membantu pertumbuhan akar dan tunas.\n\n" +
                                             "- Kalium (K): membantu pembungaan dan pembuahan."
+                                ),
+                                Triple(
+                                    Pair(painterResource(R.drawable.forjenismerekpupuk), null),
+                                    "Rekomendasi Merek Pupuk",
+                                    "- Meroke Tetap Jaya, Mutiara Pupuk NPK 16-16-16: Kombinasi " +
+                                            "amonium dan nitrat membuat pertumbuhan bunga jadi seimbang, " +
+                                            "Meski berbentuk padat, pupuk ini mudah larut dalam air sehingga " +
+                                            "memudahkan pemberian dan memaksimalkan penyerapan oleh tanaman. " +
+                                            "Kombinasi nitrat-nitrogen dengan amonium-nitrogen yang terkandung " +
+                                            "di dalamnya pun efektif memacu pertumbuhan.\n\n" +
+                                            "- Saprotan Utama, Pak Tani Pupuk NPK 16-16-16: Tanah merupakan " +
+                                            "media tanam yang sangat penting dan menentukan kesuburan suatu " +
+                                            "tanaman. Karena itu, tidak ada salahnya Anda menyiapkan unsur " +
+                                            "hara dalam tanah sebelum mulai ditanami. Bisa digunakan sebagai " +
+                                            "pupuk dasar ataupun pupuk susulan.\n\n" +
+                                            "- Kalatham, Pupuk Gandasil B - Pupuk Bunga dan Buah: Menunjang " +
+                                            "pembentukan bunga dan pembesaran buah dengan kandungan NPK " +
+                                            "seimbang (6-20-30). Berbentuk kristal yang mudah larut dalam " +
+                                            "air sehingga penyerapan nutrisi berlangsung cepat dan merata. " +
+                                            "Mengandung vitamin pertumbuhan (Aneurine, Lactoflavine, Nicotinic " +
+                                            "acid amide) yang membantu tanaman lebih kuat dan responsif terhadap pemupukan.\n\n" +
+                                            "- Meroke Tetap Jaya, Mutiara Grower Pupuk NPK 15-09-20+TE: " +
+                                            "Trace element (TE) adalah unsur hara mikro yang dibutuhkan " +
+                                            "oleh tanaman dalam kadar yang lebih sedikit. Unsur TE di dalam " +
+                                            "pupuk ini adalah boron, seng, dan mangan. Boron berfungsi untuk " +
+                                            "menunjang pembentukan dan pembelahan sel, seng untuk mengaktifkan " +
+                                            "enzim, dan mangan untuk memacu pertumbuhan tunas baru. Jumlah " +
+                                            "unsur hara pupuk ini memang sedikit, tetapi adanya TE dapat " +
+                                            "membantu tanaman mendapatkan suplai unsur hara secara merata.\n\n" +
+                                            "- Dinosaurus, Pupuk Cair Bio-Organik: Pupuk organik cair (POC) " +
+                                            "merek ini merupakan pupuk organik serbaguna karena bisa digunakan " +
+                                            "untuk menutrisi semua jenis tanaman. Pupuk ini kaya akan micronutrient, " +
+                                            "macronutrient, serta mikroba yang penting untuk pertumbuhan dan " +
+                                            "imunitas tanaman. Selain itu, Anda juga dapat memanfaatkannya " +
+                                            "sebagai dekomposer untuk mempercepat proses pengomposan."
                                 )
                             )
                         )
