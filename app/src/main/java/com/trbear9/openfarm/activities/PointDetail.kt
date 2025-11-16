@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,8 +33,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,8 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.trbear9.openfarm.R
 import com.trbear9.openfarm.util.DataStore
 import com.trbear9.openfarm.util.Screen
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -57,7 +58,7 @@ fun PointDetail(
     credits: List<String>? = listOf("play.jasperproject.com", "www.google.com"),
     details: List<Triple<Pair<Painter, String?>?, String, String>> = listOf(
         Triple(
-            Pair(rememberVectorPainter(Icons.Default.Image), "Somewhere"),
+            Pair(painterResource(R.drawable.padi), "Somewhere"),
             "lorem ipsum sit amet test",
             """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vehicula, mauris ut faucibus tincidunt
                 |
@@ -178,7 +179,7 @@ fun PointDetail(
                             Text(
                                 text =
                                     if (DataStore.contains(id)) "Kembali"
-                                    else "Selesaikan",
+                                    else "Selesai",
                                 color = Color(0xFFF0F3D0),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 30.sp,
@@ -220,25 +221,24 @@ private fun Card(perInfo: Triple<Pair<Painter, String?>?, String, String>) {
                 if (perInfo.first!!.second != null)
                     Text(
                         text = "sc: " + perInfo.first!!.second!!,
+                        fontSize = 9.sp,
+                        color = Color.White,
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .padding(end = 5.dp)
                     )
             }
-        Text(
-            text = perInfo.second,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-        )
-        Text(
-            text = perInfo.third,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Normal,
-//            textAlign = TextAlign.Justify,
+//        Text(
+//            text = perInfo.second,
+//            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
+//            textAlign = TextAlign.Center,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(top = 10.dp)
+//        )
+        MarkdownText(
+            markdown = perInfo.third,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.5.dp)
