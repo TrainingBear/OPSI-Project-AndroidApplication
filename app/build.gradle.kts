@@ -47,7 +47,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isShrinkResources = true
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -56,7 +57,7 @@ android {
         }
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             // optionally:
             // isShrinkResources = false
         }
@@ -202,4 +203,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(kotlin("test"))
 
+}
+
+tasks.register("printDirectDependencies") {
+    doLast {
+        configurations["implementation"].allDependencies.forEach {
+            println("- ${it.group}:${it.name}:${it.version}")
+        }
+    }
 }

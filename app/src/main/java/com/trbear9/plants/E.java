@@ -148,8 +148,7 @@ public final class E {
         low("low"),
         moderate("moderate"),
         high("high");
-        ;
-         public static final String absolute = A_soil_fertility;
+        public static final String absolute = A_soil_fertility;
          public static final String optimal = O_soil_fertility;
          public final String head;
          FERTILITY(String string){
@@ -162,8 +161,7 @@ public final class E {
         low("low"),
         moderate("moderate"),
         high("high");
-        ;
-         public static final String absolute = A_soil_salinity;
+        public static final String absolute = A_soil_salinity;
          public static final String optimal = O_soil_salinity;
          public final String head;
          SALINITY(String string){

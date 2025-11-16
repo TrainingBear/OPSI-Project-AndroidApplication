@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,23 +50,29 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.pseudoankit.coachmark.UnifyCoachmark
 import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.CoachMarkScope
-import com.pseudoankit.coachmark.scope.enableCoachMark
-import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.MarkKey
 import com.trbear9.openfarm.highlightConfig
 import com.trbear9.openfarm.info
 import com.trbear9.openfarm.util.DataStore
 import com.trbear9.plants.E
-import com.trbear9.plants.E.CATEGORY.*
+import com.trbear9.plants.E.CATEGORY.cereals_pseudocereals
+import com.trbear9.plants.E.CATEGORY.cover_crop
+import com.trbear9.plants.E.CATEGORY.environmental
+import com.trbear9.plants.E.CATEGORY.forage_pastures
+import com.trbear9.plants.E.CATEGORY.forest_or_wood
+import com.trbear9.plants.E.CATEGORY.fruit_nut
+import com.trbear9.plants.E.CATEGORY.materials
+import com.trbear9.plants.E.CATEGORY.medicinals_and_armoatic
+import com.trbear9.plants.E.CATEGORY.ornamentals_turf
+import com.trbear9.plants.E.CATEGORY.other
+import com.trbear9.plants.E.CATEGORY.roots_tubers
+import com.trbear9.plants.E.CATEGORY.vegetables
+import com.trbear9.plants.E.CATEGORY.weed
 import com.trbear9.plants.api.blob.Plant
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.time.delay
-import kotlinx.coroutines.withContext
 
 object CONS {
     val noImage = Icons.Default.Image
@@ -302,7 +305,7 @@ fun Kat(
             .clip(RoundedCornerShape(4.dp))
             .background(bcolor)
     ) {
-        androidx.compose.foundation.layout.Row() {
+        androidx.compose.foundation.layout.Row {
             if (icon != null) {
                 Icon(
                     imageVector = icon,
@@ -380,11 +383,11 @@ class ImageAsset {
 
         fun getImage(context: Context, name: String?): Bitmap? {
             if(name == null) return null
-            if (ImageAsset.images.containsKey(name)) return ImageAsset.images[name]!!
+            if (images.containsKey(name)) return images[name]!!
             try {
                 context.assets.open("images/$name.webp").use {
                     val decodeStream = BitmapFactory.decodeStream(it)
-                    ImageAsset.images[name] = decodeStream
+                    images[name] = decodeStream
                     return decodeStream
                 }
             } catch (_: Exception) {

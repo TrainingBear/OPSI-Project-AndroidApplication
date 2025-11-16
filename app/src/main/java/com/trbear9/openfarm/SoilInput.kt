@@ -1,10 +1,8 @@
 package com.trbear9.openfarm
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,8 +50,8 @@ fun InputSoil(
     nav: NavController? = null,
     onClick: (pH: Float?, depth: Int?) -> Unit? = { a, b -> }
 ) {
-    val context = LocalContext.current
-    var pH by remember { mutableStateOf(" ") }
+    LocalContext.current
+    var pH by remember { mutableStateOf("") }
     var depth by remember { mutableStateOf("20") }
 
     Box(

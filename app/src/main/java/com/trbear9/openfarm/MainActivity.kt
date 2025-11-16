@@ -11,8 +11,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,6 +81,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.android.gms.location.LocationServices
@@ -90,11 +93,10 @@ import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.pseudoankit.coachmark.util.CoachMarkKey
 import com.trbear9.internal.Data
 import com.trbear9.internal.TFService
+import com.trbear9.openfarm.util.DataStore
 import com.trbear9.openfarm.util.Screen
 import com.trbear9.plants.Inputs
 import com.trbear9.plants.api.GeoParameters
-import androidx.core.content.edit
-import com.trbear9.openfarm.util.DataStore
 
 val inputs = Inputs()
 var cam: Boolean = false
@@ -122,11 +124,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        val pref = getSharedPreferences("openfarm", MODE_PRIVATE)
-//        firstTime = pref.getBoolean("firstTime", true)
-//        pref.edit { putBoolean("firstTime", true) }
+        setContent {
+            LoadingScreen()
+        }
         DataStore.init(this)
-        DataStore.getPref()!!.edit { putBoolean("firstTime", true) }
         Data.load(this)
         setContent {
             App(this)
@@ -544,37 +545,44 @@ fun Tooltip(key: CoachMarkKey) {
 @Composable
 @Preview
 fun LoadingScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize().background(Color.White),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.oak_sapling),
-            contentDescription = "app icon",
-            modifier = Modifier.size(160.dp)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.smanega),
-                contentDescription = "logo sma ambarawa 1",
-                modifier = Modifier.width(60.dp)
-            )
-            Image(
-                painter = painterResource(id = R.drawable.fertinnv),
-                contentDescription = "logo fert innovation",
-                modifier = Modifier.width(120.dp)
-            )
-            Image(
-                painter = painterResource(id = R.drawable.logoman3),
-                contentDescription = "logo man jakarta 3",
-                modifier = Modifier.width(60.dp)
-            )
+    Scaffold() {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(it)) {
+            Column(Modifier.align(Alignment.Center)) {
+                Image(
+                    painter = painterResource(id = R.drawable.oak_sapling),
+                    contentDescription = "app icon",
+                    modifier = Modifier.size((this@BoxWithConstraints.maxWidth.value/1.7).dp)
+                )
+                Text(
+                    text = "Open Farm",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = (this@BoxWithConstraints.maxWidth.value/9).sp,
+                    color = Color(0xFF06E509),
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 50.dp)
+            ) {
+//                Image(
+//                    painter = painterResource(id = R.drawable.smanega),
+//                    contentDescription = "logo sma ambarawa 1",
+//                    modifier = Modifier.width(60.dp)
+//                )
+                Image(
+                    painter = painterResource(id = R.drawable.fertinnv),
+                    contentDescription = "logo fert innovation",
+                    modifier = Modifier.width((this@BoxWithConstraints.maxWidth.value /2).dp)
+                )
+//                Image(
+//                    painter = painterResource(id = R.drawable.logoman3),
+//                    contentDescription = "logo man jakarta 3",
+//                    modifier = Modifier.width(60.dp)
+//                )
+            }
         }
     }
 }

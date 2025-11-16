@@ -243,9 +243,9 @@ object Data {
             emit(response)
         }
         data.soil.let {
-            it.texture = resultSoil!!.texture;
-            it.fertility = resultSoil.fertility;
-            it.drainage = resultSoil.drainage;
+            it.texture = resultSoil!!.texture
+            it.fertility = resultSoil.fertility
+            it.drainage = resultSoil.drainage
             it.pH = it.pH ?: resultSoil.pH
 
             response.soil = it
@@ -315,7 +315,7 @@ object Data {
         var min = 0.0
         var elevation = 0f
         val meteo = OpenMeteo(geo.latitude.toFloat(), geo.longtitude.toFloat())
-        val temperatur = meteo.forecast() {
+        val temperatur = meteo.forecast {
             latitude = geo.latitude.toFloat()
             longitude = geo.longtitude.toFloat()
             temperatureUnit = TemperatureUnit.Celsius

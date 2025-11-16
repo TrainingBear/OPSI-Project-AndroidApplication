@@ -92,19 +92,6 @@ fun App(app: AppCompatActivity) {
         composable(Screen.help) {
             Guide(nav)
         }
-        composable(Screen.tentang) {
-            AndroidView(
-                factory = {
-                    LayoutInflater.from(it).inflate(R.layout.botakuhpengetahuan, null)
-                },
-                update = {
-                    val about = it.findViewById<ImageButton>(R.id.tombolKembali)
-                    about.setOnClickListener {
-                        nav.navigateUp()
-                    }
-                }
-            )
-        }
         composable(Screen.about) {
             AboutUs(nav)
 //            AndroidView(

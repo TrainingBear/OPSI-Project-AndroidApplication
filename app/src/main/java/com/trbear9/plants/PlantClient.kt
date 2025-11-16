@@ -97,14 +97,14 @@ class PlantClient {
             .url(url)
             .build()
         val call = client.newCall(request)
-        call.enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+        call.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: java.io.IOException) {
                 e.printStackTrace()
                 sus.resume(null)
             }
 
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                println("${response.code} ${response.message}");
+            override fun onResponse(call: Call, response: okhttp3.Response) {
+                println("${response.code} ${response.message}")
                 sus.resume(response.body.string())
             }
         })
@@ -118,8 +118,8 @@ class PlantClient {
                 .url("$url$IMAGE/$name")
                 .build()
             val call = client.newCall(request)
-            call.enqueue(object : okhttp3.Callback {
-                override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+            call.enqueue(object : Callback {
+                override fun onFailure(call: Call, e: java.io.IOException) {
                     e.printStackTrace()
                 }
 
@@ -137,7 +137,7 @@ class PlantClient {
 
     suspend fun sendPacket(data: UserVariable, url: String? = null
     ): Response? {
-        val url = url?:getUrl();
+        val url = url?:getUrl()
         return suspendCancellableCoroutine { sus ->
             val request = Request.Builder()
                 .url(url + PROCESS)
@@ -150,12 +150,12 @@ class PlantClient {
                 val call = client.newCall(request)
                 sus.invokeOnCancellation { call.cancel() }
                 call.enqueue(object : Callback {
-                    override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                    override fun onFailure(call: Call, e: java.io.IOException) {
                         e.printStackTrace()
                         sus.resume(null)
                     }
 
-                    override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                    override fun onResponse(call: Call, response: okhttp3.Response) {
                         sus.resume(
                             objectMapper.readValue(response.body.string(), Response::class.java)
                         )
@@ -177,11 +177,11 @@ class PlantClient {
             try {
                 val call = client.newCall(request)
                 sus.invokeOnCancellation { call.cancel() }
-                call.enqueue(object : okhttp3.Callback {
-                    override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                call.enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: java.io.IOException) {
                         e.printStackTrace()
                     }
-                    override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                    override fun onResponse(call: Call, response: okhttp3.Response) {
                         sus.resume(response)
                     }
                 })
@@ -234,13 +234,13 @@ class PlantClient {
                 .build()
             println("GETTING $provider")
             client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                override fun onFailure(call: Call, e: java.io.IOException) {
                     e.printStackTrace()
                     tries += provider
                     find()
                 }
 
-                override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                override fun onResponse(call: Call, response: okhttp3.Response) {
                     if (!response.isSuccessful) {
                         tries += provider
                         find()
@@ -255,13 +255,13 @@ class PlantClient {
                             .head()
                             .build()
                     ).enqueue(object : Callback {
-                        override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                        override fun onFailure(call: Call, e: java.io.IOException) {
                             e.printStackTrace()
                             tries += url
                             find()
                         }
 
-                        override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                        override fun onResponse(call: Call, response: okhttp3.Response) {
                             if (response.code == 200) {
                                 println("RECEIVED $url")
                                 sus.resume(url)

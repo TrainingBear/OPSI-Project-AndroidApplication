@@ -3,7 +3,17 @@ package com.trbear9.openfarm
 import android.content.res.AssetManager
 import android.util.Log
 import androidx.compose.ui.graphics.Color
-import com.trbear9.plants.E.CATEGORY.*
+import com.trbear9.plants.E.CATEGORY.cereals_pseudocereals
+import com.trbear9.plants.E.CATEGORY.cover_crop
+import com.trbear9.plants.E.CATEGORY.environmental
+import com.trbear9.plants.E.CATEGORY.fruit_nut
+import com.trbear9.plants.E.CATEGORY.materials
+import com.trbear9.plants.E.CATEGORY.medicinals_and_armoatic
+import com.trbear9.plants.E.CATEGORY.ornamentals_turf
+import com.trbear9.plants.E.CATEGORY.other
+import com.trbear9.plants.E.CATEGORY.roots_tubers
+import com.trbear9.plants.E.CATEGORY.vegetables
+import com.trbear9.plants.E.CATEGORY.weed
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.MappedByteBuffer
@@ -22,10 +32,10 @@ object Util {
     @Throws(IOException::class)
     fun loadModelFile(assets: AssetManager, modelFilename: String): MappedByteBuffer? {
         val fileDescriptor = assets.openFd(modelFilename)
-        val inputStream = FileInputStream(fileDescriptor.getFileDescriptor())
-        val fileChannel = inputStream.getChannel()
-        val startOffset = fileDescriptor.getStartOffset()
-        val declaredLength = fileDescriptor.getDeclaredLength()
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declaredLength = fileDescriptor.declaredLength
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 

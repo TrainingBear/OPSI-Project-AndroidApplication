@@ -121,7 +121,7 @@ class SoilStatsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SoilStats() {
+            SoilStats {
                 this.onBackPressedDispatcher.onBackPressed()
                 this.finish()
             }
@@ -287,9 +287,9 @@ fun SoilStats(click: () -> Unit = {}) {
                                 )
                                 Box(Modifier
                                         .fillMaxWidth()
-                                        .aspectRatio(1/8f)
+                                        .aspectRatio(16/11f)
                                         .padding(15.dp)
-                                        .clip(RoundedCornerShape(clipRound))) {
+                                ) {
                                     Image(
                                         painter = if (inputs.image != null)
                                             BitmapPainter(inputs.image!!.asImageBitmap())
@@ -297,6 +297,7 @@ fun SoilStats(click: () -> Unit = {}) {
                                         contentDescription = "Tanah",
                                         contentScale = ContentScale.FillWidth,
                                         modifier=Modifier.fillMaxSize()
+                                            .clip(RoundedCornerShape(clipRound))
                                     )
                                 }
                             }

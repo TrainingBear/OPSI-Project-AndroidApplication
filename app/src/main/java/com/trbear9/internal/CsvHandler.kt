@@ -222,7 +222,7 @@ object CsvHandler {
                         "PH" -> {
                             val min: Float
                             val max:Float
-                            val scienceName = getScienceName(record)
+                            getScienceName(record)
                             try {
                                 min = record.get(E.A_minimum_ph).toFloat()
                                 max = record.get(E.A_maximum_ph).toFloat()

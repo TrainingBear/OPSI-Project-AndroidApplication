@@ -38,7 +38,7 @@ class PlantClientTest {
 
     @Test
     fun testBitmap() {
-        val context = ApplicationProvider.getApplicationContext<Context>();
+        ApplicationProvider.getApplicationContext<Context>()
     }
 
     @Test

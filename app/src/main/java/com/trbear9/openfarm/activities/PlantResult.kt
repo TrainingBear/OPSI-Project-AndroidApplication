@@ -106,7 +106,7 @@ var coachStep = 0
 @Composable
 @Preview()
 fun SoilResultScreen() {
-    val context = LocalContext.current
+    LocalContext.current
 
     val keyboard = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf("") }
@@ -123,7 +123,7 @@ fun SoilResultScreen() {
     var loaded by rememberSaveable {
         mutableStateOf<Boolean>(
             if (inputs.soilResult == null) true
-            else inputs.soilResult.response?.loaded ?: false
+            else inputs.soilResult.response?.loaded == true
         )
     }
     var collected by rememberSaveable {
@@ -154,7 +154,7 @@ fun SoilResultScreen() {
     var focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        collected = inputs.soilResult?.collected ?: true
+        collected = inputs.soilResult?.collected != false
         Util.debug("It is already collected? $collected")
         if (inputs.soilResult != null && !collected) {
             Util.debug("Collecting")

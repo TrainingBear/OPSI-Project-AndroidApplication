@@ -67,18 +67,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.flowlayout.FlowRow
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.accompanist.flowlayout.FlowRow
 import com.pseudoankit.coachmark.UnifyCoachmark
 import com.trbear9.internal.Data
 import com.trbear9.openfarm.NavigateSoilStats
 import com.trbear9.openfarm.Util
-import com.trbear9.plants.E
-import com.trbear9.plants.E.*
+import com.trbear9.plants.E.A_maximum_ph
+import com.trbear9.plants.E.A_minimum_ph
+import com.trbear9.plants.E.Climate_zone
+import com.trbear9.plants.E.MAX_crop_cycle
+import com.trbear9.plants.E.MIN_crop_cycle
+import com.trbear9.plants.E.O_maximum_temperature
+import com.trbear9.plants.E.O_minimum_temperature
 import com.trbear9.plants.api.blob.Plant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -105,7 +110,7 @@ class PlantDetail : ComponentActivity(){
     @SuppressLint("ConfigurationScreenWidthHeight")
     @Composable
     fun getScreenWidth(): Dp {
-        return LocalConfiguration.current.screenWidthDp.dp;
+        return LocalConfiguration.current.screenWidthDp.dp
     }
 
     @SuppressLint("NotConstructor")
@@ -429,14 +434,14 @@ class PlantDetail : ComponentActivity(){
                 .wrapContentSize()
                 .clip(RoundedCornerShape(8.dp))
         ) {
-            Row() {
-                Column() {
+            Row {
+                Column {
                     Text(
                         text = head,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Row(){
+                    Row {
                         Image(
                             imageVector = icon,
                             contentDescription = head,

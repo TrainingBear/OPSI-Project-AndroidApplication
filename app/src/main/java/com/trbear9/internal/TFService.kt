@@ -78,7 +78,7 @@ object TFService {
     }
 
     fun argmax(prediction: FloatArray): Pair<String, Float> {
-        var max = Float.MIN_VALUE;
+        var max = Float.MIN_VALUE
         var soil = ""
         for (i in 0..prediction.size - 1) {
             if (prediction[i]> max) {
