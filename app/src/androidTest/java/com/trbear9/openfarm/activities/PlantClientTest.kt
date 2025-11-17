@@ -1,4 +1,4 @@
-package com.trbear9.openfarm.activities
+package com.trbear9.ui.activities
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,13 +8,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.core.StreamWriteConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.trbear9.openfarm.R
-import com.trbear9.openfarm.Util
+import com.trbear9.ui.R
+import com.trbear9.ui.Util
 import com.trbear9.plants.PlantClient
-import com.trbear9.plants.api.CustomParameters
-import com.trbear9.plants.api.GeoParameters
-import com.trbear9.plants.api.SoilParameters
-import com.trbear9.plants.api.UserVariable
+import com.trbear9.plants.parameters.CustomParameters
+import com.trbear9.plants.parameters.GeoParameters
+import com.trbear9.plants.parameters.SoilParameters
+import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.plants.E.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*

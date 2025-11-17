@@ -3,8 +3,8 @@ package com.trbear9.plants
 import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.core.StreamWriteConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.trbear9.plants.api.Response
-import com.trbear9.plants.api.UserVariable
+import com.trbear9.plants.parameters.Response
+import com.trbear9.plants.parameters.UserVariable
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback

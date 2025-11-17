@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.trbear9.openfarm"
+    namespace = "com.trbear9.ui"
     compileSdk = 36
 
     lint {
@@ -158,9 +158,9 @@ dependencies {
     implementation("com.tbuonomo:dotsindicator:5.0")
 
     implementation(libs.okhttp)
-    implementation(libs.linkfirebase)
-    implementation(libs.appcompat)
-    implementation(libs.material)
+//    implementation(libs.linkfirebase)
+//    implementation(libs.appcompat)
+//    implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
@@ -170,7 +170,7 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.activity)
     implementation(libs.mediarouter)
-    implementation(libs.room.compiler.processing.testing){
+    testImplementation(libs.room.compiler.processing.testing){
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.auto.value", module = "auto-value")
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")

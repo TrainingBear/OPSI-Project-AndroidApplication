@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
-import com.trbear9.openfarm.activities.SoilResult
+import com.trbear9.ui.activities.SoilResult
 import com.trbear9.plants.CsvHandler
-import com.trbear9.plants.api.GeoParameters
-import com.trbear9.plants.api.SoilParameters
-import com.trbear9.plants.api.UserVariable
+import com.trbear9.plants.parameters.GeoParameters
+import com.trbear9.plants.parameters.SoilParameters
+import com.trbear9.plants.parameters.UserVariable
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 

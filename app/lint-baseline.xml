@@ -46,7 +46,7 @@
 
     <issue
         id="NewApi"
-        message="`&lt;com.trbear9.openfarm.activities.PostActivity>` requires API level 33 (current min is 31)"
+        message="`&lt;com.trbear9.ui.activities.PostActivity>` requires API level 33 (current min is 31)"
         errorLine1="        &lt;activity"
         errorLine2="        ^">
         <location
