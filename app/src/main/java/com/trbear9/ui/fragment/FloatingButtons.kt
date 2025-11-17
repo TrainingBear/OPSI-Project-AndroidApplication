@@ -29,6 +29,7 @@ import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.CoachMarkScope
 import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.activities.SoilStatsActivity
+import com.trbear9.ui.util.DataStore
 import com.trbear9.ui.util.highlightConfig
 
 @Composable
@@ -60,6 +61,7 @@ fun CoachMarkScope.NavigateSoilStats(modifier: Modifier) {
                     )
                     .clip(RoundedCornerShape(topStart = 15.dp, bottomEnd = 15.dp))
                     .clickable {
+                        DataStore.completeTanah()
                         val intent = Intent(context, SoilStatsActivity::class.java)
                         context.startActivity(intent)
                     }

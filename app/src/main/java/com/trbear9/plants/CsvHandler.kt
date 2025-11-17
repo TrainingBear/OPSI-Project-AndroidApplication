@@ -173,7 +173,7 @@ object CsvHandler {
                             try {
                                 max = record.get(E.A_maximum_temperature).toFloat()
                             } catch (_: NumberFormatException){
-                                "Can't parse ${record.get(E.A_maximum_temperature)} to float (TEMPMAX)".error("CsvHandler")
+                                "Can't parse ${record.get(E.A_maximum_temperature)} to float (TEMPMAX) for ${record.get(E.Science_name)} alias ${Data.plant[record.get(E.Science_name)]?.commonName}".error("CsvHandler")
                                 continue
                             }
                             if (max >= floatVar) {

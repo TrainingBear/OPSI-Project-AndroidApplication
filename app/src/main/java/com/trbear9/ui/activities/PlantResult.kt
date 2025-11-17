@@ -498,11 +498,7 @@ fun SoilResultScreen() {
                         modifier = Modifier.align(Alignment.Center)
                     )
             }
-            if (loaded)
-                LaunchedEffect(Unit) {
-//                show(MarkKey.analisa)
-                }
-            NavigateSoilStats(Modifier
+            if (loaded) NavigateSoilStats(Modifier
                 .fillMaxSize()
                 .padding(padding))
         }

@@ -23,6 +23,7 @@ import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.plants.parameters.Response
 import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.plants.parameters.blob.Plant
+import com.trbear9.ui.activities.getLocation
 //import com.trbear9.plants.save
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,11 +31,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import lombok.Getter
 import org.apache.commons.csv.CSVRecord
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import kotlin.collections.iterator
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -128,7 +128,7 @@ object Data {
     }
 
     fun preLoad() {
-//        CsvHandler.preload()
+        CsvHandler.preload()
 //        TFService.load(context)
         val plants = File("plants.json").inputStream().use {
             objectMapper.readValue(it, Array<Plant>::class.java)
@@ -161,8 +161,8 @@ object Data {
 
         for (field in Data::class.java.declaredFields) {
             try {
-//                ObjectOutputStream(save("${field.name}.ser").outputStream())
-//                    .use{it.writeObject(field.get(this))}
+                ObjectOutputStream(save("${field.name}.ser").outputStream())
+                    .use{it.writeObject(field.get(this))}
             } catch (_: Throwable){
 //                error("Failed to serialize ${field.name}")
                 continue
@@ -296,7 +296,6 @@ object Data {
         if (kew?.containsKey(plant.nama_ilmiah) == true) {
             plant.full_taxon = kew!![plant.nama_ilmiah]
         } else {
-            log.warn("No taxonomy found for ${plant.nama_ilmiah}")
         }
     }
 
@@ -347,7 +346,6 @@ object Data {
 //                min /= size
             }
         }
-
         val MPDL = meteo.elevation {
             latitude = geo.latitude.toString()
             longitude = geo.longtitude.toString()
@@ -363,7 +361,6 @@ object Data {
         "temperatur: $min, $max with elevation: $elevation".debug("Data Processor")
     }
 
-    val log: Logger = LoggerFactory.getLogger(Data::class.java)!!
     private val objectMapper = ObjectMapper()
 
     init {

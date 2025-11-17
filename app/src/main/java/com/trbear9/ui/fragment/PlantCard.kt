@@ -75,6 +75,7 @@ import com.trbear9.plants.E.CATEGORY.vegetables
 import com.trbear9.plants.E.CATEGORY.weed
 import com.trbear9.plants.parameters.blob.Plant
 import com.trbear9.ui.activities.PlantDetail
+import com.trbear9.ui.util.debug
 import kotlinx.coroutines.delay
 
 object CONS {
@@ -115,6 +116,7 @@ fun CoachMarkScope.PlantCardDisplayer(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(8.dp),
             onClick = {
+                DataStore.completeTanaman()
                 val intent = Intent(context, PlantDetail::class.java)
                 intent.putExtra("plant", ref)
                 intent.putExtra("score", score)
@@ -263,6 +265,7 @@ fun CoachMarkScope.PlantCardDisplayer(
                         bcolor = Color.LightGray
                     )
                     ref.category?.forEach {
+//                        "PlantCategories for ${ref.commonName}: $it".debug("PlantCardTrack")
                         Kat(
                             translateCategory(it), tcolor = Color.White,
                             bcolor = categoryToColor(it)
@@ -282,7 +285,6 @@ fun CoachMarkScope.PlantCardDisplayer(
                         MarkKey.cocok,
                         MarkKey.skor,
                     )
-                    DataStore.completeTanaman()
 //                    DataStore.completeTanah()
                 } else if (!DataStore.isCompleteTanah) {
                     show(MarkKey.analisa)

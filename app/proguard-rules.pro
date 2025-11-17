@@ -19,3 +19,17 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+#-keep class com.trbear9.plants.CsvHandler {
+##    ecocropcsv;
+##    perawatan;
+#}
+
+-keep class com.trbear9.plants.Data { <fields>; }
+-keep class com.trbear9.plants.parameters.** { *; }
+
+-keep class com.fasterxml.jackson.databind.** { *; }
+-keep class com.fasterxml.jackson.core.** { *; }
+-keep class com.fasterxml.jackson.annotation.** { *; }
+
+-dontwarn com.fasterxml.jackson.**

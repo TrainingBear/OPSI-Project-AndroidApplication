@@ -15,7 +15,7 @@ object DataStore {
     lateinit var pref: SharedPreferences
         private set
     internal fun init(context: Context) {
-        if (hasInited) throw IllegalStateException("Public data storage been initialised!")
+//        if (hasInited) throw IllegalStateException("Public data storage been initialised!")
         pref = context.getSharedPreferences("settings_prefs", MODE_PRIVATE)
         hasInited = true
         isCompleteTanah = pref.getBoolean("coachTanah", false)

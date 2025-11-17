@@ -1,7 +1,9 @@
 package com.trbear9.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
@@ -9,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,9 +29,12 @@ import com.trbear9.plants.parameters.UserVariable
 import com.trbear9.ui.activities.CameraActivity
 import com.trbear9.ui.activities.Home
 import com.trbear9.ui.activities.InputSoil
+import com.trbear9.ui.activities.LoadingScreen
 import com.trbear9.ui.activities.MainActivity
 import com.trbear9.ui.activities.getLocation
+import com.trbear9.ui.activities.gps
 import com.trbear9.ui.activities.inputs
+import com.trbear9.ui.activities.perm
 import com.trbear9.ui.util.Util
 
 object LocalNav {
@@ -44,7 +50,7 @@ fun App(app: MainActivity) {
         LocalNav.current = nav
         onDispose { LocalNav.current = null }
     }
-    NavHost(navController = nav, startDestination = "home") {
+    NavHost(navController = nav, startDestination = "firstLoading") {
         composable(Screen.camera) {
             CameraActivity(nav, onClick = {
                 nav.navigate(Screen.inputSoil)
@@ -52,26 +58,42 @@ fun App(app: MainActivity) {
         }
         composable(Screen.inputSoil) {
             InputSoil(nav, onClick = { pH: Float?, depth: Int? ->
-                getLocation(context)
-                val variable = UserVariable()
-                val soil = SoilParameters()
-                if (pH != null) soil.pH = pH.coerceAtMost(14f)
-                if (depth != null) soil.numericDepth = depth
-                inputs.soil = soil
-                variable.geo = inputs.geo
-                variable.image = inputs.image
-                variable.soil = soil
-                inputs.soilResult.collected = false
-                inputs.response = Data.process(variable, inputs.soilResult)
+                perm.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Toast.makeText(
+                        context,
+                        "Tolong izinkan kamera untuk menggunakan fitur ini!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    getLocation(context)
+                    gps = true
+                    val variable = UserVariable()
+                    val soil = SoilParameters()
+                    if (pH != null) soil.pH = pH.coerceAtMost(14f)
+                    if (depth != null) soil.numericDepth = depth
+                    inputs.soil = soil
+                    variable.geo = inputs.geo
+                    variable.image = inputs.image
+                    variable.soil = soil
+                    inputs.soilResult.collected = false
+                    inputs.response = Data.process(variable, inputs.soilResult)
 //                Toast.makeText(context, "finished", Toast.LENGTH_SHORT)
 //                    .show()
-                Util.debug("Job has been finished!")
-                inputs.soilResult.res = inputs.response
+                    Util.debug("Job has been finished!")
+                    inputs.soilResult.res = inputs.response
 
-                if (isNetworkAvailable(app))
-                    nav.navigate(Screen.soilResult)
-                else Toast.makeText(context, "Tidak ada koneksi internet!", Toast.LENGTH_SHORT)
-                    .show()
+                    if (isNetworkAvailable(app))
+                        nav.navigate(Screen.soilResult)
+                    else {
+                        Toast.makeText(context, "Tidak ada koneksi internet!", Toast.LENGTH_SHORT).show()
+                        nav.navigate(Screen.soilResult)
+                    }
+                }
             })
         }
         composable(Screen.soilResult) {
@@ -119,6 +141,9 @@ fun App(app: MainActivity) {
                 credits = Guide.guidePointer!!.second.third
             )
 //            Guide.guidePointer = null
+        }
+        composable(Screen.firstLoading){
+            LoadingScreen()
         }
     }
 }

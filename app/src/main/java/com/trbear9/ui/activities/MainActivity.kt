@@ -57,6 +57,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -89,7 +90,6 @@ import com.pseudoankit.coachmark.model.HighlightedViewConfig
 import com.pseudoankit.coachmark.model.ToolTipPlacement
 import com.pseudoankit.coachmark.scope.enableCoachMark
 import com.pseudoankit.coachmark.util.CoachMarkKey
-import com.trbear9.openfarm.R
 import com.trbear9.plants.Data
 import com.trbear9.plants.TFService
 import com.trbear9.ui.util.DataStore
@@ -97,6 +97,8 @@ import com.trbear9.ui.util.Screen
 import com.trbear9.plants.Inputs
 import com.trbear9.plants.parameters.GeoParameters
 import com.trbear9.ui.App
+import com.trbear9.ui.LocalNav
+import com.trbear9.ui.R
 import com.trbear9.ui.util.MarkKey
 import com.trbear9.ui.util.debug
 import com.trbear9.ui.util.highlightConfig
@@ -122,24 +124,21 @@ var perm: ActivityResultLauncher<Array<String>> = object: ActivityResultLauncher
 //var firstTime = false
 
 class MainActivity : ComponentActivity() {
-    private val perm = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) {}
-
-    private val allLoaded = mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        perm = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) {}
         setContent {
-            if(!allLoaded.value) LoadingScreen()
-            else App(this)
-        }
-
-        lifecycleScope.launch {
-            DataStore.init(this@MainActivity)
-            Data.load(this@MainActivity)
-//            getLocation(this@MainActivity)
-//            perm.launch(arrayOf(Manifest.permission.CAMERA))
-            allLoaded.value = true
+            val isReady by produceState(initialValue = false) {
+                DataStore.init(this@MainActivity)
+                Data.load(this@MainActivity)
+                value = true
+            }
+            LaunchedEffect(isReady) {
+                if(isReady) LocalNav.current?.navigate(Screen.home)
+            }
+            App(this)
         }
     }
 
@@ -356,7 +355,6 @@ fun Home(nav: NavController? = null) {
                                         coffe = false
                                         if(DataStore.firstTime){
                                             show(MarkKey.scantanah, MarkKey.help)
-                                            DataStore.completeFirstTime()
                                         }
                                     },
                                     modifier = Modifier
@@ -492,6 +490,7 @@ fun Home(nav: NavController? = null) {
                                 ).show()
                             } else {
                                 cam = true
+                                DataStore.completeFirstTime()
                                 nav?.navigate(Screen.camera)
                             }
                         },

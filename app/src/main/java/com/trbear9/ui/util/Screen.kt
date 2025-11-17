@@ -12,6 +12,7 @@ object Screen {
     const val inputSoil = "inputSoil"
     const val help = "help"
     const val guidePointDetail = "guide_point_detail"
+    const val firstLoading = "firstLoading"
 }
 
 fun String.withArgs(vararg arg: Pair<String, String>): String{

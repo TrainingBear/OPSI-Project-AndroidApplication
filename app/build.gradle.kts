@@ -45,10 +45,12 @@ android {
         }
     }
 
+    val shrink = false
+
     buildTypes {
         release {
-            isShrinkResources = true
-            isMinifyEnabled = true
+            isShrinkResources = shrink
+            isMinifyEnabled = shrink
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -57,7 +59,7 @@ android {
         }
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
+            isMinifyEnabled = shrink
             // optionally:
             // isShrinkResources = false
         }
@@ -109,12 +111,12 @@ android {
 }
 
 dependencies {
-    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13")
+//    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13")
     implementation("io.github.pseudoankit:coachmark:3.0.1")
-    implementation ("androidx.room:room-runtime:2.6.1")
+//    implementation ("androidx.room:room-runtime:2.6.1")
     implementation(libs.androidx.foundation.layout)
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation ("androidx.room:room-ktx:2.6.1")
+//    kapt("androidx.room:room-compiler:2.6.1")
+//    implementation ("androidx.room:room-ktx:2.6.1")
     implementation("com.github.jeziellago:compose-markdown:0.4.1")
 
     // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert-support
@@ -125,16 +127,16 @@ dependencies {
     implementation("com.open-meteo:open-meteo-api-kotlin:0.7.1-beta.1")
     implementation("org.apache.commons:commons-csv:1.10.0")
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-    implementation("org.slf4j:slf4j-api:2.0.17")
+//    implementation("org.slf4j:slf4j-api:2.0.17")
     implementation ("androidx.paging:paging-runtime:3.3.6")
     implementation ("androidx.paging:paging-compose:3.3.6")
     implementation(libs.vico.compose)
-    implementation(libs.vico.compose.m2)
-    implementation(libs.vico.compose.m3)
-    implementation(libs.vico.multiplatform)
+//    implementation(libs.vico.compose.m2)
+//    implementation(libs.vico.compose.m3)
+//    implementation(libs.vico.multiplatform)
     implementation(libs.vico.views)
-    implementation(libs.vico.multiplatform.m2)
-    implementation(libs.vico.multiplatform.m3)
+//    implementation(libs.vico.multiplatform.m2)
+//    implementation(libs.vico.multiplatform.m3)
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
@@ -146,24 +148,24 @@ dependencies {
 //        exclude("messages/JavaOptionBundle.properties")
 //    }
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    implementation("org.apache.commons:commons-lang3:3.18.0")
+//    implementation("org.apache.commons:commons-lang3:3.18.0")
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     implementation("com.fasterxml.jackson.core:jackson-databind:2.20.0")
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+//    implementation("org.apache.httpcomponents:httpclient:4.5.14")
     /* https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp */
-    implementation("com.google.guava:guava:31.0.1-android")
+//    implementation("com.google.guava:guava:31.0.1-android")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("com.tbuonomo:dotsindicator:5.0")
+//    implementation("com.google.android.material:material:1.12.0")
+//    implementation("com.tbuonomo:dotsindicator:5.0")
 
-    implementation(libs.okhttp)
+//    implementation(libs.okhttp)
 //    implementation(libs.linkfirebase)
 //    implementation(libs.appcompat)
 //    implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.viewmodel.ktx)
+//    implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.leanback)

@@ -1,6 +1,7 @@
 package com.trbear9.ui.activities
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -189,7 +190,8 @@ fun Guide(nav: NavController? = null) {
                 val maxHeight = maxHeight
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center
                 ) {
                     BoxWithConstraints(
                         Modifier
@@ -207,14 +209,14 @@ fun Guide(nav: NavController? = null) {
                                 end = (maxHeight.value / 2).dp,
                                 top = 20.dp
                             ),
-                            lineHeight = 8.sp
+                            lineHeight = (fontSize.value/1.2).sp
                         )
                     }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.8f)
-                            .padding(start = 20.dp, end = (maxHeight.value / 2).dp),
+                            .padding(start = 20.dp, end = (maxHeight.value / 1.8).dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -255,13 +257,14 @@ fun Guide(nav: NavController? = null) {
                         }
                     }
                 }
-                Icon(
+                Image(
                     painter = painterResource(R.drawable.oak_sapling),
 //                    tint = Color.Black,
                     contentDescription = "png",
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .size(maxHeight / 2)
+                        .padding(end = 20.dp)
 //                            .align(Alignment.CenterEnd)
                 )
             }
@@ -290,7 +293,7 @@ fun Guide(nav: NavController? = null) {
                         GuideCard(
                             nav, num = 1, id = "tanah",
                             title = "Tanah",
-                            desc = "Apa itu tanah? Tanah liat? Tanah basah? Tanah kering?",
+                            desc = "Tanah sangat vital peranannya bagi semua kehidupan di bumi, tanah berperan penting dalam kehidupan" ,
                             credits = listOf(
                                 "https://en.wikipedia.org/wiki/Soil_pH",
                                 "https://fnb.tech/id/what-is-soil-ph/",
@@ -351,7 +354,7 @@ fun Guide(nav: NavController? = null) {
                         GuideCard(
                             nav, num = 2, id = "tanaman",
                             title = "Tanaman",
-                            desc = "Apa itu tanaman? padi, nasi, touch some grass?",
+                            desc = "Tanaman menjadi dasar seluruh rantai makanan dan berperan penting sebagai sumber pangan, energi, oksigen, dan berbagai komoditas",
                             credits = listOf(
                                 "https://id.wikipedia.org/wiki/Tanaman",
                                 "https://id.wikipedia.org/wiki/Hama",
@@ -401,7 +404,7 @@ fun Guide(nav: NavController? = null) {
                         GuideCard(
                             nav, num = 3, id = "pupuk",
                             title = "Pupuk",
-                            desc = " ",
+                            desc = "Pupuk menyediakan dan meningkatkan ketersediaan zat hara yang sangat dibutuhkan tanaman",
                             credits = listOf(
                                 "https://id.wikipedia.org/wiki/Pupuk",
                                 "https://id.my-best.com/139242"
