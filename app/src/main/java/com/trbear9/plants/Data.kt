@@ -357,8 +357,8 @@ object Data {
         geo.altitude = elevation.toDouble()
         geo.min = min
         geo.max = max
-        "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("Data Processor")
-        "temperatur: $min, $max with elevation: $elevation".debug("Data Processor")
+//        "long: ${geo.longtitude} lat: ${geo.latitude} mdpl: ${geo.altitude}".debug("Data Processor")
+//        "temperatur: $min, $max with elevation: $elevation".debug("Data Processor")
     }
 
     private val objectMapper = ObjectMapper()

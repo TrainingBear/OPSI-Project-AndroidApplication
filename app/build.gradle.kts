@@ -17,10 +17,10 @@ android {
 
     defaultConfig {
         ndk{
-            abiFilters += listOf("arm64-v8a","armeabi-v7a","armeabi")
+            abiFilters += listOf("arm64-v8a","armeabi-v7a", "x86", "x86_64")
         }
         applicationId = "com.trbear9.openfarm"
-        minSdk = 26
+        minSdk = 25
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -29,39 +29,34 @@ android {
 
     splits {
         abi {
-            isEnable = true
+// Detect app bundle and conditionally disable split abis
+            // This is needed due to a "Sequence contains more than one matching element" error
+            // present since AGP 8.9.0, for more info see:
+            // https://issuetracker.google.com/issues/402800800
+
+            // AppBundle tasks usually contain "bundle" in their name
+            val isBuildingBundle = gradle.startParameter.taskNames.any { it.lowercase().contains("bundle") }
+
+            // Disable split abis when building appBundle
+            isEnable = !isBuildingBundle
+
             reset()
-            include("arm64-v8a")
+            //noinspection ChromeOsAbiSupport
+            include("armeabi-v7a", "arm64-v8a", "x86_64", "x86")
+
             isUniversalApk = true
         }
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("/home/kujatic/Desktop/kufan.jks")
-            storePassword = "kukuhrefan"
-            keyAlias = "Jasper"
-            keyPassword = "TrainingBear"
-        }
-    }
-
-    val shrink = false
-
     buildTypes {
         release {
-            isShrinkResources = shrink
-            isMinifyEnabled = shrink
+            signingConfig = signingConfigs.getByName("release")
+            isShrinkResources = true
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-//            isShrinkResources = true
-        }
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = shrink
-            // optionally:
-            // isShrinkResources = false
         }
     }
 
@@ -92,23 +87,16 @@ android {
             pickFirsts += "messages/JavaOptionBundle.properties"
             pickFirsts += "kotlin/reflect/reflect.kotlin_builtins"
             pickFirsts += "DebugProbesKt.bin"
-            pickFirsts += "META-INF/analysis-api/analysis-api-impl-base.xml"
-            pickFirsts += "META-INF/analysis-api/analysis-api-fir.xml"
-            pickFirsts += "META-INF/analysis-api/**"
-            pickFirsts += "META-INF/**/**"
             pickFirsts += "META-INF/**"
             pickFirsts += "mozilla/public-suffix-list.txt"
-            pickFirsts += listOf(
-                "lib/armeabi-v7a/liblitert_jni.so",
-                "lib/arm64-v8a/liblitert_jni.so"
-            )
+//            pickFirsts += listOf(
+//                "lib/armeabi-v7a/liblitert_jni.so",
+//                "lib/arm64-v8a/liblitert_jni.so"
+//            )
         }
-
-    }
-    fun AndroidResources.() {
-        noCompress -= "tflite"
     }
 }
+
 
 dependencies {
 //    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13")
@@ -121,7 +109,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert-support
     implementation("com.google.ai.edge.litert:litert-support:1.4.0")
-    // https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert
+//     https://mvnrepository.com/artifact/com.google.ai.edge.litert/litert
     implementation("com.google.ai.edge.litert:litert:2.0.2")
 //    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
     implementation("com.open-meteo:open-meteo-api-kotlin:0.7.1-beta.1")

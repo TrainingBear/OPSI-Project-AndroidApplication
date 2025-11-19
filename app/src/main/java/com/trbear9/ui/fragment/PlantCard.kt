@@ -90,17 +90,7 @@ var ready by mutableStateOf(false)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoachMarkScope.PlantCardDisplayer(
-    score: Int = 0, ref: Plant?,
-    scoreModifier: BoxScope.() -> Modifier = {Modifier
-        .padding(end = 10.dp, top = 7.dp)
-        .clip(RoundedCornerShape(8.dp))
-        .wrapContentSize(Alignment.Center)
-        .background(Color.Black.copy(alpha = 0.5f))
-        .align(Alignment.TopEnd)},
-    cardModifier: Modifier = Modifier
-        .fillMaxWidth()
-        .heightIn(max = 600.dp)
-        .padding(8.dp)
+    score: Int = 0, ref: Plant?, flag: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -277,7 +267,7 @@ fun CoachMarkScope.PlantCardDisplayer(
             coached = true
         }
         LaunchedEffect(Unit){
-            if(!displayed && ready){
+            if(!flag && !displayed && ready){
                 delay(1500)
                 if(!DataStore.isCompleteTanah && !DataStore.isCompleteTanaman){
                     show(

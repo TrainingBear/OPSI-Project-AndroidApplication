@@ -298,7 +298,7 @@ fun SearchLayout(nav: NavController? = null, from: String = "home") {
             ) {
                 items(plants.itemCount) { i ->
                     val plant = Data.plant[plants[i]!!]
-                    if (plant != null) PlantCardDisplayer(0, plant)
+                    if (plant != null) PlantCardDisplayer(0, plant, true)
                 }
 
                 plants.apply {
